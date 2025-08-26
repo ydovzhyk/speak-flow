@@ -1,0 +1,10 @@
+export const getTechnicalError = ({ technical }) => technical.error;
+export const getTechnicalMessage = ({ technical }) => technical.message;
+export const getModalVindowSttus = ({ technical }) => technical.modalWindowStatus;
+export const getLoadingTechnical = ({ technical }) => technical.loading;
+export const getScreenType = ({ technical }) => technical.screenType;
+export const getTypeOperation = ({ technical }) => technical.typeOperation;
+export const getCloseButtonAuth = ({ technical }) => technical.closeButtonAuth;
+export const getInputLanguage = ({ technical }) => technical.inputLanguage;
+export const getOutputLanguage = ({ technical }) => technical.outputLanguage;
+export const getAppLanguage = ({ technical }) => technical.appLanguage;

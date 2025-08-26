@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.hover-transition {
+  @apply transition-colors duration-300;
+}
+
+.test-border {
+  @apply border-solid border-red-600 border;
+}
+
+.regular-border {
+  @apply border-solid border-[#0f1d2d] border border-opacity-50;
+}
+
+.accent-border {
+  @apply border-solid border-[#017683] border;
+}
+
+@layer utilities {
+  .stroke-text {
+    text-shadow: 1px 1px 2px rgba(119, 109, 89, 0.5);
+  }
+}
+
+@layer utilities {
+  .stroke-text-white {
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Fix loader display bug */
+.fixed-loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+:root {
+  --accent1: #0299B5;
+  --accent2: #017683;
+  --accent2-hover: #029aaa;
+  --clear-white: #FAFCFF;
+  --background: #ffffff;
+  --foreground: #000000;
+  --text-main: #000000;
+  --text-accent: #444444;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-inter), sans-serif;
+  scroll-behavior: auto !important;
+}
