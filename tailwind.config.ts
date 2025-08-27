@@ -15,9 +15,15 @@ export default {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        wave: {
+          '0%': { transform: 'scaleY(1)' },
+          '50%': { transform: 'scaleY(1.5)' },
+          '100%': { transform: 'scaleY(1)' },
+        },
       },
       animation: {
         blink: 'blink 1s infinite alternate',
+        wave: 'wave 0.5s ease-in-out infinite',
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'sans-serif'],

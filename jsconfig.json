@@ -10,7 +10,8 @@
       "@/utils/*": ["utils/*"],
       "@/images/*": ["public/images/*"],
       "@/redux/*": ["redux/*"],
-      "@/data/*": ["data/*"]
+      "@/data/*": ["data/*"],
+      "@/hooks/*": ["hooks/*"]
     }
   }
 }

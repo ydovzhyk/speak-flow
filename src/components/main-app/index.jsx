@@ -4,10 +4,17 @@ import { useState, useEffect, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { getCloseButtonAuth } from '@/redux/technical/technical-selectors';
 import { setCloseButtonAuth } from '@/redux/technical/technical-slice';
+import { getCountdown } from '@/redux/technical/technical-selectors';
+import { setCountdown } from '@/redux/technical/technical-slice';
 import Auth from '../auth';
 import Contact from '../contact';
 import SettingsContent from '../settings-content';
 import Text from '@/components/shared/text/text';
+import LogoWave from '@/components/shared/logo-wave';
+import AuthInfo from '../auth-info';
+import Countdown from '@/components/shared/countdown';
+import AutoScrollBox from '../../utils/AutoScrollBox';
+import useSocket from '../../app/hooks/useSocket';
 
 const TABS = [
   { key: 'settings', label: 'Settings' },
@@ -73,11 +80,22 @@ const EarButton = memo(function EarButton({
 
 export default function ToolCard() {
   const dispatch = useDispatch();
+  const countdown = useSelector(getCountdown);
   const [panel, setPanel] = useState(
     /** @type {null | 'settings' | 'info' | 'auth' | 'contact'} */ null
   );
 
   const closeButtonAuth = useSelector(getCloseButtonAuth);
+  const {
+    initialize,
+    sendAudio,
+    pause,
+    clear,
+    disconnect,
+    transcriptText,
+    translationText,
+  } = useSocket();
+
 
   // ESC → закриття
   useEffect(() => {
@@ -111,7 +129,31 @@ export default function ToolCard() {
 
       {/* Карта тула */}
       <div className="relative h-[560px] w-[380px] rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
-        <div className="p-4 h-[500px]">Main SpeakFlow Tool content here…</div>
+        {/* <div className="p-4 h-[500px]">Main SpeakFlow Tool content here…</div> */}
+        <div className="h-[57px] flex justify-between items-center px-4 border-b">
+          <div>
+            <LogoWave />
+          </div>
+          <div>
+            <AuthInfo />
+          </div>
+        </div>
+
+        <div className="mt-2">
+          <div className="text-sm text-gray-500 mb-1">Live transcription</div>
+          <AutoScrollBox
+            text={transcriptText}
+            placeholder="Live transcription"
+          />
+        </div>
+
+        <div className="mt-3">
+          <div className="text-sm text-gray-500 mb-1">Live translation</div>
+          <AutoScrollBox
+            text={translationText}
+            placeholder="Live translation"
+          />
+        </div>
 
         {/* Сайд-панель */}
         <div
@@ -133,6 +175,15 @@ export default function ToolCard() {
           </div>
         </div>
       </div>
+      {countdown && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/0 z-50">
+          <Countdown
+            onFinish={() => {
+              dispatch(setCountdown(false));
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -10,12 +10,24 @@ const initialState = {
   inputLanguage: 'en',
   outputLanguage: 'uk',
   appLanguage: 'en',
+  countdown: true,
+  deepgramStatus: false,
+  recordBtn: false,
 };
 
 const technical = createSlice({
   name: 'technical',
   initialState,
   reducers: {
+    setRecordBtn: (store, action) => {
+      store.recordBtn = action.payload;
+    },
+    setDeepgramStatus: (store, action) => {
+      store.deepgramStatus = action.payload;
+    },
+    setCountdown: (store, action) => {
+      store.countdown = action.payload;
+    },
     setInputLanguage: (store, action) => {
       store.inputLanguage = action.payload;
     },
@@ -55,6 +67,9 @@ const technical = createSlice({
 export default technical.reducer;
 
 export const {
+  setRecordBtn,
+  setDeepgramStatus,
+  setCountdown,
   setInputLanguage,
   setOutputLanguage,
   setAppLanguage,

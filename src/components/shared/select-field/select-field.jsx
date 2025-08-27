@@ -70,6 +70,24 @@ const SelectField = ({
           : 'white',
       cursor: 'pointer',
     }),
+    menuList: provided => ({
+      ...provided,
+      maxHeight: 155,
+      overflowY: 'auto',
+      '&::-webkit-scrollbar': {
+        width: '7px',
+        height: '7px',
+      },
+      '&::-webkit-scrollbar-track': {
+        background: 'transparent',
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: 'var(--accent2)',
+        borderRadius: '8px',
+        border: '0.5px solid white',
+        minHeight: '40px',
+      },
+    }),
   };
 
   const valueId = `select-${name}`;
@@ -103,7 +121,6 @@ const SelectField = ({
         options={options}
         styles={customStyles}
         defaultValue={defaultValue}
-        maxMenuHeight={152}
         formatOptionLabel={option =>
           showLabelWithValue
             ? `${option.value} - ${option.label}`

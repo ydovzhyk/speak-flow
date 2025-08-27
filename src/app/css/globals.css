@@ -38,6 +38,33 @@
   transform: translate(-50%, -50%);
 }
 
+/* Tailwind кастомний клас для тонкого скролбару */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--accent2);
+  border-radius: 8px;
+  border: 0.5px solid white;
+  min-height: 40px;
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 :root {
   --accent1: #0299B5;
   --accent2: #017683;
