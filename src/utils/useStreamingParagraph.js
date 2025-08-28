@@ -1,4 +1,3 @@
-// useStreamingParagraph.js
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 const DEFAULT_CHARS_PER_FRAME = 22;
@@ -6,33 +5,35 @@ const DEFAULT_CHARS_PER_FRAME = 22;
 export function useStreamingParagraph(charsPerFrame = DEFAULT_CHARS_PER_FRAME) {
   const [displayedText, setDisplayedText] = useState('');
   const queueRef = useRef([]);
-  const typingRef = useRef(null); // { target, idx } або null
+  const typingRef = useRef(null);
   const rafRef = useRef(null);
-
-  const smartJoin = (left, right) => {
-    if (!left) return right;
-    const needsSpace = /[^\s]$/.test(left) && /^[^\s.,!?;:]/.test(right);
-    return needsSpace ? left + ' ' + right : left + right;
-  };
 
   const step = useCallback(() => {
     if (!typingRef.current) {
       const next = queueRef.current.shift();
-      if (!next) return;
+      if (!next) {
+        rafRef.current = null;
+        return;
+      }
       typingRef.current = { target: next, idx: 0 };
     }
 
     const { target, idx } = typingRef.current;
     const nextIdx = Math.min(idx + charsPerFrame, target.length);
     const slice = target.slice(idx, nextIdx);
+    const isNewSentenceStart = idx === 0;
 
-    setDisplayedText(prev => smartJoin(prev, slice));
+    setDisplayedText(prev => {
+      if (!prev) return slice;
+      if (!isNewSentenceStart) {
+        return prev + slice;
+      }
+      const needSpace = /[^\s]$/.test(prev) && !/^[.,!?;:]/.test(slice);
+      return needSpace ? prev + ' ' + slice : prev + slice;
+    });
 
-    if (nextIdx >= target.length) {
-      typingRef.current = null;
-    } else {
-      typingRef.current = { target, idx: nextIdx };
-    }
+    typingRef.current =
+      nextIdx >= target.length ? null : { target, idx: nextIdx };
 
     rafRef.current = requestAnimationFrame(step);
   }, [charsPerFrame]);

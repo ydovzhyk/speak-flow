@@ -8,19 +8,22 @@ const initialState = {
   typeOperation: 'login',
   closeButtonAuth: false,
   inputLanguage: 'en',
-  outputLanguage: 'uk',
-  appLanguage: 'en',
+  outputLanguage: 'Ukrainian',
   countdown: true,
   deepgramStatus: false,
-  recordBtn: false,
+  activeBtn: 'stop',
+  line: 'speaker',
 };
 
 const technical = createSlice({
   name: 'technical',
   initialState,
   reducers: {
-    setRecordBtn: (store, action) => {
-      store.recordBtn = action.payload;
+    setLine: (store, action) => {
+      store.line = action.payload;
+    },
+    setActiveBtn: (store, action) => {
+      store.activeBtn = action.payload;
     },
     setDeepgramStatus: (store, action) => {
       store.deepgramStatus = action.payload;
@@ -33,9 +36,6 @@ const technical = createSlice({
     },
     setOutputLanguage: (store, action) => {
       store.outputLanguage = action.payload;
-    },
-    setAppLanguage: (store, action) => {
-      store.appLanguage = action.payload;
     },
     setCloseButtonAuth: (store, action) => {
       store.closeButtonAuth = action.payload;
@@ -67,12 +67,12 @@ const technical = createSlice({
 export default technical.reducer;
 
 export const {
-  setRecordBtn,
+  setLine,
+  setActiveBtn,
   setDeepgramStatus,
   setCountdown,
   setInputLanguage,
   setOutputLanguage,
-  setAppLanguage,
   setCloseButtonAuth,
   setTypeOperation,
   setDefaultTypeOperation,

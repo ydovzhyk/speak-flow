@@ -36,3 +36,9 @@ export const LANGUAGES = [
   { label: 'Ukrainian', value: 'uk' },
   { label: 'Vietnamese', value: 'vi' },
 ];
+
+export const LANG_BY_CODE = Object.fromEntries(
+  LANGUAGES.map(o => [o.value, o.label])
+);
+
+export const codeToLabel = code => LANG_BY_CODE[code] || code;

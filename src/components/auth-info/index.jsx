@@ -21,7 +21,6 @@ export default function AuthInfo() {
 
   return (
     <div className="flex items-center gap-[10px]">
-      {/* Avatar (optional) */}
       {user?.userAvatar ? (
         <img
           src={user.userAvatar}
@@ -34,7 +33,6 @@ export default function AuthInfo() {
         </div>
       )}
 
-      {/* Greeting */}
       <Text
         type="tiny"
         as="p"
@@ -44,10 +42,8 @@ export default function AuthInfo() {
         Hi, {name}
       </Text>
 
-      {/* Divider */}
       <span className="h-5 w-px bg-[rgba(0,0,0,0.45)]" />
 
-      {/* Logout */}
       <button
         type="button"
         onClick={handleLogout}
@@ -55,7 +51,7 @@ export default function AuthInfo() {
         aria-label="Log out"
         title="Log out"
       >
-        <FiLogOut className="text-base" />
+        <FiLogOut size={20} className="text-base" />
       </button>
     </div>
   );

@@ -1,108 +1,148 @@
-import { useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import io from "socket.io-client";
-import {
-  // addSentenceTranscript,
-  // addSentenceTranslated,
-  setRecordBtn,
-  setDeepgramStatus,
-} from '@/redux/technical/technical-slice';
+import { useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import io from 'socket.io-client';
+import { v4 as uuid } from 'uuid';
+import { setDeepgramStatus } from '@/redux/technical/technical-slice';
 import {
   getInputLanguage,
   getOutputLanguage,
 } from '@/redux/technical/technical-selectors';
+import { getUser } from '@/redux/auth/auth-selectors';
 import { useStreamingParagraph } from '@/utils/useStreamingParagraph';
+import { codeToLabel } from '../../data/languages';
 
-// const serverURL = "http://localhost:4000";
-const serverURL = "wss://test-task-backend-34db7d47d9c8.herokuapp.com";
+const STORAGE_KEY = 'speakflow.settings';
+const serverURL = 'wss://test-task-backend-34db7d47d9c8.herokuapp.com';
 
-const subscriptions = [
-  "final",
-  "final-transleted",
-  "partial",
-  "transcriber-ready",
-  "error",
-  "close",
-];
+function readSettings() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeSettings(patch) {
+  try {
+    const prev = readSettings();
+    const next = { ...prev, ...patch };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {}
+}
 
 const useSocket = () => {
   const socketRef = useRef(null);
+  const readyResolverRef = useRef(null);
   const dispatch = useDispatch();
-  const outputLanguage = useSelector(getOutputLanguage);
+  const outputLanguage = codeToLabel(useSelector(getOutputLanguage));
   const inputLanguage = useSelector(getInputLanguage);
+  const user = useSelector(getUser);
 
   const {
     displayedText: transcriptText,
     enqueueSentence: enqueueTranscript,
-    pause: pauseTranscript,
     reset: resetTranscript,
   } = useStreamingParagraph(22);
 
   const {
     displayedText: translationText,
     enqueueSentence: enqueueTranslation,
-    pause: pauseTranslation,
     reset: resetTranslation,
   } = useStreamingParagraph(22);
 
-  const initialize = () => {
-    if (!socketRef.current) {
-      socketRef.current = io(serverURL);
+  const getOrCreateClientId = () => {
+    if (user?._id) return user._id;
 
-      socketRef.current.on('connect', () => {
-        console.log('connected to WS server');
-
-        subscriptions.forEach(event => {
-          socketRef.current.on(event, data => {
-            if (event === 'transcriber-ready' && data === 'Ready') {
-              dispatch(setDeepgramStatus(true));
-              dispatch(setRecordBtn(true));
-            }
-
-            if (event === 'close' && data === 'Deepgram connection is closed') {
-              dispatch(setDeepgramStatus(false));
-            }
-
-            socket.on('final', transcript => {
-              enqueueTranscript(transcript);
-              // dispatch(addSentenceTranscript(transcript));
-            });
-
-            socket.on('final-transleted', translation => {
-              enqueueTranslation(translation);
-              // dispatch(addSentenceTranslated(translation));
-            });
-          });
-        });
-      });
-    } else {
-      return;
+    let { clientId } = readSettings();
+    if (!clientId) {
+      clientId = uuid();
+      writeSettings({ clientId });
     }
+    return clientId;
+  };
+
+  const initialize = () => {
+    if (socketRef.current) {
+      return Promise.resolve(socketRef.current);
+    }
+
+    const clientId = getOrCreateClientId();
+
+    socketRef.current = io(serverURL, {
+      transports: ['websocket'],
+      auth: { clientId },
+    });
+
+    const s = socketRef.current;
+
+    const readyPromise = new Promise(resolve => {
+      readyResolverRef.current = resolve;
+    });
+
+    s.on('connect', () => {
+      console.log('🟢 WebSocket connected as', clientId);
+    });
+
+    s.on('transcriber-ready', data => {
+      if (data === 'Ready') {
+        dispatch(setDeepgramStatus(true));
+        if (readyResolverRef.current) {
+          readyResolverRef.current(s);
+          readyResolverRef.current = null;
+        }
+      }
+    });
+
+    s.on('close', msg => {
+      if (msg === 'Deepgram connection is closed') {
+        dispatch(setDeepgramStatus(false));
+      }
+    });
+
+    s.on('final', transcript => {
+      console.log('🟢 Final transcript received:', transcript);
+      enqueueTranscript(transcript);
+    });
+
+    s.on('final-transleted', translation => {
+      console.log('🟢 Final translation received:', translation);
+      enqueueTranslation(translation);
+    });
+
+    s.on('error', e => console.error('socket error:', e));
+
+    return readyPromise;
   };
 
   const sendAudio = (audioData, sampleRate, sourceType) => {
-    if (socketRef.current) {
-      // console.log(sourceType);
-      socketRef.current.emit('incoming-audio', {
-        audioData,
-        sampleRate,
-        sourceType,
-        outputLanguage,
-        inputLanguage,
-      });
-    }
+    const s = socketRef.current;
+    if (!s) return;
+
+    const clientId = getOrCreateClientId();
+    console.log('outputLanguage:', outputLanguage);
+    s.emit('incoming-audio', {
+      audioData,
+      sampleRate,
+      sourceType,
+      targetLanguage: outputLanguage,
+      inputLanguage,
+      clientId,
+    });
   };
 
-  const pause = async data => {
-    if (socketRef.current) {
-      socketRef.current.emit('pause-deepgram', data);
-    }
+  const pause = data => {
+    socketRef.current?.emit('pause-deepgram', data);
   };
 
-  const disconnect = async () => {
-    if (socketRef.current) {
-      socketRef.current.emit('diconnect-deepgram');
-    }
+  const disconnect = () => {
+    const s = socketRef.current;
+    if (!s) return;
+    s.emit('disconnect-deepgram');
+    s.disconnect();
+    socketRef.current = null;
+    // resetTranscript();
+    // resetTranslation();
   };
 
   return {

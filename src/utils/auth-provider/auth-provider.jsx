@@ -22,7 +22,6 @@ const AuthProvider = () => {
       authData.sid &&
       !isLogin
     ) {
-      console.log('Fetching current user with stored tokens:', authData);
       dispatch(
         getCurrentUser({
           accessToken: authData.accessToken,

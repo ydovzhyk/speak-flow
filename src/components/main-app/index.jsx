@@ -2,10 +2,15 @@
 
 import { useState, useEffect, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getCloseButtonAuth } from '@/redux/technical/technical-selectors';
-import { setCloseButtonAuth } from '@/redux/technical/technical-slice';
-import { getCountdown } from '@/redux/technical/technical-selectors';
-import { setCountdown } from '@/redux/technical/technical-slice';
+import { useSocketContext } from '@/utils/socket-provider/socket-provider';
+import useAudioRecorder from '@/utils/audio-recorder/useAudioRecorder';
+import {
+  setCloseButtonAuth,
+  setLine,
+  setActiveBtn,
+  setCountdown,
+} from '@/redux/technical/technical-slice';
+import { getCloseButtonAuth, getCountdown, getActiveBtn, getDeepgramStatus, getLine } from '@/redux/technical/technical-selectors';
 import Auth from '../auth';
 import Contact from '../contact';
 import SettingsContent from '../settings-content';
@@ -13,8 +18,9 @@ import Text from '@/components/shared/text/text';
 import LogoWave from '@/components/shared/logo-wave';
 import AuthInfo from '../auth-info';
 import Countdown from '@/components/shared/countdown';
-import AutoScrollBox from '../../utils/AutoScrollBox';
-import useSocket from '../../app/hooks/useSocket';
+import LiveTextPanels from '../live-text-panels';
+import PlayModePanel from '../play-mode-panel';
+import { SocketProvider } from '@/utils/socket-provider/socket-provider';
 
 const TABS = [
   { key: 'settings', label: 'Settings' },
@@ -78,24 +84,33 @@ const EarButton = memo(function EarButton({
   );
 });
 
-export default function ToolCard() {
+const ToolCard = () => {
   const dispatch = useDispatch();
   const countdown = useSelector(getCountdown);
   const [panel, setPanel] = useState(
     /** @type {null | 'settings' | 'info' | 'auth' | 'contact'} */ null
   );
-
   const closeButtonAuth = useSelector(getCloseButtonAuth);
-  const {
-    initialize,
-    sendAudio,
-    pause,
-    clear,
-    disconnect,
-    transcriptText,
-    translationText,
-  } = useSocket();
+  const activeBtn = useSelector(getActiveBtn);
+  const activeLine = useSelector(getLine);
+  const deepgramStatus = useSelector(getDeepgramStatus);
 
+  const { initialize, sendAudio, pause, disconnect } = useSocketContext();
+  const {
+    startRecording,
+    stopRecording,
+    togglePauseResume,
+    isRecording,
+    isPaused,
+    audioContext,
+    sourceNodeMic,
+    sourceNodeSpeaker,
+  } = useAudioRecorder({
+    dataCb: (audioData, sampleRate, sourceType) => {
+      sendAudio(audioData, sampleRate, sourceType);
+      dispatch(setLine(sourceType));
+    },
+  });
 
   // ESC → закриття
   useEffect(() => {
@@ -111,6 +126,38 @@ export default function ToolCard() {
       dispatch(setCloseButtonAuth(false));
     }
   }, [closeButtonAuth, panel, dispatch]);
+
+  useEffect(() => {
+    switch (activeBtn) {
+      case 'record':
+        if (!isRecording && !isPaused) {
+          initialize();
+          startRecording();
+        } else if (isRecording && isPaused) {
+          togglePauseResume();
+          pause(false);
+        }
+        break;
+
+      case 'pause':
+        if (isRecording && !isPaused) {
+          togglePauseResume();
+          pause(true);
+        }
+        break;
+
+      case 'stop':
+        if (deepgramStatus) {
+          stopRecording();
+          disconnect();
+        }
+        break;
+
+      default:
+        break;
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [activeBtn, isRecording, isPaused /* deepgramStatus? */]);
 
   return (
     <div className="relative inline-flex items-center justify-center w-fit">
@@ -139,20 +186,12 @@ export default function ToolCard() {
           </div>
         </div>
 
-        <div className="mt-2">
-          <div className="text-sm text-gray-500 mb-1">Live transcription</div>
-          <AutoScrollBox
-            text={transcriptText}
-            placeholder="Live transcription"
-          />
-        </div>
+            <div className="p-4">
+              <LiveTextPanels />
+            </div>
 
-        <div className="mt-3">
-          <div className="text-sm text-gray-500 mb-1">Live translation</div>
-          <AutoScrollBox
-            text={translationText}
-            placeholder="Live translation"
-          />
+        <div className="p-4">
+          <PlayModePanel />
         </div>
 
         {/* Сайд-панель */}
@@ -175,7 +214,7 @@ export default function ToolCard() {
           </div>
         </div>
       </div>
-      {countdown && (
+      {/* {countdown && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/0 z-50">
           <Countdown
             onFinish={() => {
@@ -183,7 +222,9 @@ export default function ToolCard() {
             }}
           />
         </div>
-      )}
+      )} */}
     </div>
   );
 }
+
+export default ToolCard;

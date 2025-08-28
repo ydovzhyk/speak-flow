@@ -1,6 +1,7 @@
 import React from 'react';
 import Logo from '@/components/shared/logo/logo';
 import MainApp from '@/components/main-app';
+import { SocketProvider } from '@/utils/socket-provider/socket-provider';
 
 export default function Home() {
   return (
@@ -14,7 +15,9 @@ export default function Home() {
       </div>
 
       {/* Центрований MainApp */}
-      <MainApp />
+      <SocketProvider>
+        <MainApp />
+      </SocketProvider>
     </div>
   );
 }
