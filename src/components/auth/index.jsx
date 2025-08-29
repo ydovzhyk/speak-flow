@@ -29,11 +29,11 @@ const Auth = () => {
       : 'Sign up quickly with Google';
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       {/* Таби (кнопки як текст) */}
-      <div className="w-full flex flex-row justify-around gap-[2px]">
+      <div className="w-full h-[40px] flex flex-row justify-around gap-[2px]">
         <div
-          className={`w-1/2 rounded-t-md border border-[rgba(82,85,95,0.2)] flex justify-center items-center ${
+          className={`w-[calc(50%-2px)] rounded-t-md border border-[rgba(82,85,95,0.2)] flex justify-center items-center ${
             typeOperation === 'login' ? 'border-b-0' : ''
           }`}
         >
@@ -45,7 +45,7 @@ const Auth = () => {
           />
         </div>
         <div
-          className={`w-1/2 rounded-t-md border border-[rgba(82,85,95,0.2)] flex justify-center items-center  ${
+          className={`w-[calc(50%-2px)] rounded-t-md border border-[rgba(82,85,95,0.2)] flex justify-center items-center  ${
             typeOperation === 'registration' ? 'border-b-0' : ''
           }`}
         >
@@ -59,7 +59,7 @@ const Auth = () => {
       </div>
 
       {/* Контент */}
-      <div className="w-full h-[430px] flex flex-col justify-start gap-5 pt-5 px-5 pb-5 border-x border-b border-[rgba(15,54,181,0.2)] rounded-b-md">
+      <div className="min-h-[calc(100%-40px)] w-full flex flex-col justify-start gap-5 pt-5 px-5 pb-5 border-x border-b border-[rgba(15,54,181,0.2)] rounded-b-md">
         <div className="w-full flex flex-col items-center gap-5">
           <div className="flex flex-col items-center gap-5">
             <Text type="tiny" as="p" fontWeight="light">

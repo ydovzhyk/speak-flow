@@ -20,13 +20,14 @@ import AuthInfo from '../auth-info';
 import Countdown from '@/components/shared/countdown';
 import LiveTextPanels from '../live-text-panels';
 import PlayModePanel from '../play-mode-panel';
-import { SocketProvider } from '@/utils/socket-provider/socket-provider';
+import AudioBarsVisualizer from '../shared/audio-bars-visualizer';
+import Timer from '@/components/shared/timer';
 
 const TABS = [
-  { key: 'settings', label: 'Settings' },
-  { key: 'info', label: 'Information' },
-  { key: 'auth', label: 'Authentication' },
-  { key: 'contact', label: 'Contact' },
+  { key: 'settings', label: 'SETTINGS' },
+  { key: 'info', label: 'INFO' },
+  { key: 'auth', label: 'AUTH' },
+  { key: 'contact', label: 'CONTACT' },
 ];
 
 const PanelTitles = {
@@ -66,9 +67,10 @@ const EarButton = memo(function EarButton({
   return (
     <button
       onClick={() => onToggle(isActive ? null : tabKey)}
-      className="rotate-90 rounded-t-lg shadow w-[100px] border border-gray-300 pb-[3px]"
+      className="rotate-90 rounded-t-lg shadow border border-gray-300 pb-[3px]"
       style={{
         backgroundColor: isActive ? 'var(--accent1)' : 'var(--accent2)',
+        width: '85px',
       }}
       aria-pressed={isActive}
     >
@@ -157,12 +159,12 @@ const ToolCard = () => {
         break;
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [activeBtn, isRecording, isPaused /* deepgramStatus? */]);
+  }, [activeBtn, isRecording, isPaused /* deepgramStatus? */]);
 
   return (
     <div className="relative inline-flex items-center justify-center w-fit">
       {/* Вушка праворуч */}
-      <div className="absolute top-[100px] -right-[62px] flex flex-col gap-[70px]">
+      <div className="absolute top-1/2 -translate-y-1/2 -right-[54px] flex flex-col gap-[55px]">
         {TABS.map(t => (
           <EarButton
             key={t.key}
@@ -175,9 +177,8 @@ const ToolCard = () => {
       </div>
 
       {/* Карта тула */}
-      <div className="relative h-[560px] w-[380px] rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
-        {/* <div className="p-4 h-[500px]">Main SpeakFlow Tool content here…</div> */}
-        <div className="h-[57px] flex justify-between items-center px-4 border-b">
+      <div className="relative h-[85vh] min-w-[317px] w-[370px] rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
+        <div className="h-[9vh] flex justify-between items-center px-4 border-b">
           <div>
             <LogoWave />
           </div>
@@ -186,19 +187,53 @@ const ToolCard = () => {
           </div>
         </div>
 
-            <div className="p-4">
-              <LiveTextPanels />
-            </div>
+        <div className="h-[6vh] border border-[var(--accent2)] rounded-md mx-4 my-3 flex items-center justify-between">
+          <Timer />
+          <div className="h-full flex items-center justify-center flex-1">
+            {audioContext && sourceNodeSpeaker && activeLine === 'speaker' && (
+              <AudioBarsVisualizer
+                audioContext={audioContext}
+                sourceNode={sourceNodeSpeaker}
+              />
+            )}
+            {audioContext && sourceNodeMic && activeLine === 'mic' && (
+              <AudioBarsVisualizer
+                audioContext={audioContext}
+                sourceNode={sourceNodeMic}
+              />
+            )}
+          </div>
+          <div className="w-[40px] h-full flex items-center justify-center">
+            <img
+              src={
+                activeLine === 'mic'
+                  ? '/images/buttons/microphone.png'
+                  : '/images/buttons/speaker.png'
+              }
+              alt="active channel"
+              className="w-5 h-5 mr-2"
+              style={{
+                width: activeLine === 'mic' ? '25px' : '20px',
+                height: activeLine === 'mic' ? '25px' : '20px',
+              }}
+            />
+          </div>
+        </div>
 
-        <div className="p-4">
-          <PlayModePanel />
+        <div className="h-[66vh] px-4 pb-4 flex flex-col gap-3">
+          <div className="flex-1 min-h-0">
+            <LiveTextPanels />
+          </div>
+          <div className="h-[6vh] flex flex-row items-center justify-center">
+            <PlayModePanel />
+          </div>
         </div>
 
         {/* Сайд-панель */}
         <div
-          className={`absolute top-0 right-0 h-full w-full bg-white border-l-2 border-teal-700 shadow-lg transform transition-transform duration-300 ${panel ? 'translate-x-0' : 'translate-x-full'}`}
+          className={`absolute top-0 right-0 h-full w-full bg-white border-l-2 border-teal-700 shadow-lg transform transition-transform duration-300 ${panel ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
         >
-          <div className="flex justify-between items-center p-4 border-b">
+          <div className="h-[9vh] flex justify-between items-center p-4 border-b">
             <h2 className="font-semibold text-[var(--accent2)]">
               {panel ? PanelTitles[panel] : ''}
             </h2>
@@ -209,7 +244,7 @@ const ToolCard = () => {
               ✖
             </button>
           </div>
-          <div className="p-4">
+          <div className="flex-1 overflow-y-auto thin-scrollbar p-4 min-h-[74vh] test-border">
             <PanelContent active={panel} />
           </div>
         </div>

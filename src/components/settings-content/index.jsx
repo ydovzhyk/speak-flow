@@ -6,7 +6,7 @@ import TranslateMe from '@/utils/translating/translating';
 
 const SettingsContent = () => {
   return (
-    <div className="w-full h-[470px] rounded-md border border-[rgba(82,85,95,0.2)] p-4 bg-white overflow-y-auto flex flex-col justify-start gap-5">
+    <div className="w-full min-h-full rounded-md border border-[rgba(82,85,95,0.2)] p-4 bg-white flex flex-col justify-start gap-5">
       <SelectLanguagePanel />
       <div className="border-b border-[rgba(82,85,95,0.2)]" />
       <div className='w-full flex flex-col gap-5'>

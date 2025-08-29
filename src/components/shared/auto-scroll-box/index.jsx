@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 const AutoScrollBox = ({
   text,
   placeholder = '',
-  height = 160,
+  height = '100%',
   className = '',
 }) => {
   const boxRef = useRef(null);

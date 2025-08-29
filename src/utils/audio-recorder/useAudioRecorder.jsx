@@ -10,16 +10,21 @@ const useAudioRecorder = ({ dataCb }) => {
   const [mediaRecorderSpeaker, setMediaRecorderSpeaker] = useState(null);
   const [timerInterval, setTimerInterval] = useState(null);
 
+  // 🔹 стани-дзеркала для ререндера
+  const [ctxState, setCtxState] = useState(null);
+  const [micNodeState, setMicNodeState] = useState(null);
+  const [spkNodeState, setSpkNodeState] = useState(null);
+
+  // рефи WebAudio
   const sourceNodeMic = useRef(null);
   const sourceNodeSpeaker = useRef(null);
   const scriptProcessorMic = useRef(null);
   const scriptProcessorSpeaker = useRef(null);
   const audioContext = useRef(null);
 
-  // таймер
   const _startTimer = useCallback(() => {
     const interval = setInterval(() => {
-      setRecordingTime(time => time + 1);
+      setRecordingTime(t => t + 1);
     }, 1500);
     setTimerInterval(interval);
   }, []);
@@ -29,7 +34,6 @@ const useAudioRecorder = ({ dataCb }) => {
     setTimerInterval(null);
   }, [timerInterval]);
 
-  // конвертація Float32 → Int16 PCM
   const float32To16BitPCM = float32Arr => {
     const pcm16bit = new Int16Array(float32Arr.length);
     for (let i = 0; i < float32Arr.length; ++i) {
@@ -39,27 +43,26 @@ const useAudioRecorder = ({ dataCb }) => {
     return pcm16bit;
   };
 
-  // ▶️ старт запису
   const startRecording = async () => {
     if (timerInterval) throw new Error('timerInterval not null');
 
-    // Ініціалізація AudioContext тільки тут (на клієнті й після кліку)
+    // ініт контексту тільки після юзер-дії (клік)
     if (!audioContext.current) {
-      if (typeof window === 'undefined') {
-        console.error('AudioContext not available on server');
-        return;
-      }
-      const AudioCtx = window.AudioContext || window['webkitAudioContext'];
+      const AudioCtx =
+        typeof window !== 'undefined'
+          ? window.AudioContext
+          : null;
       if (!AudioCtx) {
         console.error('Web Audio API not supported');
         return;
       }
       audioContext.current = new AudioCtx();
+      setCtxState(audioContext.current); // 🔸 тригеримо ререндер
     }
 
     if (!navigator.mediaDevices) {
       setIsRecording(true);
-      return 24000; // fallback для тестів
+      return 24000;
     }
 
     if (audioContext.current.state === 'suspended') {
@@ -80,6 +83,10 @@ const useAudioRecorder = ({ dataCb }) => {
     sourceNodeSpeaker.current =
       audioContext.current.createMediaStreamSource(streamSpeaker);
 
+    // 🔸 піднімаємо у стейт для пропів у візуалізер
+    setMicNodeState(sourceNodeMic.current);
+    setSpkNodeState(sourceNodeSpeaker.current);
+
     const chunkSize = 4096;
     scriptProcessorMic.current = audioContext.current.createScriptProcessor(
       chunkSize,
@@ -99,8 +106,7 @@ const useAudioRecorder = ({ dataCb }) => {
       scriptProcessorMic.current.onaudioprocess = event => {
         const float32Audio = event.inputBuffer.getChannelData(0);
         const pcm16Audio = float32To16BitPCM(float32Audio);
-        lastMicLevel = pcm16Audio.reduce((acc, val) => acc + Math.abs(val), 0);
-
+        lastMicLevel = pcm16Audio.reduce((acc, v) => acc + Math.abs(v), 0);
         if (lastMicLevel > lastSpeakerLevel) {
           dataCb(pcm16Audio, audioContext.current.sampleRate, 'mic');
         }
@@ -109,11 +115,7 @@ const useAudioRecorder = ({ dataCb }) => {
       scriptProcessorSpeaker.current.onaudioprocess = event => {
         const float32Audio = event.inputBuffer.getChannelData(0);
         const pcm16Audio = float32To16BitPCM(float32Audio);
-        lastSpeakerLevel = pcm16Audio.reduce(
-          (acc, val) => acc + Math.abs(val),
-          0
-        );
-
+        lastSpeakerLevel = pcm16Audio.reduce((acc, v) => acc + Math.abs(v), 0);
         if (lastSpeakerLevel > lastMicLevel) {
           dataCb(pcm16Audio, audioContext.current.sampleRate, 'speaker');
         }
@@ -124,7 +126,6 @@ const useAudioRecorder = ({ dataCb }) => {
 
     sourceNodeMic.current.connect(scriptProcessorMic.current);
     sourceNodeSpeaker.current.connect(scriptProcessorSpeaker.current);
-
     scriptProcessorMic.current.connect(audioContext.current.destination);
     scriptProcessorSpeaker.current.connect(audioContext.current.destination);
 
@@ -134,7 +135,6 @@ const useAudioRecorder = ({ dataCb }) => {
     const recorderSpeaker = new MediaRecorder(streamSpeaker);
     setMediaRecorderMic(recorderMic);
     setMediaRecorderSpeaker(recorderSpeaker);
-
     recorderMic.start();
     recorderSpeaker.start();
     _startTimer();
@@ -142,7 +142,6 @@ const useAudioRecorder = ({ dataCb }) => {
     return audioContext.current.sampleRate;
   };
 
-  // ⏹️ стоп
   const stopRecording = async () => {
     scriptProcessorMic.current?.disconnect();
     scriptProcessorSpeaker.current?.disconnect();
@@ -154,9 +153,11 @@ const useAudioRecorder = ({ dataCb }) => {
     setRecordingTime(0);
     setIsRecording(false);
     setIsPaused(false);
+
+    // (опційно) занулити стейти, якщо треба ховати візуалізери
+    // setCtxState(null); setMicNodeState(null); setSpkNodeState(null);
   };
 
-  // ⏸️ / ▶️ пауза/резюм
   const togglePauseResume = useCallback(() => {
     if (!audioContext.current) return;
 
@@ -165,7 +166,6 @@ const useAudioRecorder = ({ dataCb }) => {
       mediaRecorderMic?.resume();
       mediaRecorderSpeaker?.resume();
       _startTimer();
-
       sourceNodeMic.current.connect(scriptProcessorMic.current);
       sourceNodeSpeaker.current.connect(scriptProcessorSpeaker.current);
       scriptProcessorMic.current.connect(audioContext.current.destination);
@@ -175,7 +175,6 @@ const useAudioRecorder = ({ dataCb }) => {
       _stopTimer();
       mediaRecorderMic?.pause();
       mediaRecorderSpeaker?.pause();
-
       scriptProcessorMic.current.disconnect();
       scriptProcessorSpeaker.current.disconnect();
       sourceNodeMic.current.disconnect();
@@ -196,6 +195,10 @@ const useAudioRecorder = ({ dataCb }) => {
     isRecording,
     isPaused,
     recordingTime,
+    // ✅ готові до передачі в UI (оновлюються через setState)
+    audioContext: ctxState,
+    sourceNodeMic: micNodeState,
+    sourceNodeSpeaker: spkNodeState,
   };
 };
 
