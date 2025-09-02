@@ -1,4 +1,3 @@
-// src/api/axios.js
 import axios from 'axios';
 import { getAuthDataFromStorage } from '@/utils/auth-data';
 import { setRefreshUserData } from '@/redux/auth/auth-slice';

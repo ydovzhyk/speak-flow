@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { login, register } from '@/redux/auth/auth-operations';

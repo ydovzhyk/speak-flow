@@ -2,7 +2,11 @@ import { useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import io from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
-import { setDeepgramStatus } from '@/redux/technical/technical-slice';
+import {
+  setDeepgramStatus,
+  pushTranscript,
+  pushTranslation,
+} from '@/redux/technical/technical-slice';
 import {
   getInputLanguage,
   getOutputLanguage,
@@ -103,11 +107,13 @@ const useSocket = () => {
     s.on('final', transcript => {
       console.log('🟢 Final transcript received:', transcript);
       enqueueTranscript(transcript);
+      dispatch(pushTranscript(transcript));
     });
 
     s.on('final-transleted', translation => {
       console.log('🟢 Final translation received:', translation);
       enqueueTranslation(translation);
+      dispatch(pushTranslation(translation));
     });
 
     s.on('error', e => console.error('socket error:', e));
@@ -152,6 +158,8 @@ const useSocket = () => {
     disconnect,
     transcriptText,
     translationText,
+    resetTranscript,
+    resetTranslation,
   };
 };
 

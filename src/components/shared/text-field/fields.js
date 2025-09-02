@@ -24,4 +24,12 @@ export const fields = {
       '*The Password field must be more than 2 and less than 21 characters',
     required: true,
   },
+  title: {
+    label: 'Title',
+    name: 'title',
+    type: 'text',
+    placeholder: 'Title',
+    title: '*The Title field must be more than 2 characters',
+    required: true,
+  },
 };

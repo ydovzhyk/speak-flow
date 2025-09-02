@@ -10,23 +10,33 @@ import {
   setActiveBtn,
   setCountdown,
 } from '@/redux/technical/technical-slice';
-import { getCloseButtonAuth, getCountdown, getActiveBtn, getDeepgramStatus, getLine } from '@/redux/technical/technical-selectors';
+import {
+  getCloseButtonAuth,
+  getActiveBtn,
+  getDeepgramStatus,
+  getLine,
+  getSavedData,
+  getHasAnyText,
+} from '@/redux/technical/technical-selectors';
+import { getLogin } from '@/redux/auth/auth-selectors';
 import Auth from '../auth';
 import Contact from '../contact';
 import SettingsContent from '../settings-content';
 import Text from '@/components/shared/text/text';
 import LogoWave from '@/components/shared/logo-wave';
 import AuthInfo from '../auth-info';
-import Countdown from '@/components/shared/countdown';
 import LiveTextPanels from '../live-text-panels';
 import PlayModePanel from '../play-mode-panel';
 import AudioBarsVisualizer from '../shared/audio-bars-visualizer';
 import Timer from '@/components/shared/timer';
+import SaveRecordsPanel from '../save-records-panel';
+import Records from '../records';
 
 const TABS = [
-  { key: 'settings', label: 'SETTINGS' },
   { key: 'info', label: 'INFO' },
   { key: 'auth', label: 'AUTH' },
+  { key: 'records', label: 'RECORDS' },
+  { key: 'settings', label: 'SETTINGS' },
   { key: 'contact', label: 'CONTACT' },
 ];
 
@@ -35,6 +45,7 @@ const PanelTitles = {
   info: 'Information',
   auth: 'Authentication',
   contact: 'Contact me',
+  records: 'Your Records'
 };
 
 const PanelContent = ({ active }) => {
@@ -53,6 +64,7 @@ const PanelContent = ({ active }) => {
   if (active === 'auth') return <Auth />;
   if (active === 'contact') return <Contact />;
   if (active === 'settings') return <SettingsContent />;
+  if (active === 'records') return <Records />;
   return null;
 };
 
@@ -88,7 +100,6 @@ const EarButton = memo(function EarButton({
 
 const ToolCard = () => {
   const dispatch = useDispatch();
-  const countdown = useSelector(getCountdown);
   const [panel, setPanel] = useState(
     /** @type {null | 'settings' | 'info' | 'auth' | 'contact'} */ null
   );
@@ -96,6 +107,32 @@ const ToolCard = () => {
   const activeBtn = useSelector(getActiveBtn);
   const activeLine = useSelector(getLine);
   const deepgramStatus = useSelector(getDeepgramStatus);
+
+  const isLogin = useSelector(getLogin);
+  const savedData = useSelector(getSavedData);
+  const hasAnyText = useSelector(getHasAnyText);
+
+  const hasSaved = !!(
+    savedData &&
+    (Array.isArray(savedData)
+      ? savedData.length
+      : Object.keys(savedData || {}).length)
+  );
+
+  const showRecordsTab = isLogin && (hasSaved || hasAnyText);
+
+  const visibleTabs = TABS.filter(t => {
+    if (!isLogin && t.key === 'records') return false;
+    if (isLogin && t.key === 'auth') return false;
+    if (t.key === 'records' && !showRecordsTab) return false;
+    return true;
+  });
+
+  useEffect(() => {
+    if (panel === 'records' && (!isLogin || !showRecordsTab)) {
+      setPanel(null);
+    }
+  }, [panel, isLogin, showRecordsTab]);
 
   const { initialize, sendAudio, pause, disconnect } = useSocketContext();
   const {
@@ -165,7 +202,7 @@ const ToolCard = () => {
     <div className="relative inline-flex items-center justify-center w-fit">
       {/* Вушка праворуч */}
       <div className="absolute top-1/2 -translate-y-1/2 -right-[54px] flex flex-col gap-[55px]">
-        {TABS.map(t => (
+        {visibleTabs.map(t => (
           <EarButton
             key={t.key}
             activeKey={panel}
@@ -224,8 +261,9 @@ const ToolCard = () => {
           <div className="flex-1 min-h-0">
             <LiveTextPanels />
           </div>
-          <div className="h-[6vh] flex flex-row items-center justify-center">
+          <div className="h-[6vh] flex flex-row items-center justify-between">
             <PlayModePanel />
+            <SaveRecordsPanel />
           </div>
         </div>
 
@@ -249,15 +287,6 @@ const ToolCard = () => {
           </div>
         </div>
       </div>
-      {/* {countdown && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/0 z-50">
-          <Countdown
-            onFinish={() => {
-              dispatch(setCountdown(false));
-            }}
-          />
-        </div>
-      )} */}
     </div>
   );
 }

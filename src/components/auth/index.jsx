@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getTypeOperation } from '@/redux/technical/technical-selectors';
-import { setTypeOperation } from '@/redux/technical/technical-slice';
+import { getTypeOperationAuth } from '@/redux/technical/technical-selectors';
+import { setTypeOperationAuth } from '@/redux/technical/technical-slice';
 import Button from '../shared/button';
 import Text from '@/components/shared/text/text';
 import AuthInputForm from '@/components/shared/auth-input-form';
@@ -11,7 +11,7 @@ import { FaGoogle } from 'react-icons/fa';
 
 const Auth = () => {
   const dispatch = useDispatch();
-  const typeOperation = useSelector(getTypeOperation);
+  const typeOperation = useSelector(getTypeOperationAuth);
   const [currentOrigin, setCurrentOrigin] = useState('');
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const Auth = () => {
           <Button
             btnClass="btnPlain"
             text="Login"
-            onClick={() => dispatch(setTypeOperation('login'))}
+            onClick={() => dispatch(setTypeOperationAuth('login'))}
             textColor="text-black"
           />
         </div>
@@ -52,7 +52,7 @@ const Auth = () => {
           <Button
             btnClass="btnPlain"
             text="Registration"
-            onClick={() => dispatch(setTypeOperation('registration'))}
+            onClick={() => dispatch(setTypeOperationAuth('registration'))}
             textColor="text-black"
           />
         </div>

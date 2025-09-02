@@ -16,28 +16,35 @@ import logger from 'redux-logger';
 
 const isServer = typeof window === 'undefined';
 
-const createPersistedReducer = () => {
+const createPersistedAuthReducer = () => {
   if (isServer) return authReducer;
-
   const storage = require('redux-persist/lib/storage').default;
-
-  const persistConfig = {
+  const cfg = {
     key: 'auth-sid',
     storage,
     whitelist: ['sid', 'accessToken', 'refreshToken'],
-    debug: process.env.NODE_ENV === 'development',
-    suppressWarnings: true,
   };
-
-  return persistReducer(persistConfig, authReducer);
+  return persistReducer(cfg, authReducer);
 };
 
-const finalAuthReducer = createPersistedReducer();
+const createPersistedTechnicalReducer = () => {
+  if (isServer) return technicalReducer;
+  const storage = require('redux-persist/lib/storage').default;
+  const cfg = {
+    key: 'tech-local',
+    storage,
+    whitelist: ['transcriptArr', 'translationArr'],
+  };
+  return persistReducer(cfg, technicalReducer);
+};
+
+const finalAuthReducer = createPersistedAuthReducer();
+const finalTechnicalReducer = createPersistedTechnicalReducer();
 
 export const store = configureStore({
   reducer: {
     auth: finalAuthReducer,
-    technical: technicalReducer,
+    technical: finalTechnicalReducer,
   },
   middleware: getDefaultMiddleware => {
     const middlewares = getDefaultMiddleware({
