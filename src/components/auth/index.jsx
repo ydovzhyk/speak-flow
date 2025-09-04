@@ -35,7 +35,6 @@ const Auth = () => {
         typeOperation === 'login' ? { height: '100%' } : { minHeight: '100%' }
       }
     >
-      {/* Таби (кнопки як текст) */}
       <div className="w-full h-[40px] flex flex-row justify-around gap-[2px]">
         <div
           className={`w-[calc(50%-2px)] rounded-t-md border border-[rgba(82,85,95,0.2)] flex justify-center items-center ${
@@ -63,14 +62,12 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Контент */}
       <div className="min-h-[calc(100%-40px)] w-full flex flex-col justify-start gap-5 pt-5 px-5 pb-5 border-x border-b border-[rgba(15,54,181,0.2)] rounded-b-md">
         <div className="w-full flex flex-col items-center gap-5">
           <div className="flex flex-col items-center gap-5">
             <Text type="tiny" as="p" fontWeight="light">
               {googleText}
             </Text>
-
             <a
               href={`${REACT_APP_API_URL}/google?origin=${currentOrigin}`}
               className="inline-flex justify-center items-center gap-[5px] mx-auto w-[170px] h-[40px] regular-border hover-transition hover:shadow-md hover:bg-[var(--accent1)] hover:border-[var(--accent1)] rounded-[5px] cursor-pointer group"

@@ -1,7 +1,7 @@
 'use client';
 
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import {
@@ -91,7 +91,6 @@ const SaveForm = () => {
         )}
       />
 
-      {/* Read-only transcript / translation */}
       <div className="grid grid-cols-1 gap-3">
         <TextareaField
           label={tTranscript}

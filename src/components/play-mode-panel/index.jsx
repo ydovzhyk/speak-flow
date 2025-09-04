@@ -26,7 +26,6 @@ const PlayModePanel = () => {
 
   return (
     <div className="flex items-center gap-2">
-
       <div className="relative h-[27px] w-[42px] flex items-center justify-center">
         {isActiveBtn !== 'record' ? (
           <img
@@ -50,7 +49,6 @@ const PlayModePanel = () => {
           </div>
         )}
       </div>
-
       <img
         src={
           isActiveBtn === 'pause'
@@ -61,7 +59,6 @@ const PlayModePanel = () => {
         className="h-[27px] w-auto cursor-pointer select-none"
         onClick={() => handleButtonClick('pause')}
       />
-
       <img
         src={
           isActiveBtn === 'stop'

@@ -77,7 +77,6 @@ function Contact() {
           error={errors.name}
           autoComplete="off"
         />
-
         <TextField
           type="email"
           name="email"
@@ -90,7 +89,6 @@ function Contact() {
           error={errors.email}
           autoComplete="off"
         />
-
         <label className="relative inline-block w-full text-[var(--text-main)]">
           <textarea
             className={`pl-[10px] w-full h-[120px] font-normal text-[14px] leading-none regular-border border-opacity-50 rounded-[5px] tracking-[1px] transition-all duration-300 ease-in-out outline-none bg-transparent py-2`}
@@ -130,8 +128,6 @@ function Contact() {
             </Text>
           )}
         </label>
-
-        {/* Кнопка */}
         <div className="w-full flex flex-row items-center justify-center mt-[-20px]">
           <Button
             text={isLoading ? 'Sending Message...' : 'Send Message'}

@@ -32,7 +32,6 @@ export default function AuthInfo() {
           {String(name).charAt(0).toUpperCase()}
         </div>
       )}
-
       <Text
         type="tiny"
         as="p"
@@ -41,9 +40,7 @@ export default function AuthInfo() {
       >
         Hi, {name}
       </Text>
-
       <span className="h-5 w-px bg-[rgba(0,0,0,0.45)]" />
-
       <button
         type="button"
         onClick={handleLogout}

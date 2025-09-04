@@ -7,8 +7,6 @@ import useAudioRecorder from '@/utils/audio-recorder/useAudioRecorder';
 import {
   setCloseButtonAuth,
   setLine,
-  setActiveBtn,
-  setCountdown,
   setTypeOperationRecords,
 } from '@/redux/technical/technical-slice';
 import {
@@ -63,7 +61,6 @@ const PanelContent = ({ active }) => {
   return null;
 };
 
-// маленький підкомпонент “вушка”
 const EarButton = memo(function EarButton({
   activeKey,
   tabKey,
@@ -205,11 +202,10 @@ const ToolCard = () => {
         break;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeBtn, isRecording, isPaused /* deepgramStatus? */]);
+  }, [activeBtn, isRecording, isPaused, deepgramStatus]);
 
   return (
     <div className="relative inline-flex items-center justify-center w-fit">
-      {/* Вушка праворуч */}
       <div className="absolute top-1/2 -translate-y-1/2 -right-[54px] flex flex-col gap-[55px]">
         {visibleTabs.map(t => (
           <EarButton
@@ -222,7 +218,6 @@ const ToolCard = () => {
         ))}
       </div>
 
-      {/* Карта тула */}
       <div className="relative h-[85vh] min-w-[317px] w-[370px] rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
         <div className="h-[9vh] flex justify-between items-center px-4 border-b">
           <div>
@@ -276,7 +271,6 @@ const ToolCard = () => {
           </div>
         </div>
 
-        {/* Сайд-панель */}
         <div
           className={`absolute top-0 right-0 h-full w-full bg-white border-l-2 border-teal-700 shadow-lg transform transition-transform duration-300 ${panel ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
         >
