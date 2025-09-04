@@ -9,15 +9,20 @@ import {
   setLine,
   setActiveBtn,
   setCountdown,
+  setTypeOperationRecords,
 } from '@/redux/technical/technical-slice';
 import {
   getCloseButtonAuth,
   getActiveBtn,
   getDeepgramStatus,
   getLine,
-  getSavedData,
   getHasAnyText,
+  getTypeOperationRecords,
+  getSavedData,
 } from '@/redux/technical/technical-selectors';
+import {
+  getRecords,
+} from '@/redux/technical/technical-operations';
 import { getLogin } from '@/redux/auth/auth-selectors';
 import Auth from '../auth';
 import Contact from '../contact';
@@ -31,6 +36,7 @@ import AudioBarsVisualizer from '../shared/audio-bars-visualizer';
 import Timer from '@/components/shared/timer';
 import SaveRecordsPanel from '../save-records-panel';
 import Records from '../records';
+import Info from '../info';
 
 const TABS = [
   { key: 'info', label: 'INFO' },
@@ -49,18 +55,7 @@ const PanelTitles = {
 };
 
 const PanelContent = ({ active }) => {
-  if (active === 'info') {
-    return (
-      <div>
-        <p className="mb-2">ℹ️ Some info about SpeakFlow…</p>
-        <ul className="list-disc pl-5 text-sm">
-          <li>How it works</li>
-          <li>Tips</li>
-          <li>Privacy</li>
-        </ul>
-      </div>
-    );
-  }
+  if (active === 'info') return <Info />;
   if (active === 'auth') return <Auth />;
   if (active === 'contact') return <Contact />;
   if (active === 'settings') return <SettingsContent />;
@@ -107,6 +102,7 @@ const ToolCard = () => {
   const activeBtn = useSelector(getActiveBtn);
   const activeLine = useSelector(getLine);
   const deepgramStatus = useSelector(getDeepgramStatus);
+  const typeOperationRecords = useSelector(getTypeOperationRecords);
 
   const isLogin = useSelector(getLogin);
   const savedData = useSelector(getSavedData);
@@ -133,6 +129,19 @@ const ToolCard = () => {
       setPanel(null);
     }
   }, [panel, isLogin, showRecordsTab]);
+
+  useEffect(() => {
+    if (!isLogin) return;
+    if (!showRecordsTab) return;
+    if (typeOperationRecords === 'SaveRecords' || typeOperationRecords === 'GetRecords') {
+      setPanel('records');
+    }
+  }, [typeOperationRecords, isLogin, showRecordsTab]);
+
+  useEffect(() => {
+    if (!isLogin) return;
+    if (!hasSaved) dispatch(getRecords());
+  }, [dispatch, isLogin, hasSaved]);
 
   const { initialize, sendAudio, pause, disconnect } = useSocketContext();
   const {
@@ -194,8 +203,8 @@ const ToolCard = () => {
 
       default:
         break;
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeBtn, isRecording, isPaused /* deepgramStatus? */]);
 
   return (
@@ -276,7 +285,12 @@ const ToolCard = () => {
               {panel ? PanelTitles[panel] : ''}
             </h2>
             <button
-              onClick={() => setPanel(null)}
+              onClick={() => {
+                setPanel(null);
+                if (typeOperationRecords) {
+                  dispatch(setTypeOperationRecords(null));
+                }
+              }}
               className="text-sm text-[var(--text-accent)] hover:text-[var(--text-main)]"
             >
               ✖

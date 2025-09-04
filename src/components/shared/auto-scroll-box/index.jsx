@@ -70,9 +70,9 @@ const AutoScrollBox = ({
           onClick={handleCopy}
           disabled={!hasText}
           aria-label="Copy text"
-          className="absolute top-2 right-2 rounded-full w-8 h-8 backdrop-blur border border-gray-400 shadow bg-white/30 hover:bg-white/70 disabled:opacity-20 flex items-center justify-center transition-opacity outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          className="absolute top-2 right-2 rounded-full w-10 h-10 backdrop-blur-[2px] bg-white/30 border border-gray-400  hover:bg-white/70 disabled:opacity-20 flex items-center justify-center transition-opacity outline-none focus:ring-2 focus:ring-[var(--accent)]"
         >
-          <IoCopyOutline size={18} color="#017683" />
+          <IoCopyOutline size={20} color="#017683" />
         </button>
       )}
 

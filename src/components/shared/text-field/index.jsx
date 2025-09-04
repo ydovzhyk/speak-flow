@@ -24,7 +24,7 @@ const TextField = forwardRef(
     const labelBase =
       'relative inline-block w-full h-[35px] text-[var(--text-main)]';
     const inputBase =
-      'absolute top-0 left-0 pl-[10px] w-full h-[40px] font-normal text-[14px] leading-none regular-border border-opacity-50 rounded-[5px] tracking-[1px] transition-all duration-300 ease-in-out outline-none bg-transparent';
+      'absolute top-0 left-0 pl-[10px] w-full h-[40px] bg-white font-normal text-[14px] regular-border border-opacity-50 rounded-[5px] transition-all duration-300 ease-in-out outline-none';
     const emptyInputClass = 'regular-border border-opacity-50 outline-none';
 
     const labelClass = clsx(labelBase, className);

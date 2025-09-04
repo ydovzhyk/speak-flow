@@ -6,7 +6,7 @@ import Text from '@/components/shared/text/text';
 const TextareaField = ({
   label,
   name = 'textarea',
-  register, // з RHF: register(name, rules)
+  register,
   required,
   validation = {},
   maxLength,
@@ -17,7 +17,6 @@ const TextareaField = ({
   className = '',
   showCounter = true, // ← можна вимкнути лічильник
 }) => {
-  // Якщо ліміт не заданий ні через prop, ні через validation — ліміту немає
   const limit =
     typeof maxLength === 'number'
       ? maxLength
@@ -28,19 +27,13 @@ const TextareaField = ({
   const [count, setCount] = useState((value || '').length);
 
   useEffect(() => {
-    // для readOnly або керованих значень оновлюємо лічильник при зміні value
     setCount((value || '').length);
   }, [value]);
 
   const baseClasses = `
-    bg-white w-full rounded-md border-2 border-gray-300 outline-none
-    focus:border-[var(--accent)] focus:ring-[var(--accent)]
-    px-3 py-2 text-[var(--text-title)] ${className}
+    bg-white w-full rounded-md regular-border border-opacity-50 outline-none
+    px-3 py-2 font-normal text-[14px] overflow-y-auto thin-scrollbar ${className}
   `;
-
-  // readOnly → керований режим: тільки value (onChange не потрібен)
-  // editable + RHF → через register додаємо onChange для лічильника
-  // editable без RHF → простий onChange, щоб оновлювати лічильник
   const textAreaProps = readOnly
     ? { value }
     : register
@@ -54,13 +47,13 @@ const TextareaField = ({
         };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <label>
         <Text
           type="tiny"
-          as="p"
-          fontWeight="light"
-          className="text-[var(--text-title)]"
+          as="span"
+          fontWeight="normal"
+          className="text-[var(--text-main)]"
         >
           {label}
         </Text>
@@ -77,14 +70,20 @@ const TextareaField = ({
       />
 
       {showCounter && (
-        <div className="text-xs text-right text-gray-500">
-          {limit !== null
+        <Text
+            type="extraSmall"
+            as="span"
+            fontWeight="normal"
+            className="text-gray-500 text-right"
+          >
+            {limit !== null
             ? `${count}/${limit} characters`
             : `${count} characters`}
-        </div>
+          </Text>
       )}
     </div>
   );
 };
 
 export default TextareaField;
+

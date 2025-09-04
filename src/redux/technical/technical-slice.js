@@ -9,7 +9,7 @@ const initialState = {
   loading: false,
   screenType: 'isDesctop',
   typeOperationAuth: 'login',
-  typeOperationRecords: 'GetRecords',
+  typeOperationRecords: null,
   closeButtonAuth: false,
   closeButtonRecords: false,
   inputLanguage: 'en',
@@ -115,7 +115,7 @@ const technical = createSlice({
       })
       .addCase(getRecords.fulfilled, (store, { payload }) => {
         store.loading = false;
-        store.savedData = payload;
+        store.savedData = payload.savedData;
       })
       .addCase(getRecords.rejected, (store, { payload }) => {
         store.loading = false;

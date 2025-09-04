@@ -29,7 +29,12 @@ const Auth = () => {
       : 'Sign up quickly with Google';
 
   return (
-    <div className="w-full h-full">
+    <div
+      className="flex flex-col"
+      style={
+        typeOperation === 'login' ? { height: '100%' } : { minHeight: '100%' }
+      }
+    >
       {/* Таби (кнопки як текст) */}
       <div className="w-full h-[40px] flex flex-row justify-around gap-[2px]">
         <div

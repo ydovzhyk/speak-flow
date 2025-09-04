@@ -5,6 +5,7 @@ import {
   axiosDeleteRecord,
 } from '../../api/rcords';
 import { setCloseButtonRecords } from './technical-slice';
+import { toast } from 'react-toastify';
 
 export const saveRecord = createAsyncThunk(
   'records/save-record',
@@ -12,9 +13,8 @@ export const saveRecord = createAsyncThunk(
     try {
       const data = await axiosSaveRecord(userData);
       if (data) {
-        toast.success('Record successfully saved!');
+        toast.success(`${data.message}`);
       }
-      dispatch(setCloseButtonRecords(true));
       return data;
     } catch (error) {
       const { data, status } = error.response;
@@ -26,7 +26,7 @@ export const saveRecord = createAsyncThunk(
 
 export const getRecords = createAsyncThunk(
   'records/get-records',
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const data = await axiosGetRecords();
       return data;
@@ -40,11 +40,11 @@ export const getRecords = createAsyncThunk(
 
 export const deleteRecord = createAsyncThunk(
   'records/delete-record',
-  async (userData, { dispatch, rejectWithValue }) => {
+  async (userData, { rejectWithValue }) => {
     try {
       const data = await axiosDeleteRecord(userData);
       if (data) {
-        toast.success('Record successfully deleted!');
+        toast.success(`${data.message}`);
       }
       return data;
     } catch (error) {
