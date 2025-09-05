@@ -2,9 +2,9 @@ import axios from 'axios';
 import { getAuthDataFromStorage } from '@/utils/auth-data';
 import { setRefreshUserData } from '@/redux/auth/auth-slice';
 
-const REACT_APP_API_URL = 'http://localhost:4000';
-// const REACT_APP_API_URL =
-//   'https://test-task-backend-34db7d47d9c8.herokuapp.com';
+// const REACT_APP_API_URL = 'http://localhost:4000';
+const REACT_APP_API_URL =
+  'https://test-task-backend-34db7d47d9c8.herokuapp.com';
 
 export const instance = axios.create({
   baseURL: REACT_APP_API_URL,
