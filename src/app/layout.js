@@ -1,6 +1,7 @@
 import Script from 'next/script';
 import { Suspense } from 'react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Analytics } from '@vercel/analytics/next';
 import { StoreProvider } from '@/redux/store-provider';
 import { LanguageProvider } from '@/utils/translating/language-context';
 import ClientLayout from './client-layout';
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
             <ClientLayout>{children}</ClientLayout>
           </LanguageProvider>
         </StoreProvider>
+        <Analytics />
         <SpeedInsights />
       </body>
     </html>

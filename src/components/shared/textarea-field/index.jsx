@@ -71,15 +71,15 @@ const TextareaField = ({
 
       {showCounter && (
         <Text
-            type="extraSmall"
-            as="span"
-            fontWeight="normal"
-            className="text-gray-500 text-right"
-          >
-            {limit !== null
-            ? `${count}/${limit} characters`
-            : `${count} characters`}
-          </Text>
+          type="extraSmall"
+          as="span"
+          fontWeight="normal"
+          className="text-gray-500 text-right"
+        >
+          {limit !== null
+          ? `${count}/${limit} characters`
+          : `${count} characters`}
+        </Text>
       )}
     </div>
   );

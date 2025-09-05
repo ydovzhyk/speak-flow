@@ -126,7 +126,6 @@ const useSocket = () => {
     if (!s) return;
 
     const clientId = getOrCreateClientId();
-    console.log('outputLanguage:', outputLanguage);
     s.emit('incoming-audio', {
       audioData,
       sampleRate,

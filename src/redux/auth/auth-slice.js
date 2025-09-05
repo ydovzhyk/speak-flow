@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { register, login, logout, updateUser } from './auth-operations';
+import { register, login, logout, getCurrentUser, updateUser, deleteUser } from './auth-operations';
 
 const initialState = {
   user: {},
@@ -77,9 +77,10 @@ const auth = createSlice({
         store.error = '';
         store.message = '';
       })
-      .addCase(login.fulfilled, (store, { payload }) =>
-        accessAuth(store, payload)
-      )
+      .addCase(login.fulfilled, (store, { payload }) => {
+        store.loading = false;
+        accessAuth(store, payload);
+      })
       .addCase(login.rejected, (store, { payload }) => {
         store.loading = false;
         if (payload && payload.data && payload.data.message) {
@@ -96,7 +97,10 @@ const auth = createSlice({
         store.error = '';
         store.message = '';
       })
-      .addCase(logout.fulfilled, () => initialState)
+      .addCase(logout.fulfilled, () => {
+        store.loading = false;
+        return initialState;
+      })
       .addCase(logout.rejected, (store, { payload }) => {
         store.loading = false;
         if (payload && payload.data && payload.data.message) {
@@ -108,20 +112,61 @@ const auth = createSlice({
         }
       })
       // *GET CURRENT USER
-      .addCase(updateUser.pending, store => {
+      .addCase(getCurrentUser.pending, store => {
         store.loading = true;
         store.isRefreshing = true;
         store.error = '';
         store.message = '';
       })
-      .addCase(updateUser.fulfilled, (store, { payload }) => {
+      .addCase(getCurrentUser.fulfilled, (store, { payload }) => {
+        store.loading = false;
         accessAuth(store, payload);
         store.isRefreshing = false;
         store.isLoginPanel = true;
       })
-      .addCase(updateUser.rejected, (store, { payload }) => {
+      .addCase(getCurrentUser.rejected, (store, { payload }) => {
         store.loading = false;
         store.isRefreshing = false;
+        if (payload && payload.data && payload.data.message) {
+          store.error = payload.data.message;
+        } else if (payload && payload.message) {
+          store.error = payload.message;
+        } else {
+          store.error = 'Oops, something went wrong, try again';
+        }
+      })
+      // *UPDATE USER
+      .addCase(updateUser.pending, store => {
+        store.loading = true;
+        store.error = '';
+        store.message = '';
+      })
+      .addCase(updateUser.fulfilled, (store, { payload }) => {
+        store.loading = false;
+        store.message = payload.message;
+      })
+      .addCase(updateUser.rejected, (store, { payload }) => {
+        store.loading = false;
+        if (payload && payload.data && payload.data.message) {
+          store.error = payload.data.message;
+        } else if (payload && payload.message) {
+          store.error = payload.message;
+        } else {
+          store.error = 'Oops, something went wrong, try again';
+        }
+      })
+      // *DELETE USER
+      .addCase(deleteUser.pending, store => {
+        store.loading = true;
+        store.error = '';
+        store.message = '';
+      })
+      .addCase(deleteUser.fulfilled, (store, { payload }) => {
+        store.loading = false;
+        store.message = payload.message;
+      })
+      .addCase(deleteUser.rejected, (store, { payload }) => {
+        store.loading = false;
         if (payload && payload.data && payload.data.message) {
           store.error = payload.data.message;
         } else if (payload && payload.message) {
