@@ -205,8 +205,8 @@ const ToolCard = () => {
   }, [activeBtn, isRecording, isPaused, deepgramStatus]);
 
   return (
-    <div className="inline-block pr-[27px] w-full max-w-[390px] overflow-hidden test-border">
-      <div className="relative inline-flex items-center justify-center w-fit">
+    <div className="flex flex-row items-center justify-center pr-[27px] w-full max-w-[390px] overflow-hidden">
+      <div className="w-full relative inline-flex items-center justify-center">
         <div className="absolute top-1/2 -translate-y-1/2 -right-[54px] flex flex-col gap-[55px]">
           {visibleTabs.map(t => (
             <EarButton
