@@ -1,20 +1,24 @@
-import React from 'react';
+import { useSelector } from 'react-redux';
 import Logo from '@/components/shared/logo/logo';
 import MainApp from '@/components/main-app';
 import { SocketProvider } from '@/utils/socket-provider/socket-provider';
+import { getScreenType } from '@/redux/technical/technical-selectors';
 
 export default function Home() {
+  const screenType = useSelector(getScreenType);
+
   return (
     <div
       className="relative min-h-screen w-full bg-cover bg-center bg-no-repeat font-[family-name:var(--font-geist-sans)] flex items-center justify-center"
       style={{ backgroundImage: "url('/images/bg.webp')" }}
     >
-      {/* Логотип у верхньому лівому куті */}
-      <div className="absolute top-[50px] left-[50px]">
-        <Logo width={250} variant="color" />
-      </div>
 
-      {/* Центрований MainApp */}
+      {screenType === 'desktop' && (
+        <div className="absolute top-[50px] left-[50px]">
+          <Logo width={250} variant="color" />
+        </div>
+      )}
+
       <SocketProvider>
         <MainApp />
       </SocketProvider>
