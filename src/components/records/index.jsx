@@ -60,7 +60,6 @@ const SaveForm = () => {
       savedAt: new Date().toISOString(),
     };
     try {
-      console.log('Saving record:', userData);
       await dispatch(saveRecord(userData)).unwrap();
       await dispatch(getRecords()).unwrap();
       resetTranscript();
@@ -305,9 +304,6 @@ const Records = () => {
   const data = useSelector(getSavedData);
 
   const effectiveType = typeOperation ?? 'GetRecords';
-
-  console.log("selectedRecord:", selectedRecord);
-  console.log("data:", data);
 
   return (
     <div

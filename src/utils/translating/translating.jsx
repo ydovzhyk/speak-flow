@@ -121,7 +121,7 @@ export const useTranslate = text => {
           setTranslatedText(normalizeCase(res));
         }
       })
-      .catch(err => console.log(err));
+      .catch(err => console.error(err));
   }, [text, languageIndex]);
 
   return translatedText;

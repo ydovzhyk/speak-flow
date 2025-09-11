@@ -14,8 +14,8 @@ export default function Home() {
       className="relative min-h-screen w-full bg-cover bg-center bg-no-repeat font-[family-name:var(--font-geist-sans)] flex items-center justify-center"
       style={{ backgroundImage: "url('/images/bg.webp')" }}
     >
-      {screenType === 'desktop' && (
-        <div className="absolute top-[50px] left-[50px]">
+      {screenType === 'isDesktop' && (
+        <div className="absolute top-[20px] left-[50px]">
           <Logo width={250} variant="color" />
         </div>
       )}
