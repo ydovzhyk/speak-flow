@@ -233,7 +233,7 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
   }
 
   return (
-    <div className="flex h-[calc(100%+40px)] flex-col gap-3 min-h-0 mt-[-15px]">
+    <div className="flex h-[calc(100%+70px)] flex-col gap-3 min-h-0 mt-[-15px]">
       {selectedRecord && (
         <div className="flex h-full flex-col gap-3">
           <div className="font-medium">
@@ -245,14 +245,14 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
               translation={selectedRecord.translation}
             />
           </div>
-          <div className="mt-[10px]">
+          <div className="mb-[-10px]">
             <Button
               text="Back to List"
               btnClass="btnPlain"
               type="button"
               onClick={() => setSelectedRecord(null)}
             />
-          </div>
+            </div>
         </div>
       )}
       {!selectedRecord && (
