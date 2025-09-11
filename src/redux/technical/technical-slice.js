@@ -7,7 +7,7 @@ const initialState = {
   error: '',
   message: '',
   loading: false,
-  screenType: 'isDesctop',
+  screenType: 'isDesktop',
   typeOperationAuth: 'login',
   typeOperationRecords: null,
   closeButtonAuth: false,
@@ -18,144 +18,163 @@ const initialState = {
   deepgramStatus: false,
   activeBtn: 'stop',
   line: 'speaker',
-  savedData: [],
+  savedData: { items: [] },
+  selectedRecord: null,
   transcriptArr: [],
   translationArr: [],
+};
+
+const errMsg = payload =>
+  payload?.data?.message ||
+  payload?.message ||
+  'Oops, something went wrong, try again';
+
+const toItems = payload => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.savedData)) return payload.savedData;
+  if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+    const maybeItemKeys = [
+      '_id',
+      'id',
+      'title',
+      'transcript',
+      'translation',
+      'savedAt',
+      'date',
+    ];
+    const isSingle =
+      Object.keys(payload).some(k => maybeItemKeys.includes(k)) &&
+      !payload.items &&
+      !payload.savedData;
+    if (isSingle) return [payload];
+  }
+  return [];
 };
 
 const technical = createSlice({
   name: 'technical',
   initialState,
   reducers: {
-    setSelectedRecord: (store, action) => {
-      store.selectedRecord = action.payload;
+    setSelectedRecord: (state, action) => {
+      state.selectedRecord = action.payload ?? null;
     },
-    pushTranscript: (store, action) => {
-      store.transcriptArr.push(String(action.payload));
-      if (store.transcriptArr.length > MAX_SEGMENTS)
-        store.transcriptArr.shift();
+
+    pushTranscript: (state, action) => {
+      state.transcriptArr.push(String(action.payload ?? ''));
+      if (state.transcriptArr.length > MAX_SEGMENTS)
+        state.transcriptArr.shift();
     },
-    pushTranslation: (store, action) => {
-      store.translationArr.push(String(action.payload));
-      if (store.translationArr.length > MAX_SEGMENTS)
-        store.translationArr.shift();
+    pushTranslation: (state, action) => {
+      state.translationArr.push(String(action.payload ?? ''));
+      if (state.translationArr.length > MAX_SEGMENTS)
+        state.translationArr.shift();
     },
-    clearLocalTexts: store => {
-      store.transcriptArr = [];
-      store.translationArr = [];
+    clearLocalTexts: state => {
+      state.transcriptArr = [];
+      state.translationArr = [];
     },
-    setLine: (store, action) => {
-      store.line = action.payload;
+    setLine: (state, action) => {
+      state.line = action.payload;
     },
-    setActiveBtn: (store, action) => {
-      store.activeBtn = action.payload;
+    setActiveBtn: (state, action) => {
+      state.activeBtn = action.payload;
     },
-    setDeepgramStatus: (store, action) => {
-      store.deepgramStatus = action.payload;
+    setDeepgramStatus: (state, action) => {
+      state.deepgramStatus = action.payload;
     },
-    setCountdown: (store, action) => {
-      store.countdown = action.payload;
+    setCountdown: (state, action) => {
+      state.countdown = action.payload;
     },
-    setInputLanguage: (store, action) => {
-      store.inputLanguage = action.payload;
+    setInputLanguage: (state, action) => {
+      state.inputLanguage = action.payload;
     },
-    setOutputLanguage: (store, action) => {
-      store.outputLanguage = action.payload;
+    setOutputLanguage: (state, action) => {
+      state.outputLanguage = action.payload;
     },
-    setCloseButtonAuth: (store, action) => {
-      store.closeButtonAuth = action.payload;
+    setCloseButtonAuth: (state, action) => {
+      state.closeButtonAuth = action.payload;
     },
-    setCloseButtonRecords: (store, action) => {
-      store.closeButtonRecords = action.payload;
+    setCloseButtonRecords: (state, action) => {
+      state.closeButtonRecords = action.payload;
     },
-    setTypeOperationAuth: (store, action) => {
-      store.typeOperationAuth = action.payload;
+    setTypeOperationAuth: (state, action) => {
+      state.typeOperationAuth = action.payload;
     },
-    setTypeOperationRecords: (store, action) => {
-      store.typeOperationRecords = action.payload;
+    setTypeOperationRecords: (state, action) => {
+      state.typeOperationRecords = action.payload;
     },
-    clearTechnicalError: store => {
-      store.error = '';
+    clearTechnicalError: state => {
+      state.error = '';
     },
-    clearTechnicalMessage: store => {
-      store.message = '';
+    clearTechnicalMessage: state => {
+      state.message = '';
     },
-    setTechnicalError: (store, action) => {
-      store.error = action.payload;
+    setTechnicalError: (state, action) => {
+      state.error = action.payload ?? '';
     },
-    setScreenType: (store, action) => {
-      store.screenType = action.payload;
+    setScreenType: (state, action) => {
+      state.screenType = action.payload;
     },
   },
 
-  extraReducers: (builder) => {
-    // * Save Record
+  extraReducers: builder => {
+    // SAVE RECORD
     builder
-      .addCase(saveRecord.pending, store => {
-        store.loading = true;
-        store.error = '';
-        store.message = '';
+      .addCase(saveRecord.pending, state => {
+        state.loading = true;
+        state.error = '';
+        state.message = '';
       })
-      .addCase(saveRecord.fulfilled, (store, { payload }) => {
-        store.loading = false;
-        store.savedData = payload;
+      .addCase(saveRecord.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        const items = toItems(payload);
+        if (items.length) state.savedData = { items };
+        state.message = payload?.message ?? state.message;
       })
-      .addCase(saveRecord.rejected, (store, { payload }) => {
-        store.loading = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
-      })
-      // * Get Records
-      .addCase(getRecords.pending, store => {
-        store.loading = true;
-        store.error = '';
-        store.message = '';
-      })
-      .addCase(getRecords.fulfilled, (store, { payload }) => {
-        store.loading = false;
-        store.savedData = payload.savedData;
-      })
-      .addCase(getRecords.rejected, (store, { payload }) => {
-        store.loading = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
-      })
-      // * Delete Record
-      .addCase(deleteRecord.pending, store => {
-        store.loading = true;
-        store.error = '';
-        store.message = '';
-      })
-      .addCase(deleteRecord.fulfilled, (store, { payload }) => {
-        store.loading = false;
-        store.savedData = payload;
-      })
-      .addCase(deleteRecord.rejected, (store, { payload }) => {
-        store.loading = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
+      .addCase(saveRecord.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = errMsg(payload);
       });
-  }
+
+    // GET RECORDS
+    builder
+      .addCase(getRecords.pending, state => {
+        state.loading = true;
+        state.error = '';
+        state.message = '';
+      })
+      .addCase(getRecords.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.savedData = { items: toItems(payload) };
+      })
+      .addCase(getRecords.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = errMsg(payload);
+      });
+
+    // DELETE RECORD
+    builder
+      .addCase(deleteRecord.pending, state => {
+        state.loading = true;
+        state.error = '';
+        state.message = '';
+      })
+      .addCase(deleteRecord.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.savedData = { items: toItems(payload) };
+      })
+      .addCase(deleteRecord.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = errMsg(payload);
+      });
+  },
 });
 
 export default technical.reducer;
 
 export const {
+  setSelectedRecord,
   setCloseButtonRecords,
   setTypeOperationRecords,
   pushTranscript,
@@ -171,7 +190,6 @@ export const {
   setTypeOperationAuth,
   clearTechnicalError,
   clearTechnicalMessage,
-  setActiveSection,
   setTechnicalError,
   setScreenType,
 } = technical.actions;

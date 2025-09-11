@@ -205,93 +205,97 @@ const ToolCard = () => {
   }, [activeBtn, isRecording, isPaused, deepgramStatus]);
 
   return (
-    <div className="relative inline-flex items-center justify-center w-fit">
-      <div className="absolute top-1/2 -translate-y-1/2 -right-[54px] flex flex-col gap-[55px]">
-        {visibleTabs.map(t => (
-          <EarButton
-            key={t.key}
-            activeKey={panel}
-            tabKey={t.key}
-            label={t.label}
-            onToggle={setPanel}
-          />
-        ))}
-      </div>
-
-      <div className="relative h-[85vh] min-w-[290px] max-w-[370px] rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
-        <div className="h-[9vh] flex justify-between items-center px-4 border-b">
-          <div>
-            <LogoWave />
-          </div>
-          <div>
-            <AuthInfo />
-          </div>
-        </div>
-
-        <div className="h-[6vh] border border-[var(--accent2)] rounded-md mx-4 my-3 flex items-center justify-between">
-          <Timer />
-          <div className="h-full flex items-center justify-center flex-1">
-            {audioContext && sourceNodeSpeaker && activeLine === 'speaker' && (
-              <AudioBarsVisualizer
-                audioContext={audioContext}
-                sourceNode={sourceNodeSpeaker}
-              />
-            )}
-            {audioContext && sourceNodeMic && activeLine === 'mic' && (
-              <AudioBarsVisualizer
-                audioContext={audioContext}
-                sourceNode={sourceNodeMic}
-              />
-            )}
-          </div>
-          <div className="w-[40px] h-full flex items-center justify-center">
-            <img
-              src={
-                activeLine === 'mic'
-                  ? '/images/buttons/microphone.png'
-                  : '/images/buttons/speaker.png'
-              }
-              alt="active channel"
-              className="w-5 h-5 mr-2"
-              style={{
-                width: activeLine === 'mic' ? '25px' : '20px',
-                height: activeLine === 'mic' ? '25px' : '20px',
-              }}
+    <div className="inline-block pr-[27px] w-full max-w-[390px] overflow-hidden">
+      <div className="relative inline-flex items-center justify-center w-fit">
+        <div className="absolute top-1/2 -translate-y-1/2 -right-[54px] flex flex-col gap-[55px]">
+          {visibleTabs.map(t => (
+            <EarButton
+              key={t.key}
+              activeKey={panel}
+              tabKey={t.key}
+              label={t.label}
+              onToggle={setPanel}
             />
-          </div>
+          ))}
         </div>
 
-        <div className="h-[66vh] px-4 pb-4 flex flex-col gap-3">
-          <div className="flex-1 min-h-0">
-            <LiveTextPanels />
+        <div className="relative h-[85vh] w-full rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
+          <div className="h-[9vh] flex justify-between items-center px-4 border-b">
+            <div>
+              <LogoWave />
+            </div>
+            <div>
+              <AuthInfo />
+            </div>
           </div>
-          <div className="h-[6vh] flex flex-row items-center justify-between">
-            <PlayModePanel />
-            <SaveRecordsPanel />
-          </div>
-        </div>
 
-        <div
-          className={`absolute top-0 right-0 h-full w-full bg-white border-l-2 border-teal-700 shadow-lg transform transition-transform duration-300 ${panel ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
-        >
-          <div className="h-[9vh] flex justify-between items-center p-4 border-b">
-            <h2 className="font-semibold text-[var(--accent2)]">
-              {panel ? PanelTitles[panel] : ''}
-            </h2>
-            <button
-              onClick={() => {
-                setPanel(null);
-                if (typeOperationRecords) {
-                  dispatch(setTypeOperationRecords(null));
+          <div className="h-[6vh] border border-[var(--accent2)] rounded-md mx-4 my-3 flex items-center justify-between">
+            <Timer />
+            <div className="h-full flex items-center justify-center flex-1">
+              {audioContext &&
+                sourceNodeSpeaker &&
+                activeLine === 'speaker' && (
+                  <AudioBarsVisualizer
+                    audioContext={audioContext}
+                    sourceNode={sourceNodeSpeaker}
+                  />
+                )}
+              {audioContext && sourceNodeMic && activeLine === 'mic' && (
+                <AudioBarsVisualizer
+                  audioContext={audioContext}
+                  sourceNode={sourceNodeMic}
+                />
+              )}
+            </div>
+            <div className="w-[40px] h-full flex items-center justify-center">
+              <img
+                src={
+                  activeLine === 'mic'
+                    ? '/images/buttons/microphone.png'
+                    : '/images/buttons/speaker.png'
                 }
-              }}
-              className="text-sm text-[var(--text-accent)] hover:text-[var(--text-main)]"
-            >
-              ✖
-            </button>
+                alt="active channel"
+                className="w-5 h-5 mr-2"
+                style={{
+                  width: activeLine === 'mic' ? '25px' : '20px',
+                  height: activeLine === 'mic' ? '25px' : '20px',
+                }}
+              />
+            </div>
           </div>
-          <div className="flex-1 overflow-y-auto thin-scrollbar p-4 min-h-[74vh] test-border">
-            <PanelContent active={panel} />
+
+          <div className="h-[66vh] px-4 pb-4 flex flex-col gap-3">
+            <div className="flex-1 min-h-0">
+              <LiveTextPanels />
+            </div>
+            <div className="h-[6vh] flex flex-row items-center justify-between">
+              <PlayModePanel />
+              <SaveRecordsPanel />
+            </div>
+          </div>
+
+          <div
+            className={`absolute top-0 right-0 h-full w-full bg-white border-l-2 border-teal-700 shadow-lg transform transition-transform duration-300 ${panel ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
+          >
+            <div className="h-[9vh] flex justify-between items-center p-4 border-b">
+              <h2 className="font-semibold text-[var(--accent2)]">
+                {panel ? PanelTitles[panel] : ''}
+              </h2>
+              <button
+                onClick={() => {
+                  setPanel(null);
+                  if (typeOperationRecords) {
+                    dispatch(setTypeOperationRecords(null));
+                  }
+                }}
+                className="text-sm text-[var(--text-accent)] hover:text-[var(--text-main)]"
+              >
+                ✖
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto thin-scrollbar p-4 min-h-[74vh] test-border">
+              <PanelContent active={panel} />
+            </div>
           </div>
         </div>
       </div>

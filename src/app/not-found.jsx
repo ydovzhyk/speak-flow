@@ -2,12 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { getIsLoginPanel } from '@/redux/auth/auth-selectors';
 import Text from '@/components/shared/text/text';
 
 export default function NotFound() {
-  const isLoginPanel = useSelector(getIsLoginPanel);
   const [afterMobileHeader, setAfterMobileHeader] = useState(false);
 
   useEffect(() => {
@@ -23,8 +20,8 @@ export default function NotFound() {
   }, []);
 
   const topOffset = useMemo(
-    () => (isLoginPanel && afterMobileHeader ? 148 : 85),
-    [isLoginPanel, afterMobileHeader]
+    () => (afterMobileHeader ? 148 : 85),
+    [afterMobileHeader]
   );
 
   return (

@@ -1,5 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { register, login, logout, getCurrentUser, updateUser, deleteUser } from './auth-operations';
+import {
+  register,
+  login,
+  logout,
+  getCurrentUser,
+  updateUser,
+  deleteUser,
+} from './auth-operations';
 
 const initialState = {
   user: {},
@@ -11,16 +18,25 @@ const initialState = {
   isRefreshing: false,
   error: null,
   message: null,
-  isLoginPanel: false,
 };
 
-const accessAuth = (store, payload) => {
-  store.loading = false;
-  store.isLogin = true;
-  store.user = payload.user;
-  store.sid = payload.sid;
-  store.accessToken = payload.accessToken;
-  store.refreshToken = payload.refreshToken;
+const errMsg = payload =>
+  payload?.data?.message ||
+  payload?.message ||
+  'Oops, something went wrong, try again';
+
+const applyAuthPayload = (state, payload) => {
+  state.loading = false;
+  state.isLogin = true;
+  state.error = null;
+
+  state.user = payload?.user ?? { ...(payload || {}) };
+
+  if (payload?.sid !== undefined) state.sid = payload.sid;
+  if (payload?.accessToken !== undefined)
+    state.accessToken = payload.accessToken;
+  if (payload?.refreshToken !== undefined)
+    state.refreshToken = payload.refreshToken;
 };
 
 const auth = createSlice({
@@ -28,152 +44,112 @@ const auth = createSlice({
   initialState,
   reducers: {
     clearUser: () => ({ ...initialState }),
-    clearUserError: store => {
-      store.error = null;
+    clearUserError: state => {
+      state.error = null;
     },
-    clearUserMessage: store => {
-      store.message = null;
+    clearUserMessage: state => {
+      state.message = null;
     },
-    setRefreshUserData: (store, action) => {
-      store.sid = action.payload.sid;
-      store.accessToken = action.payload.accessToken;
-      store.refreshToken = action.payload.refreshToken;
+    setRefreshUserData: (state, action) => {
+      state.sid = action.payload.sid ?? state.sid;
+      state.accessToken = action.payload.accessToken ?? state.accessToken;
+      state.refreshToken = action.payload.refreshToken ?? state.refreshToken;
     },
-    updateIsLoginPanel: (store, action) => {
-      store.isLoginPanel = action.payload;
-      store.isLogin = action.payload;
-    }
   },
 
   extraReducers: builder => {
     builder
-      // * REGISTER
-      .addCase(register.pending, store => {
-        store.loading = true;
-        store.error = '';
-        store.message = '';
+      // REGISTER
+      .addCase(register.pending, state => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
       })
-      .addCase(register.fulfilled, (store, { payload }) => {
-        store.loading = false;
-        store.isLogin = true;
-        store.user = { ...payload };
-        store.sid = payload.sid;
-        store.accessToken = payload.accessToken;
-        store.refreshToken = payload.refreshToken;
+      .addCase(register.fulfilled, (state, { payload }) => {
+        applyAuthPayload(state, payload);
       })
-      .addCase(register.rejected, (store, { payload }) => {
-        store.loading = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
+      .addCase(register.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = errMsg(payload);
       })
-      // * LOGIN
-      .addCase(login.pending, store => {
-        store.loading = true;
-        store.error = '';
-        store.message = '';
+
+      // LOGIN
+      .addCase(login.pending, state => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
       })
-      .addCase(login.fulfilled, (store, { payload }) => {
-        store.loading = false;
-        accessAuth(store, payload);
+      .addCase(login.fulfilled, (state, { payload }) => {
+        applyAuthPayload(state, payload);
       })
-      .addCase(login.rejected, (store, { payload }) => {
-        store.loading = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
+      .addCase(login.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = errMsg(payload);
       })
-      //* LOGOUT
-      .addCase(logout.pending, store => {
-        store.loading = true;
-        store.error = '';
-        store.message = '';
+
+      // LOGOUT
+      .addCase(logout.pending, state => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
       })
-      .addCase(logout.fulfilled, () => {
-        store.loading = false;
-        return initialState;
+      .addCase(logout.fulfilled, () => ({
+        ...initialState,
+        loading: false,
+        isLogin: false,
+        isLoginPanel: false,
+      }))
+      .addCase(logout.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = errMsg(payload);
       })
-      .addCase(logout.rejected, (store, { payload }) => {
-        store.loading = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
+
+      // GET CURRENT USER
+      .addCase(getCurrentUser.pending, state => {
+        state.loading = true;
+        state.isRefreshing = true;
+        state.error = null;
+        state.message = null;
       })
-      // *GET CURRENT USER
-      .addCase(getCurrentUser.pending, store => {
-        store.loading = true;
-        store.isRefreshing = true;
-        store.error = '';
-        store.message = '';
+      .addCase(getCurrentUser.fulfilled, (state, { payload }) => {
+        applyAuthPayload(state, payload);
+        state.isRefreshing = false;
+        state.isLoginPanel = true;
       })
-      .addCase(getCurrentUser.fulfilled, (store, { payload }) => {
-        store.loading = false;
-        accessAuth(store, payload);
-        store.isRefreshing = false;
-        store.isLoginPanel = true;
+      .addCase(getCurrentUser.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.isRefreshing = false;
+        state.error = errMsg(payload);
       })
-      .addCase(getCurrentUser.rejected, (store, { payload }) => {
-        store.loading = false;
-        store.isRefreshing = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
+
+      // UPDATE USER
+      .addCase(updateUser.pending, state => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
       })
-      // *UPDATE USER
-      .addCase(updateUser.pending, store => {
-        store.loading = true;
-        store.error = '';
-        store.message = '';
+      .addCase(updateUser.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.message = payload?.message ?? null;
       })
-      .addCase(updateUser.fulfilled, (store, { payload }) => {
-        store.loading = false;
-        store.message = payload.message;
+      .addCase(updateUser.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = errMsg(payload);
       })
-      .addCase(updateUser.rejected, (store, { payload }) => {
-        store.loading = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
+
+      // DELETE USER
+      .addCase(deleteUser.pending, state => {
+        state.loading = true;
+        state.error = null;
+        state.message = null;
       })
-      // *DELETE USER
-      .addCase(deleteUser.pending, store => {
-        store.loading = true;
-        store.error = '';
-        store.message = '';
+      .addCase(deleteUser.fulfilled, (state, { payload }) => {
+        state.loading = false;
+        state.message = payload?.message ?? null;
       })
-      .addCase(deleteUser.fulfilled, (store, { payload }) => {
-        store.loading = false;
-        store.message = payload.message;
-      })
-      .addCase(deleteUser.rejected, (store, { payload }) => {
-        store.loading = false;
-        if (payload && payload.data && payload.data.message) {
-          store.error = payload.data.message;
-        } else if (payload && payload.message) {
-          store.error = payload.message;
-        } else {
-          store.error = 'Oops, something went wrong, try again';
-        }
+      .addCase(deleteUser.rejected, (state, { payload }) => {
+        state.loading = false;
+        state.error = errMsg(payload);
       });
   },
 });
@@ -184,5 +160,4 @@ export const {
   clearUserError,
   clearUserMessage,
   setRefreshUserData,
-  updateIsLoginPanel,
 } = auth.actions;

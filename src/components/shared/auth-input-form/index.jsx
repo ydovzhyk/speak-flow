@@ -169,12 +169,11 @@ const AuthInputForm = ({ typeOperation = 'login' }) => {
         />
       )}
 
-      <div className="w-full flex flex-row items-center justify-center"
-      style={{ marginTop: typeOperation === 'login' ? '-15px' : '0' }}>
-        <Button
-          text={btnText}
-          btnClass='btnDark'
-        />
+      <div
+        className="w-full flex flex-row items-center justify-center"
+        style={{ marginTop: typeOperation === 'login' ? '-15px' : '0' }}
+      >
+        <Button text={btnText} btnClass="btnDark" type="submit" />
       </div>
     </form>
   );
