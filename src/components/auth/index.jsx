@@ -41,24 +41,28 @@ const Auth = () => {
             typeOperation === 'login' ? 'border-b-0' : ''
           }`}
         >
-          <Button
-            btnClass="btnPlain"
-            text="Login"
-            onClick={() => dispatch(setTypeOperationAuth('login'))}
-            textColor="text-black"
-          />
+          <div className="w-full flex justify-center items-center">
+            <Button
+              btnClass="btnPlain"
+              text="Login"
+              onClick={() => dispatch(setTypeOperationAuth('login'))}
+              textColor="text-black"
+            />
+          </div>
         </div>
         <div
           className={`w-[calc(50%-2px)] rounded-t-md border border-[rgba(82,85,95,0.2)] flex justify-center items-center  ${
             typeOperation === 'registration' ? 'border-b-0' : ''
           }`}
         >
-          <Button
-            btnClass="btnPlain"
-            text="Registration"
-            onClick={() => dispatch(setTypeOperationAuth('registration'))}
-            textColor="text-black"
-          />
+          <div className="w-full flex justify-center items-center">
+            <Button
+              btnClass="btnPlain"
+              text="Registration"
+              onClick={() => dispatch(setTypeOperationAuth('registration'))}
+              textColor="text-black"
+            />
+          </div>
         </div>
       </div>
 
