@@ -27,6 +27,9 @@ const technical = createSlice({
   name: 'technical',
   initialState,
   reducers: {
+    setSelectedRecord: (store, action) => {
+      store.selectedRecord = action.payload;
+    },
     pushTranscript: (store, action) => {
       store.transcriptArr.push(String(action.payload));
       if (store.transcriptArr.length > MAX_SEGMENTS)

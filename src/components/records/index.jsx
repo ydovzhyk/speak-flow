@@ -24,6 +24,7 @@ import { fields } from '../shared/text-field/fields';
 import TextField from '../shared/text-field';
 import TextareaField from '../shared/textarea-field';
 import Text from '../shared/text/text';
+import LiveTextPanels from '../live-text-panels';
 
 const SaveForm = () => {
   const dispatch = useDispatch();
@@ -59,6 +60,7 @@ const SaveForm = () => {
       savedAt: new Date().toISOString(),
     };
     try {
+      console.log('Saving record:', userData);
       await dispatch(saveRecord(userData)).unwrap();
       await dispatch(getRecords()).unwrap();
       resetTranscript();
@@ -72,7 +74,10 @@ const SaveForm = () => {
   };
 
   return (
-    <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)}>
+    <form
+      className="flex flex-col gap-4 h-full"
+      onSubmit={handleSubmit(onSubmit)}
+    >
       <Controller
         control={control}
         name="title"
@@ -114,6 +119,7 @@ const SaveForm = () => {
         <Button
           text={btnStatus}
           btnClass="btnDark"
+          type="submit"
           disabled={!trimmedTranscript && !trimmedTranslation}
         />
       </div>
@@ -121,7 +127,7 @@ const SaveForm = () => {
   );
 };
 
-const ListItem = ({ item, onDelete }) => {
+const ListItem = ({ item, onDelete, onOpen }) => {
   const tDelete = useTranslate('Delete');
   const tOpen = useTranslate('Open');
   const date = new Date(item.savedAt || item.date || Date.now());
@@ -134,7 +140,7 @@ const ListItem = ({ item, onDelete }) => {
   return (
     <div className="rounded-md regular-border border-opacity-50 p-3 flex flex-col gap-2">
       <div className="flex items-center justify-end">
-        <div className="text-xs text-gray-500 mb-[-8px]">{dateStr}</div>
+        <div className="text-xs text-gray-500">{dateStr}</div>
       </div>
       <div className="font-medium">{item.title || '(no title)'}</div>
       <div className="text-xs text-gray-700 line-clamp-2">
@@ -144,23 +150,27 @@ const ListItem = ({ item, onDelete }) => {
       <div className="text-xs text-gray-700 line-clamp-2">
         {item.translation || ''}
       </div>
-      <div className="flex gap-2 justify-end">
-        <Button
-          text={tOpen}
-          btnClass="btnPlain"
-          onClick={() => window.open?.(item.link || '#', '_blank')}
-        />
-        <Button
-          text={tDelete}
-          btnClass="btnPlain"
-          onClick={() => onDelete(item)}
-        />
+      <div className="flex flex-row align-center justify-center gap-[80px]">
+        <div>
+          <Button
+            text={tOpen}
+            btnClass="btnPlain"
+            onClick={() => onOpen(item)}
+          />
+        </div>
+        <div>
+          <Button
+            text={tDelete}
+            btnClass="btnPlain"
+            onClick={() => onDelete(item)}
+          />
+        </div>
       </div>
     </div>
   );
 };
 
-const GetList = () => {
+const GetList = ({ selectedRecord, setSelectedRecord }) => {
   const dispatch = useDispatch();
   const data = useSelector(getSavedData);
 
@@ -212,6 +222,11 @@ const GetList = () => {
   const onDelete = async item => {
     await dispatch(deleteRecord(item._id || item.id)).unwrap();
     await dispatch(getRecords()).unwrap();
+    setSelectedRecord(null);
+  };
+
+  const onOpen = item => {
+    setSelectedRecord(item);
   };
 
   if (!list || list.length === 0) {
@@ -219,31 +234,64 @@ const GetList = () => {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <label className="flex-1 flex flex-col gap-2">
-        <Text type="tiny" as="span" fontWeight="normal">
-          {tSearchLabel}
-        </Text>
-        <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder={tSearchPH}
-          aria-label={tSearchLabel}
-          className="w-full pl-[10px] rounded-[5px] h-[40px] bg-white font-normal text-[14px] regular-border border-opacity-50 transition-all duration-300 ease-in-out outline-none"
-        />
-      </label>
-
-      {filtered.length === 0 ? (
-        <div className="text-sm text-gray-600">{tNoResult}</div>
-      ) : (
+    <div className="flex flex-col gap-3 mt-[-15px] min-h-0 border border-green-600">
+      {selectedRecord && (
         <div className="flex flex-col gap-3">
-          {filtered.map(item => (
-            <ListItem
-              key={item._id || item.id}
-              item={item}
-              onDelete={onDelete}
+          <div className="font-medium">
+            {selectedRecord.title || '(no title)'}
+          </div>
+          <div className="flex-1 min-h-0">
+            <LiveTextPanels
+              transcript={selectedRecord.transcript}
+              translation={selectedRecord.translation}
+              // className="h-[270px]"
             />
-          ))}
+          </div>
+          <div className="mb-[-10px]">
+            <Button
+              text="Back to List"
+              btnClass="btnPlain"
+              type="button"
+              onClick={() => setSelectedRecord(null)}
+            />
+          </div>
+        </div>
+      )}
+      {!selectedRecord && (
+        <div className="flex flex-col gap-3">
+          <label className="flex-1 flex flex-col gap-2">
+            <Text type="tiny" as="span" fontWeight="normal">
+              {tSearchLabel}
+            </Text>
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder={tSearchPH}
+              aria-label={tSearchLabel}
+              className="w-full pl-[10px] rounded-[5px] h-[40px] bg-white font-normal text-[14px] regular-border border-opacity-50 transition-all duration-300 ease-in-out outline-none"
+            />
+          </label>
+
+          {filtered.length === 0 ? (
+            <div className="text-sm text-gray-600">{tNoResult}</div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {filtered.map(item => (
+                <ListItem
+                  key={item._id || item.id}
+                  item={item}
+                  onDelete={e => {
+                    e?.stopPropagation?.();
+                    onDelete(item);
+                  }}
+                  onOpen={e => {
+                    e?.stopPropagation?.();
+                    onOpen(item);
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -254,41 +302,70 @@ const Records = () => {
   const dispatch = useDispatch();
   const typeOperation = useSelector(getTypeOperationRecords);
   const hasAnyText = useSelector(getHasAnyText);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const data = useSelector(getSavedData);
 
   const effectiveType = typeOperation ?? 'GetRecords';
 
+  console.log("selectedRecord:", selectedRecord);
+  console.log("data:", data);
+
   return (
-    <div className="h-full flex flex-col">
+    <div
+      className="flex flex-col"
+      // style={{
+      //   [(effectiveType === 'GetRecords' && selectedRecord) ||
+      //   (effectiveType === 'GetRecords' && data.length > 1)
+      //     ? 'minHeight'
+      //     : 'height']: '100%',
+      // }}
+
+      style={{
+        [(effectiveType === 'GetRecords' && data.length > 1 && !selectedRecord)
+          ? 'minHeight'
+          : (effectiveType === 'GetRecords' && selectedRecord)
+            ? 'height'
+            : 'height']: '100%',
+      }}
+    >
       <div className="w-full h-[40px] flex flex-row justify-around gap-[2px]">
         <div
           className={`w-[calc(50%-2px)] rounded-t-md border border-[rgba(82,85,95,0.2)] flex justify-center items-center ${
             effectiveType === 'GetRecords' ? 'border-b-0' : ''
           }`}
         >
-          <Button
-            btnClass="btnPlain"
-            text="Get Records"
-            onClick={() => dispatch(setTypeOperationRecords('GetRecords'))}
-            textColor="text-black"
-          />
+          <div>
+            <Button
+              btnClass="btnPlain"
+              text="Get Records"
+              onClick={() => dispatch(setTypeOperationRecords('GetRecords'))}
+              textColor="text-black"
+            />
+          </div>
         </div>
         <div
           className={`w-[calc(50%-2px)] rounded-t-md border border-[rgba(82,85,95,0.2)] flex justify-center items-center ${
             effectiveType === 'SaveRecords' ? 'border-b-0' : ''
           }`}
         >
-          <Button
-            btnClass="btnPlain"
-            text="Save Records"
-            onClick={() => dispatch(setTypeOperationRecords('SaveRecords'))}
-            textColor="text-black"
-          />
+          <div>
+            <Button
+              btnClass="btnPlain"
+              text="Save Records"
+              onClick={() => dispatch(setTypeOperationRecords('SaveRecords'))}
+              textColor="text-black"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="min-h-[calc(100%-40px)] w-full flex flex-col gap-5 pt-9 px-5 pb-5 border-x border-b border-[rgba(15,54,181,0.2)] rounded-b-md">
+      <div className="min-h-[calc(100%-40px)] w-full flex flex-col gap-5 pt-9 px-5 pb-5 border-x border-b border-[rgba(15,54,181,0.2)] rounded-b-md test-border">
         {effectiveType === 'GetRecords' ? (
-          <GetList />
+          // null
+          <GetList
+            selectedRecord={selectedRecord}
+            setSelectedRecord={setSelectedRecord}
+          />
         ) : (
           <SaveForm key={String(hasAnyText)} />
         )}
