@@ -218,7 +218,7 @@ const ToolCard = () => {
         ))}
       </div>
 
-      <div className="relative h-[85vh] min-w-[317px] w-[310px] rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
+      <div className="relative h-[85vh] min-w-[300px] max-w-[370px] rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
         <div className="h-[9vh] flex justify-between items-center px-4 border-b">
           <div>
             <LogoWave />
