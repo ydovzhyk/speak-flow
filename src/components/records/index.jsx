@@ -234,9 +234,9 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
   }
 
   return (
-    <div className="flex flex-col gap-3 mt-[-15px] min-h-0 border border-green-600">
+    <div className="flex h-[calc(100%+40px)] flex-col gap-3 min-h-0 mt-[-15px]">
       {selectedRecord && (
-        <div className="flex flex-col gap-3">
+        <div className="flex h-full flex-col gap-3">
           <div className="font-medium">
             {selectedRecord.title || '(no title)'}
           </div>
@@ -244,10 +244,9 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
             <LiveTextPanels
               transcript={selectedRecord.transcript}
               translation={selectedRecord.translation}
-              // className="h-[270px]"
             />
           </div>
-          <div className="mb-[-10px]">
+          <div className="mt-[10px]">
             <Button
               text="Back to List"
               btnClass="btnPlain"
@@ -313,13 +312,6 @@ const Records = () => {
   return (
     <div
       className="flex flex-col border border-[rgba(82,85,95,0.2)] border-t-transparent rounded-md"
-      // style={{
-      //   [(effectiveType === 'GetRecords' && selectedRecord) ||
-      //   (effectiveType === 'GetRecords' && data.length > 1)
-      //     ? 'minHeight'
-      //     : 'height']: '100%',
-      // }}
-
       style={{
         [effectiveType === 'GetRecords' && data.length > 1 && !selectedRecord
           ? 'minHeight'
@@ -359,9 +351,8 @@ const Records = () => {
         </div>
       </div>
 
-      <div className="min-h-[calc(100%-40px)] w-full flex flex-col gap-5 pt-9 px-5 pb-5">
+      <div className="h-[calc(100%-40px)] w-full flex flex-col gap-5 pt-9 px-5 pb-5">
         {effectiveType === 'GetRecords' ? (
-          // null
           <GetList
             selectedRecord={selectedRecord}
             setSelectedRecord={setSelectedRecord}

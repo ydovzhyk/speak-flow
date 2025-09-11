@@ -293,7 +293,7 @@ const ToolCard = () => {
                 ✖
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto thin-scrollbar p-4 min-h-[74vh] test-border">
+            <div className="flex-1 overflow-y-auto thin-scrollbar p-4 min-h-[74vh]">
               <PanelContent active={panel} />
             </div>
           </div>
