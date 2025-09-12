@@ -57,7 +57,8 @@ function Contact() {
   };
 
   return (
-    <div className="w-full h-full rounded-md border border-[rgba(82,85,95,0.2)] p-4 bg-white">
+    <div className="w-full rounded-md border border-[rgba(82,85,95,0.2)] p-4 bg-white h-full landscape:!h-auto landscape:min-h-0"
+    >
       <div className="mb-5">
         <Text type="tiny" as="p" fontWeight="light">
           Have questions about the app or ideas for new features? I’d love to

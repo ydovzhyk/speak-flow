@@ -73,56 +73,57 @@ const SaveForm = () => {
   };
 
   return (
-    <form
-      className="flex flex-col gap-4 h-full"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <Controller
-        control={control}
-        name="title"
-        rules={{
-          required: tRequired,
-          minLength: { value: 2, message: tTitleMin },
-        }}
-        render={({ field: { onChange, value }, fieldState }) => (
-          <TextField
-            value={value}
-            handleChange={onChange}
-            error={fieldState.error}
-            autoComplete="off"
-            {...fields.title}
+      <form
+        className="flex flex-col gap-4"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        <Controller
+          control={control}
+          name="title"
+          rules={{
+            required: tRequired,
+            minLength: { value: 2, message: tTitleMin },
+          }}
+          render={({ field: { onChange, value }, fieldState }) => (
+            <TextField
+              value={value}
+              handleChange={onChange}
+              error={fieldState.error}
+              autoComplete="off"
+              {...fields.title}
+            />
+          )}
+        />
+
+        <div className="grid grid-cols-1 gap-3">
+          <TextareaField
+            label={tTranscript}
+            name="transcript"
+            register={register}
+            placeholder={tNothingToSave}
+            rows={3}
+            showCounter={false}
           />
-        )}
-      />
+          <TextareaField
+            label={tTranslation}
+            name="translation"
+            register={register}
+            placeholder={tNothingToSave}
+            rows={3}
+            showCounter={false}
+          />
+        </div>
 
-      <div className="grid grid-cols-1 gap-3">
-        <TextareaField
-          label={tTranscript}
-          name="transcript"
-          register={register}
-          placeholder={tNothingToSave}
-          rows={3}
-          showCounter={false}
-        />
-        <TextareaField
-          label={tTranslation}
-          name="translation"
-          register={register}
-          placeholder={tNothingToSave}
-          rows={3}
-          showCounter={false}
-        />
-      </div>
+        <div className="flex items-center justify-center">
+          <Button
+            text={btnStatus}
+            btnClass="btnDark"
+            type="submit"
+            disabled={!trimmedTranscript && !trimmedTranslation}
+          />
+        </div>
+      </form>
 
-      <div className="flex items-center justify-center">
-        <Button
-          text={btnStatus}
-          btnClass="btnDark"
-          type="submit"
-          disabled={!trimmedTranscript && !trimmedTranslation}
-        />
-      </div>
-    </form>
   );
 };
 
@@ -233,7 +234,7 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
   }
 
   return (
-    <div className="flex h-[calc(100%+70px)] flex-col gap-3 min-h-0 mt-[-15px]">
+    <div className="flex flex-col h-[calc(100%+70px)] min-h-0 mt-[-15px]">
       {selectedRecord && (
         <div className="flex h-full flex-col gap-3">
           <div className="font-medium">
@@ -252,7 +253,7 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
               type="button"
               onClick={() => setSelectedRecord(null)}
             />
-            </div>
+          </div>
         </div>
       )}
       {!selectedRecord && (
@@ -301,7 +302,6 @@ const Records = () => {
   const typeOperation = useSelector(getTypeOperationRecords);
   const hasAnyText = useSelector(getHasAnyText);
   const [selectedRecord, setSelectedRecord] = useState(null);
-  const data = useSelector(getSavedData);
 
   const effectiveType = typeOperation ?? 'GetRecords';
 
@@ -309,11 +309,9 @@ const Records = () => {
     <div
       className="flex flex-col border border-[rgba(82,85,95,0.2)] border-t-transparent rounded-md"
       style={{
-        [effectiveType === 'GetRecords' && data.length > 1 && !selectedRecord
-          ? 'minHeight'
-          : effectiveType === 'GetRecords' && selectedRecord
-            ? 'height'
-            : 'height']: '100%',
+        [effectiveType === 'GetRecords' && selectedRecord
+          ? 'height'
+          : 'minHeight']: '100%',
       }}
     >
       <div className="w-full h-[40px] flex flex-row justify-around gap-[3px] mt-[-1px] mr-[-4px]">
@@ -347,7 +345,7 @@ const Records = () => {
         </div>
       </div>
 
-      <div className="h-[calc(100%-40px)] w-full flex flex-col gap-5 pt-9 px-5 pb-5">
+      <div className="w-full lg:landscape:!h-[calc(100%-40px)] portrait:h-[calc(100%-40px)] landscape:!h-auto landscape:max-h-[calc(100%-40px)] flex flex-col gap-5 pt-9 px-5 pb-5">
         {effectiveType === 'GetRecords' ? (
           <GetList
             selectedRecord={selectedRecord}

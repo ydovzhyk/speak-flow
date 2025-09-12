@@ -206,7 +206,7 @@ const ToolCard = () => {
 
   return (
     <div className="flex flex-row items-center justify-center pr-[27px] w-full max-w-[390px] overflow-hidden">
-      <div className="w-full relative inline-flex items-center justify-center">
+      <div className="w-full h-[100vh] landscape:!h-[570px] lg:landscape:!h-[100vh] relative inline-flex items-center justify-center">
         <div className="absolute top-1/2 -translate-y-1/2 -right-[54px] flex flex-col gap-[55px]">
           {visibleTabs.map(t => (
             <EarButton
@@ -219,8 +219,8 @@ const ToolCard = () => {
           ))}
         </div>
 
-        <div className="relative h-[85vh] w-full rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
-          <div className="h-[9vh] flex justify-between items-center px-4 border-b">
+        <div className="relative h-[85vh] landscape:!h-[85%] w-full rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
+          <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center px-4 border-b">
             <div>
               <LogoWave />
             </div>
@@ -229,7 +229,7 @@ const ToolCard = () => {
             </div>
           </div>
 
-          <div className="h-[6vh] border border-[var(--accent2)] rounded-md mx-4 my-3 flex items-center justify-between">
+          <div className="h-[6vh] landscape:!h-[9%] border border-[var(--accent2)] rounded-md mx-4 my-3 flex items-center justify-between">
             <Timer />
             <div className="h-full flex items-center justify-center flex-1">
               {audioContext &&
@@ -264,11 +264,11 @@ const ToolCard = () => {
             </div>
           </div>
 
-          <div className="h-[66vh] px-4 pb-4 flex flex-col gap-3">
+          <div className="h-[66vh] landscape:!h-[75%] px-4 pb-4 flex flex-col gap-3">
             <div className="flex-1 min-h-0">
               <LiveTextPanels />
             </div>
-            <div className="h-[6vh] flex flex-row items-center justify-between">
+            <div className="h-[6vh] landscape:!h-[12%] flex flex-row items-center justify-between">
               <PlayModePanel />
               <SaveRecordsPanel />
             </div>
@@ -277,7 +277,7 @@ const ToolCard = () => {
           <div
             className={`absolute top-0 right-0 h-full w-full bg-white border-l-2 border-teal-700 shadow-lg transform transition-transform duration-300 ${panel ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
           >
-            <div className="h-[9vh] flex justify-between items-center p-4 border-b">
+            <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center p-4 border-b">
               <h2 className="font-semibold text-[var(--accent2)]">
                 {panel ? PanelTitles[panel] : ''}
               </h2>
@@ -293,7 +293,7 @@ const ToolCard = () => {
                 ✖
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto thin-scrollbar p-4 min-h-[74vh]">
+            <div className="flex-1 overflow-y-auto thin-scrollbar p-4 min-h-[74vh] landscape:!min-h-[74%]">
               <PanelContent active={panel} />
             </div>
           </div>
