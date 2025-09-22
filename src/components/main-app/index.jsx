@@ -157,13 +157,6 @@ const ToolCard = () => {
     },
   });
 
-  // ESC → закриття
-  useEffect(() => {
-    const onKey = e => e.key === 'Escape' && setPanel(null);
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
   // автозакриття після успішного логіну
   useEffect(() => {
     if (closeButtonAuth && panel === 'auth') {

@@ -79,11 +79,16 @@ export async function translateMyText(text = '', languageIndex) {
   const { languages } = languagesAndCodes;
   const lang = languages[languageIndex];
 
-  if (lang) {
-    const result = await translate(text, lang.code);
+  const str = Array.isArray(text) ? text.join('') : String(text ?? '');
+  if (!str.trim()) return '';
+
+  if (!lang) return str;
+
+  try {
+    const result = await translate(str, { to: lang.code });
     return result;
-  } else {
-    throw new Error('Language not found');
+  } catch (e) {
+    return str;
   }
 }
 
@@ -131,3 +136,5 @@ export const TranslatedText = ({ text }) => {
   const translatedText = useTranslate(text);
   return <>{translatedText}</>;
 };
+
+

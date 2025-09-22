@@ -21,7 +21,7 @@ const Auth = () => {
   }, []);
 
   const REACT_APP_API_URL =
-    'https://test-task-backend-34db7d47d9c8.herokuapp.com';
+    'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 
   const googleText =
     typeOperation === 'login'
@@ -73,7 +73,7 @@ const Auth = () => {
               {googleText}
             </Text>
             <a
-              href={`${REACT_APP_API_URL}/google?origin=${currentOrigin}`}
+              href={`${REACT_APP_API_URL}/api/google?origin=${currentOrigin}`}
               className="inline-flex justify-center items-center gap-[5px] mx-auto w-[170px] h-[40px] regular-border hover-transition hover:shadow-md hover:bg-[var(--accent1)] hover:border-[var(--accent1)] rounded-[5px] cursor-pointer group"
             >
               <span className="text-black group-hover:text-white transition-colors duration-300">

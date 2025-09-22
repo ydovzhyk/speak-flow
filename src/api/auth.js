@@ -2,12 +2,11 @@ import axios from 'axios';
 import { getAuthDataFromStorage } from '@/utils/auth-data';
 import { setRefreshUserData } from '@/redux/auth/auth-slice';
 
-// const REACT_APP_API_URL = 'http://localhost:4000';
-const REACT_APP_API_URL =
-  'https://test-task-backend-34db7d47d9c8.herokuapp.com';
+// const REACT_APP_URL = 'http://localhost:4000';
+const REACT_APP_URL = 'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 
 export const instance = axios.create({
-  baseURL: REACT_APP_API_URL,
+  baseURL: `${REACT_APP_URL}/api`,
 });
 
 function clearAuthData(store) {
@@ -24,44 +23,64 @@ function clearAuthData(store) {
 }
 
 function isHardLogoutMessage(msg = '') {
+  const m = String(msg || '').toLowerCase();
   return (
-    msg === 'Please login again' ||
-    msg === 'Invalid session' ||
-    msg === 'Session timed out, please login again'
+    m.includes('please login again') ||
+    m.includes('invalid session') ||
+    m.includes('session timed out') ||
+    m.includes('refresh end')
   );
 }
 
 export function setupInterceptors(store) {
   // === Request ===
-  instance.interceptors.request.use(
-    config => {
-      const authData = getAuthDataFromStorage(store);
-      if (
-        authData?.accessToken &&
-        config.url !== '/auth/refresh'
-      ) {
-        config.headers = {
-          ...(config.headers || {}),
-          Authorization: `Bearer ${authData.accessToken}`,
-        };
-      }
-      return config;
-    },
-    error => Promise.reject(error)
-  );
+  instance.interceptors.request.use(config => {
+    const authData = getAuthDataFromStorage(store);
+    const u = config.url || '';
+    const isRefresh = u.endsWith('/auth/refresh') || u === 'auth/refresh';
+    if (authData?.accessToken && !isRefresh) {
+      config.headers = {
+        ...(config.headers || {}),
+        Authorization: `Bearer ${authData.accessToken}`,
+      };
+    }
+    return config;
+  });
 
   // === Response ===
   instance.interceptors.response.use(
-    response => response,
+    r => r,
     async error => {
       const originalRequest = error?.config;
+      const { response } = error || {};
+      if (!response || !originalRequest) return Promise.reject(error);
 
-      if (!error.response || !originalRequest) {
+      const status = response.status;
+      const data = response.data || {};
+      const message = data.message || '';
+      const code = data.code || '';
+      const url = originalRequest.url || '';
+      const isRefreshReq =
+        url.endsWith('/auth/refresh') || url.includes('/auth/refresh');
+
+      if (isRefreshReq) {
+        clearAuthData(store);
         return Promise.reject(error);
       }
 
-      const { status, data } = error.response;
-      const message = data?.message;
+      const hardLogoutByCode =
+        (status === 401 &&
+          (code === 'REFRESH_EXPIRED' || code === 'REFRESH_INVALID')) ||
+        (status === 404 &&
+          (code === 'USER_NOT_FOUND' || code === 'SESSION_NOT_FOUND'));
+
+      if (
+        hardLogoutByCode ||
+        (status === 401 && isHardLogoutMessage(message))
+      ) {
+        clearAuthData(store);
+        return Promise.reject(error);
+      }
 
       if (status === 401 && message === 'Unauthorized') {
         if (originalRequest._retry) {
@@ -80,11 +99,7 @@ export function setupInterceptors(store) {
           const refreshResp = await instance.post(
             '/auth/refresh',
             { sid: authData.sid },
-            {
-              headers: {
-                Authorization: `Bearer ${authData.refreshToken}`,
-              },
-            }
+            { headers: { Authorization: `Bearer ${authData.refreshToken}` } }
           );
 
           const newData = {
@@ -118,14 +133,14 @@ export function setupInterceptors(store) {
         }
       }
 
-      if (status === 401 && isHardLogoutMessage(message)) {
+      if (status === 403) {
         clearAuthData(store);
-        return Promise.reject(error);
       }
 
       return Promise.reject(error);
     }
   );
+
 }
 
 export const axiosRegister = async userData => {
@@ -154,6 +169,6 @@ export const axiosUpdateUser = async userData => {
 };
 
 export const axiosDeleteUser = async id => {
-  const { data } = await instance.post(`/auth/delete/${id}`);
+  const { data } = await instance.delete(`/auth/delete/${id}`);
   return data;
 };

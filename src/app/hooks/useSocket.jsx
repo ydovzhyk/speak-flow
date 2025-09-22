@@ -16,7 +16,8 @@ import { useStreamingParagraph } from '@/utils/useStreamingParagraph';
 import { codeToLabel } from '../../data/languages';
 
 const STORAGE_KEY = 'speakflow.settings';
-const serverURL = 'wss://test-task-backend-34db7d47d9c8.herokuapp.com';
+const serverURL = 'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
+// const serverURL = 'http://localhost:4000';
 
 function readSettings() {
   try {
