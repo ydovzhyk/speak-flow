@@ -3,6 +3,7 @@
 import { useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm, Controller } from 'react-hook-form';
+import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import { getLogin, getUser } from '@/redux/auth/auth-selectors';
 import SelectLanguagePanel from '../select-language-panel';
 import Text from '@/components/shared/text/text';
@@ -19,6 +20,12 @@ const SettingsContent = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector(getLogin);
   const user = useSelector(getUser);
+  const {
+    initialize,
+    disconnect,
+    isConnected,
+    usageFormatted,
+  } = useSocketContext();
 
   const tUserNameReq = useTranslate('User name is required');
   const tNameMin = useTranslate('Name must have at least 2 characters');
@@ -53,6 +60,16 @@ const SettingsContent = () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
+
+  useEffect(() => {
+    const wasConnected = isConnected();
+    initialize()
+      .catch(() => {});
+    return () => {
+      if (!wasConnected) disconnect();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onSubmit = async data => {
     const nextUsername = (data.username ?? '').trim() || user?.username || '';
@@ -183,6 +200,22 @@ const SettingsContent = () => {
           </div>
         </>
       )}
+      <div className="border-b border-[rgba(82,85,95,0.2)]" />
+      <div className="flex flex-col gap-2 text-sm">
+        <div className="flex flex-row items-center gap-2">
+          <Text type="tiny" as="p" fontWeight="light">
+            Total recorded time:
+          </Text>{' '}
+          <strong>{usageFormatted.total}</strong>
+        </div>
+
+        <div className="flex flex-row items-center gap-2">
+          <Text type="tiny" as="p" fontWeight="light">
+            Last session time:
+          </Text>
+          <strong>{usageFormatted.lastSession}</strong>
+        </div>
+      </div>
     </div>
   );
 };

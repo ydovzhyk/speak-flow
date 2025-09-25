@@ -1,5 +1,4 @@
 'use client';
-
 import { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import useSocket from '@/app/hooks/useSocket';
@@ -10,13 +9,20 @@ import {
 
 const SocketCtx = createContext(null);
 
-export function SocketProvider({ children }) {
+export function SocketProvider({ children, autoconnect = false }) {
   const value = useSocket();
   const persistedTranscript = useSelector(getTranscriptJoined);
   const persistedTranslation = useSelector(getTranslationJoined);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!autoconnect) return;
+    value.initialize().catch(() => {});
+    return () => value.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoconnect]);
 
   const memo = useMemo(
     () => ({
@@ -28,13 +34,7 @@ export function SocketProvider({ children }) {
         ? value.translationText || persistedTranslation
         : '',
     }),
-    [
-      mounted,
-      value.transcriptText,
-      value.translationText,
-      persistedTranscript,
-      persistedTranslation,
-    ]
+    [mounted, value, persistedTranscript, persistedTranslation]
   );
 
   return <SocketCtx.Provider value={memo}>{children}</SocketCtx.Provider>;

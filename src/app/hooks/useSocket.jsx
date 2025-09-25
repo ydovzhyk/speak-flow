@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import io from 'socket.io-client';
 import { v4 as uuid } from 'uuid';
@@ -43,6 +43,67 @@ const useSocket = () => {
   const outputLanguage = codeToLabel(useSelector(getOutputLanguage));
   const inputLanguage = useSelector(getInputLanguage);
   const user = useSelector(getUser);
+  const handshakeIdRef = useRef(null);
+
+  // ===== Usage state =====
+  const [usage, setUsage] = useState(() => {
+    const u = user?.usage;
+    return {
+      totalMs: u?.totalRecordMs || 0,
+      lastSession: {
+        seconds: Math.floor((u?.lastSession?.durationMs || 0) / 1000),
+        startedAt: u?.lastSession?.startedAt || null,
+        endedAt: u?.lastSession?.endedAt || null,
+      },
+    };
+  });
+
+  // Utility: formatting time
+  const pad = n => String(n).padStart(2, '0');
+  const formatSeconds = (sec = 0) => {
+    const s = Math.max(0, Math.floor(sec));
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const ss = s % 60;
+    return `${pad(h)}:${pad(m)}:${pad(ss)}`;
+  };
+  const formatMs = (ms = 0) => formatSeconds(Math.floor(ms / 1000));
+
+  // User loaded/changed — update initial usage
+  useEffect(() => {
+    const u = user?.usage;
+    if (!u) return;
+    setUsage({
+      totalMs: u.totalRecordMs || 0,
+      lastSession: {
+        seconds: Math.floor((u.lastSession?.durationMs || 0) / 1000),
+        startedAt: u.lastSession?.startedAt || null,
+        endedAt: u.lastSession?.endedAt || null,
+      },
+    });
+  }, [user]);
+
+  useEffect(() => {
+    const desiredId = user?._id || readSettings().clientId;
+    const currentId = handshakeIdRef.current;
+
+    if (
+      socketRef.current &&
+      desiredId &&
+      currentId &&
+      desiredId !== currentId
+    ) {
+      try {
+        socketRef.current.emit('disconnect-deepgram');
+      } catch (e) {
+        console.warn('disconnect-deepgram emit failed:', e);
+      }
+      socketRef.current.disconnect();
+      socketRef.current = null;
+
+      initialize();
+    }
+  }, [user?._id]);
 
   const {
     displayedText: transcriptText,
@@ -57,7 +118,11 @@ const useSocket = () => {
   } = useStreamingParagraph(22);
 
   const getOrCreateClientId = () => {
-    if (user?._id) return user._id;
+    if (user?._id) {
+      const prev = readSettings();
+      if (prev.clientId !== user._id) writeSettings({ clientId: user._id });
+      return user._id;
+    }
 
     let { clientId } = readSettings();
     if (!clientId) {
@@ -85,10 +150,13 @@ const useSocket = () => {
       readyResolverRef.current = resolve;
     });
 
+    // ===== WS connection =====
     s.on('connect', () => {
       console.log('🟢 WebSocket connected as', clientId);
+      handshakeIdRef.current = clientId;
     });
 
+    // ===== Transcriber connection status =====
     s.on('transcriber-ready', data => {
       if (data === 'Ready') {
         dispatch(setDeepgramStatus(true));
@@ -105,6 +173,7 @@ const useSocket = () => {
       }
     });
 
+    // ===== Get final transcript/translation =====
     s.on('final', transcript => {
       console.log('🟢 Final transcript received:', transcript);
       enqueueTranscript(transcript);
@@ -115,6 +184,46 @@ const useSocket = () => {
       console.log('🟢 Final translation received:', translation);
       enqueueTranslation(translation);
       dispatch(pushTranslation(translation));
+    });
+
+    // ===== Response to usage:request =====
+    s.on('usage:current', payload => {
+      const totalMs = Number(payload?.totalMs || 0);
+      const last = payload?.lastSession || {};
+      const startedAt = last.startedAt || null;
+      const endedAt = last.endedAt || null;
+      const baseSeconds = Number(last.seconds || 0);
+
+      setUsage({
+        totalMs,
+        lastSession: {
+          seconds: baseSeconds,
+          startedAt,
+          endedAt,
+        },
+      });
+    });
+
+    s.on('usage:progress', payload => {
+      const startedAt = payload?.startedAt || null;
+      const seconds = Number(payload?.seconds || 0);
+      const liveTotalMs = Number(payload?.liveTotalMs ?? NaN);
+
+      setUsage(u => ({
+        totalMs: Number.isFinite(liveTotalMs) ? liveTotalMs : u.totalMs,
+        lastSession: { startedAt, endedAt: null, seconds },
+      }));
+    });
+
+    s.on('usage:final', payload => {
+      setUsage({
+        totalMs: Number(payload?.totalMs || 0),
+        lastSession: {
+          seconds: Number(payload?.seconds || 0),
+          startedAt: payload?.startedAt || null,
+          endedAt: payload?.endedAt || null,
+        },
+      });
     });
 
     s.on('error', e => console.error('socket error:', e));
@@ -147,9 +256,10 @@ const useSocket = () => {
     s.emit('disconnect-deepgram');
     s.disconnect();
     socketRef.current = null;
-    // resetTranscript();
-    // resetTranslation();
+    handshakeIdRef.current = null;
   };
+
+  const isConnected = () => Boolean(socketRef.current?.connected);
 
   return {
     initialize,
@@ -160,6 +270,14 @@ const useSocket = () => {
     translationText,
     resetTranscript,
     resetTranslation,
+
+    isConnected,
+
+    usage,
+    usageFormatted: {
+      total: formatMs(usage.totalMs),
+      lastSession: formatSeconds(usage.lastSession?.seconds || 0),
+    },
   };
 };
 
