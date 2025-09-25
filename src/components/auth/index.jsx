@@ -23,6 +23,8 @@ const Auth = () => {
   const REACT_APP_API_URL =
     'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 
+  console.log('Current origin for OAuth:', REACT_APP_API_URL);
+
   const googleText =
     typeOperation === 'login'
       ? 'Login quickly with Google'
