@@ -1,4 +1,3 @@
-// ✅ next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack(config) {
@@ -26,6 +25,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'openweathermap.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
       },
     ],
   },

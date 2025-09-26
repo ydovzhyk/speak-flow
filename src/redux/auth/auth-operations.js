@@ -48,16 +48,15 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk(
   'auth/logout',
-  async (_, { dispatch, rejectWithValue }) => {
+  async (_, { dispatch }) => {
     try {
-      const data = await axiosLogout();
+      await axiosLogout();
+    } catch (e) {
+    } finally {
       localStorage.removeItem('speakflow.authData');
-      return data;
-    } catch (error) {
-      const { data, status } = error.response;
-      toast.error(`Failed to logout: ${data.message}`);
-      return rejectWithValue({ data, status });
+      dispatch(clearUser());
     }
+    return { ok: true };
   }
 );
 

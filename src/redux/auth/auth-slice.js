@@ -99,11 +99,12 @@ const auth = createSlice({
         isLogin: false,
         isLoginPanel: false,
       }))
-      .addCase(logout.rejected, (state, { payload }) => {
-        state.loading = false;
-        state.error = errMsg(payload);
-      })
-
+      .addCase(logout.rejected, () => ({
+        ...initialState,
+        loading: false,
+        isLogin: false,
+        isLoginPanel: false,
+      }))
       // GET CURRENT USER
       .addCase(getCurrentUser.pending, state => {
         state.loading = true;

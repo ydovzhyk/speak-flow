@@ -215,7 +215,7 @@ const ToolCard = () => {
         <div className="relative h-[85vh] landscape:!h-[85%] w-full rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
           <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center px-4 border-b">
             <div>
-              <LogoWave />
+              <LogoWave widthLogo={100}/>
             </div>
             <div>
               <AuthInfo />
