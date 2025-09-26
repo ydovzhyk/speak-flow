@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm, Controller } from 'react-hook-form';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
@@ -14,7 +14,7 @@ import TextField from '@/components/shared/text-field';
 import { fields } from '@/components/shared/text-field/fields';
 import Button from '@/components/shared/button';
 import { cropSquareAndCompressToBase64 } from '@/utils/cropSquareAndCompress';
-import { updateUser } from '@/redux/auth/auth-operations';
+import { updateUser, deleteUser } from '@/redux/auth/auth-operations';
 
 const SettingsContent = () => {
   const dispatch = useDispatch();
@@ -26,6 +26,7 @@ const SettingsContent = () => {
     isConnected,
     usageFormatted,
   } = useSocketContext();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const tUserNameReq = useTranslate('User name is required');
   const tNameMin = useTranslate('Name must have at least 2 characters');
@@ -95,6 +96,12 @@ const SettingsContent = () => {
     await dispatch(updateUser(userData)).unwrap();
 
     reset({ username: nextUsername, avatarFile: null });
+  };
+
+  const handleConfirmDelete = async () => {
+    setShowDeleteModal(false);
+    console.log('Deleting user:', user?._id);
+    await dispatch(deleteUser(user._id)).unwrap();
   };
 
   return (
@@ -198,8 +205,46 @@ const SettingsContent = () => {
               </div>
             </form>
           </div>
+
+          <div className="border-t border-[rgba(82,85,95,0.2)] pt-4 flex flex-col gap-5 items-center">
+            <Text type="tiny" as="p" fontWeight="light">
+              Permanently delete your profile and all associated data.
+            </Text>
+            <Button
+              text="Delete Profile"
+              btnClass="btnDark"
+              type="button"
+              onClick={() => setShowDeleteModal(true)}
+            />
+          </div>
+
+          {showDeleteModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
+              <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+                <Text type="tiny" as="p" fontWeight="normal" className="mb-4">
+                  Are you sure you want to delete your profile? This action
+                  cannot be undone.
+                </Text>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    text="Cancel"
+                    btnClass="btnDark"
+                    type="button"
+                    onClick={() => setShowDeleteModal(false)}
+                  />
+                  <Button
+                    text="Yes, Delete"
+                    btnClass="btnDark"
+                    type="button"
+                    onClick={handleConfirmDelete}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
+
       <div className="border-b border-[rgba(82,85,95,0.2)]" />
       <div className="flex flex-col gap-2 text-sm">
         <div className="flex flex-row items-center gap-2">

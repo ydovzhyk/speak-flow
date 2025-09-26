@@ -8,7 +8,9 @@ import {
   axiosDeleteUser,
 } from '../../api/auth';
 import { setCloseButtonAuth } from '../technical/technical-slice';
+import { clearUser } from './auth-slice';
 import { toast } from 'react-toastify';
+
 export const register = createAsyncThunk(
   'auth/register',
   async (userData, { dispatch, rejectWithValue }) => {
@@ -65,9 +67,22 @@ export const getCurrentUser = createAsyncThunk(
   async (_, { dispatch, rejectWithValue }) => {
     try {
       const authDataJSON = localStorage.getItem('speakflow.authData');
-      const authData = JSON.parse(authDataJSON);
-      const userData = authData;
-      const data = await axiosGetCurrentUser(userData);
+      if (!authDataJSON) {
+        return rejectWithValue({
+          data: { message: 'Not authenticated' },
+          status: 401,
+        });
+      }
+      let authData;
+      try {
+        authData = JSON.parse(authDataJSON);
+      } catch {
+        return rejectWithValue({
+          data: { message: 'Broken auth data' },
+          status: 400,
+        });
+      }
+      const data = await axiosGetCurrentUser(authData);
       return data;
     } catch (error) {
       const { data, status } = error.response;
@@ -95,17 +110,16 @@ export const updateUser = createAsyncThunk(
 
 export const deleteUser = createAsyncThunk(
   'auth/delete',
-  async (userId, { dispatch, rejectWithValue }) => {
+  async (userId, { dispatch }) => {
     try {
-      const data = await axiosDeleteUser(userId);
-      toast.success(`${data.message}`);
-      localStorage.removeItem('speakflow.authData');
-      localStorage.removeItem('speakflow.settings');
-      return data;
-    } catch (error) {
-      const { data, status } = error.response;
-      toast.error(`Failed to delete user: ${data.message}`);
-      return rejectWithValue({ data, status });
+      await axiosDeleteUser(userId);
+      toast.success('Your account has been deleted.');
+    } catch (e) {
+    } finally {
+        localStorage.removeItem('speakflow.authData');
+        localStorage.removeItem('speakflow.settings');
+        dispatch(clearUser());
     }
+    return { ok: true };
   }
 );

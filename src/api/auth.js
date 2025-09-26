@@ -170,5 +170,5 @@ export const axiosUpdateUser = async userData => {
 
 export const axiosDeleteUser = async id => {
   const { data } = await instance.delete(`/auth/delete/${id}`);
-  return data;
+  return { ok: true, status: data.status };
 };

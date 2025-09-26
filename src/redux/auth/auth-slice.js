@@ -93,18 +93,15 @@ const auth = createSlice({
         state.error = null;
         state.message = null;
       })
-      .addCase(logout.fulfilled, () => ({
-        ...initialState,
-        loading: false,
-        isLogin: false,
-        isLoginPanel: false,
-      }))
-      .addCase(logout.rejected, () => ({
-        ...initialState,
-        loading: false,
-        isLogin: false,
-        isLoginPanel: false,
-      }))
+      .addCase(logout.fulfilled, state => {
+        state.loading = false;
+        state.isLogin = false;
+      })
+      .addCase(logout.rejected, state => {
+        state.loading = false;
+        state.isLogin = false;
+      })
+
       // GET CURRENT USER
       .addCase(getCurrentUser.pending, state => {
         state.loading = true;
@@ -144,13 +141,13 @@ const auth = createSlice({
         state.error = null;
         state.message = null;
       })
-      .addCase(deleteUser.fulfilled, (state, { payload }) => {
+      .addCase(deleteUser.fulfilled, state => {
         state.loading = false;
-        state.message = payload?.message ?? null;
+        state.isLogin = false;
       })
-      .addCase(deleteUser.rejected, (state, { payload }) => {
+      .addCase(deleteUser.rejected, state => {
         state.loading = false;
-        state.error = errMsg(payload);
+        state.isLogin = false;
       });
   },
 });

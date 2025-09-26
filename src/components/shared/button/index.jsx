@@ -58,7 +58,7 @@ const Button = ({
       disabled={disabled}
       style={style}
     >
-      <div className="flex flex-row items-center justify-center gap-2.5 mt-[-2px]">
+      <div className="flex flex-row items-center justify-center gap-2.5">
         {image && (
           <Image
             src={image}
