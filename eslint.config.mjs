@@ -1,6 +1,7 @@
 import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import globals from 'globals';
+import prettierPlugin from 'eslint-plugin-prettier';
 
 const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
@@ -19,9 +20,7 @@ export default [
       'prettier',
     ],
     settings: {
-      next: {
-        rootDir: 'packages/my-app/',
-      },
+      next: { rootDir: 'packages/my-app/' },
     },
     rules: {
       'react/no-unescaped-entities': 'off',
@@ -30,7 +29,6 @@ export default [
       '@next/next/no-typos': 'error',
       '@next/next/no-html-link-for-pages': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      'prettier/prettier': 'error',
     },
   }),
 
@@ -43,6 +41,12 @@ export default [
         ...globals.node,
         process: 'readonly',
       },
+    },
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      'prettier/prettier': 'error',
     },
   },
 ];
