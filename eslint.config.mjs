@@ -1,26 +1,24 @@
 import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
-import globals from 'globals';
-import prettierPlugin from 'eslint-plugin-prettier';
 
 const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
   recommendedConfig: js.configs.recommended,
 });
 
-export default [
-  { ignores: ['node_modules', 'dist', '.next', 'public', 'coverage'] },
-
+const eslintConfig = [
   ...compat.config({
     extends: [
-      'eslint:recommended',
-      'next/core-web-vitals',
-      'next/typescript',
-      'plugin:@next/next/recommended',
-      'prettier',
+      'eslint:recommended', // Базові правила ESLint
+      'next/core-web-vitals', // Оптимізація для Core Web Vitals
+      'next/typescript', // Додаткові правила для TypeScript
+      'plugin:@next/next/recommended', // Рекомендовані правила Next.js
+      'prettier', // Вимикає конфліктувані правила ESLint
     ],
     settings: {
-      next: { rootDir: 'packages/my-app/' },
+      next: {
+        rootDir: 'packages/my-app/',
+      },
     },
     rules: {
       'react/no-unescaped-entities': 'off',
@@ -29,24 +27,19 @@ export default [
       '@next/next/no-typos': 'error',
       '@next/next/no-html-link-for-pages': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      'prettier/prettier': 'error',
     },
-  }),
-
-  {
     languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module',
       globals: {
-        ...globals.browser,
-        ...globals.node,
         process: 'readonly',
       },
     },
-    plugins: {
-      prettier: prettierPlugin,
-    },
-    rules: {
-      'prettier/prettier': 'error',
-    },
-  },
+  }),
 ];
+
+const finalEslintConfig = {
+  ...eslintConfig[0],
+  ignores: ['node_modules', 'dist', '.next', 'public', 'coverage'],
+};
+
+export default finalEslintConfig;
