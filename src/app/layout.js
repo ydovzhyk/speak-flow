@@ -15,6 +15,8 @@ const inter = Inter({
   display: 'swap',
   variable: '--font-inter',
 });
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID; 
 export const metadata = {};
 export default function RootLayout({ children }) {
   return (
@@ -23,7 +25,23 @@ export default function RootLayout({ children }) {
         <StoreProvider>
           <LanguageProvider>
             {/* gtag.js */}
-            {/* <Script src={https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}} strategy="afterInteractive" /> <Script id="ga4-init" strategy="afterInteractive"> { window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', { send_page_view: false }); } </Script> */}
+            {GA_ID && (
+              <>
+                <Script
+                  src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+                  strategy="afterInteractive"
+                />
+                <Script id="ga4-init" strategy="afterInteractive">
+                  {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                // Вимикаємо авто page_view, бо ти шлеш їх у GaPageviews
+                gtag('config', '${GA_ID}', { send_page_view: false });
+              `}
+                </Script>
+              </>
+            )}
             <Suspense fallback={null}>
               <GaPageviews />
             </Suspense>

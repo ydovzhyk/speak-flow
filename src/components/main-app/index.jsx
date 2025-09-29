@@ -21,6 +21,7 @@ import {
 import {
   getRecords,
 } from '@/redux/technical/technical-operations';
+import { gaEvent } from '@/utils/gtag';
 import { getLogin } from '@/redux/auth/auth-selectors';
 import Auth from '../auth';
 import Contact from '../contact';
@@ -68,9 +69,21 @@ const EarButton = memo(function EarButton({
   onToggle,
 }) {
   const isActive = activeKey === tabKey;
+
+  const handleClick = () => {
+    const nextKey = isActive ? null : tabKey;
+    onToggle(nextKey);
+
+    gaEvent('tab_toggle', {
+      tab_key: tabKey,
+      tab_label: label,
+      action: isActive ? 'close' : 'open',
+    });
+  };
+
   return (
     <button
-      onClick={() => onToggle(isActive ? null : tabKey)}
+      onClick={handleClick}
       className="rotate-90 rounded-t-lg shadow border border-gray-300 pb-[3px]"
       style={{
         backgroundColor: isActive ? 'var(--accent1)' : 'var(--accent2)',
