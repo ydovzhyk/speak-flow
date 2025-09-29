@@ -3,6 +3,21 @@
 import React from 'react';
 import Text from '../text/text';
 import Image from 'next/image';
+import { gaEvent } from '@/utils/gtag';
+
+function toGaEventName(raw = '') {
+  let s = String(raw).trim().toLowerCase();
+  // замінюємо все, що не буква/цифра, на _
+  s = s.replace(/[^a-z0-9]+/g, '_');
+  // прибрати повторювані підкреслення
+  s = s.replace(/_+/g, '_').replace(/^_+|_+$/g, '');
+  // має починатись з літери
+  if (!/^[a-z]/.test(s)) s = `btn_${s}`;
+  // максимум 40 символів
+  if (s.length > 40) s = s.slice(0, 40).replace(/_+$/, '');
+  // запасний варіант
+  return s || 'btn_click';
+}
 
 const Button = ({
   text = '',
@@ -14,6 +29,11 @@ const Button = ({
   image = null,
   disabled = false,
   width = '170px',
+
+  // трекінг подій натискання кнопки
+  trackEventName, // опційно: якщо не вказано — беремо з text
+  trackEventParams = {}, // будь-які додаткові параметри
+  track = true, // можна вимкнути трекінг для конкретної кнопки
 }) => {
   const base = 'items-center justify-center group';
   const sized = 'w-[150px] h-[40px] md:w-[170px]';
@@ -49,14 +69,27 @@ const Button = ({
 
   const textColorFinal = disabled ? 'text-main-color' : textColor;
 
+  const handleClick = e => {
+    if (!disabled && track) {
+      const action = trackEventName || toGaEventName(text);
+      gaEvent(action, {
+        button_id: id || undefined,
+        button_text: text || undefined,
+        ...trackEventParams,
+      });
+    }
+    onClick?.(e);
+  };
+
   return (
     <button
       id={id}
       className={btnClasses}
-      onClick={onClick}
+      onClick={handleClick}
       type={type}
       disabled={disabled}
       style={style}
+      data-event={trackEventName || toGaEventName(text)}
     >
       <div className="flex flex-row items-center justify-center gap-2.5">
         {image && (
