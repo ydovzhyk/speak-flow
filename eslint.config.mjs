@@ -1,19 +1,22 @@
 import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
+import globals from 'globals';
 
 const compat = new FlatCompat({
   baseDirectory: import.meta.dirname,
   recommendedConfig: js.configs.recommended,
 });
 
-const eslintConfig = [
+export default [
+  { ignores: ['node_modules', 'dist', '.next', 'public', 'coverage'] },
+
   ...compat.config({
     extends: [
-      'eslint:recommended', // Базові правила ESLint
-      'next/core-web-vitals', // Оптимізація для Core Web Vitals
-      'next/typescript', // Додаткові правила для TypeScript
-      'plugin:@next/next/recommended', // Рекомендовані правила Next.js
-      'prettier', // Вимикає конфліктувані правила ESLint
+      'eslint:recommended',
+      'next/core-web-vitals',
+      'next/typescript',
+      'plugin:@next/next/recommended',
+      'prettier',
     ],
     settings: {
       next: {
@@ -29,17 +32,17 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
       'prettier/prettier': 'error',
     },
+  }),
+
+  {
     languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
       globals: {
+        ...globals.browser,
+        ...globals.node,
         process: 'readonly',
       },
     },
-  }),
+  },
 ];
-
-const finalEslintConfig = {
-  ...eslintConfig[0],
-  ignores: ['node_modules', 'dist', '.next', 'public', 'coverage'],
-};
-
-export default finalEslintConfig;
