@@ -11,7 +11,6 @@ export const getCloseButtonAuth = ({ technical }) => technical.closeButtonAuth;
 export const getCloseButtonRecords = ({ technical }) => technical.closeButtonRecords;
 export const getInputLanguage = ({ technical }) => technical.inputLanguage;
 export const getOutputLanguage = ({ technical }) => technical.outputLanguage;
-export const getCountdown = ({ technical }) => technical.countdown;
 export const getDeepgramStatus = ({ technical }) => technical.deepgramStatus;
 export const getActiveBtn = ({ technical }) => technical.activeBtn;
 export const getLine = ({ technical }) => technical.line;

@@ -10,12 +10,13 @@ const Info = () => {
       </Text>
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          1. Open the SpeakFlow
+          1. Open SpeakFlow
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          When you launch the app, the SpeakFlow panel appears. It’s designed to
-          stay centered on your screen and always adapt to your device’s height
-          (around 85–90% of the screen), so you don’t need to scroll around.
+          When you open the website, you’ll see the main tool right away.
+          SpeakFlow works in any modern browser: on desktop you can record both
+          from your microphone and system audio (speakers), while on mobile you
+          can record only from the microphone.
         </Text>
       </section>
 
@@ -24,7 +25,7 @@ const Info = () => {
           2. Adjust your settings (SETTINGS tab)
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          Before recording, visit Settings and choose:
+          Before recording, open the SETTINGS tab and choose:
         </Text>
         <ul className="list-disc pl-5">
           <li>
@@ -46,7 +47,16 @@ const Info = () => {
           </li>
         </ul>
         <Text type="small" as="p" fontWeight="light">
-          These preferences are saved automatically for the next time you open
+          If you are signed in, you can also customize your profile: update your
+          profile picture, change your nickname, or delete your account along
+          with all saved data if needed.
+        </Text>
+        <Text type="small" as="p" fontWeight="light">
+          Here you can also see your recording statistics — the total time
+          you’ve recorded with SpeakFlow and the duration of your last session.
+        </Text>
+        <Text type="small" as="p" fontWeight="light">
+          All preferences are saved automatically for the next time you open
           SpeakFlow.
         </Text>
       </section>
@@ -78,35 +88,62 @@ const Info = () => {
         <Text type="tiny" as="h3" fontWeight="medium">
           4. Start recording (MAIN screen)
         </Text>
+
         <ol className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Press Play/Record (bottom-left button).
+              Press <strong>Play/Record</strong> (bottom-left button).
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Your browser will ask for permission. <br />
-              - Select Entire Screen, <br />
-              - allow System Audio, <br />- and click Share.
+              Your browser will ask for permission:
+              <br />– choose <strong>Entire Screen</strong>,
+              <br />– enable <strong>System Audio</strong>,
+              <br />– click <strong>Share</strong>.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Begin speaking (microphone) or playing audio (speakers).
+              Start speaking (microphone) or play audio (speakers).
             </Text>
           </li>
         </ol>
+
         <Text type="small" as="p" fontWeight="light">
           SpeakFlow automatically detects the active source: the mic/speaker
-          icon updates, and the audio bars show live sound energy.
+          icon updates and the audio bars react to sound in real time.
         </Text>
-        <Text type="small" as="p" fontWeight="light">
-          Pause temporarily stops capturing. Stop ends the session (next time,
-          your browser may ask permissions again).
+
+        {/* PAUSE vs STOP */}
+        <Text type="small" as="p" fontWeight="medium">
+          Pause vs Stop
         </Text>
+        <ul className="list-disc pl-5">
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              <strong>Pause</strong> temporarily suspends recording but{' '}
+              <em>does not end</em> the current session. You can resume
+              instantly and continue in the same transcript. If a pause lasts
+              too long, the browser connection may drop and you might be asked
+              to grant microphone permissions again. All text captured{' '}
+              <em>before</em> the pause stays available. Press{' '}
+              <strong>Record</strong> again to continue — new text will be
+              appended to the existing content.
+            </Text>
+          </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              <strong>Stop</strong> fully stops recording and closes the active
+              session/connection. The captured <em>Transcript</em> and{' '}
+              <em>Translation</em> remain on screen so you can copy, clear, or
+              save them.
+            </Text>
+          </li>
+        </ul>
+
         <Text type="small" as="p" fontWeight="light">
-          A session timer above the visualizer shows how long you’ve been
+          The session timer above the visualizer shows how long you’ve been
           recording.
         </Text>
       </section>

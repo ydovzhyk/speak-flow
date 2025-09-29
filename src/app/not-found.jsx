@@ -1,41 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useSelector } from 'react-redux';
 import Text from '@/components/shared/text/text';
+import Logo from '@/components/shared/logo/logo';
+import { getScreenType } from '@/redux/technical/technical-selectors';
 
 export default function NotFound() {
-  const [afterMobileHeader, setAfterMobileHeader] = useState(false);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
-
-
-  useEffect(() => {
-    const onResize = () => setAfterMobileHeader(window.innerWidth > 768);
-    onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
-  const topOffset = useMemo(
-    () => (afterMobileHeader ? 148 : 85),
-    [afterMobileHeader]
-  );
+  const screenType = useSelector(getScreenType);
 
   return (
     <section
       className="w-full h-full relative bg-center bg-no-repeat bg-cover"
       style={{
-        paddingTop: `${topOffset}px`,
-        height: `calc(100dvh - ${topOffset}px)`,
-        backgroundImage: 'url(/images/404-bg.webp)',
+        height: `100dvh`,
+        backgroundImage: 'url(/images/bg.webp)',
       }}
     >
-      <div className="absolute inset-0 bg-white/10 backdrop-blur-[2px]" />
+      {screenType === 'isDesktop' && (
+        <div className="absolute top-[20px] left-[50px]">
+          <Logo width={250} variant="color" />
+        </div>
+      )}
+
       <div className="absolute inset-0 flex flex-row items-center justify-center">
-        <div className="container relative flex flex-col gap-12 items-center">
+        <div className="container relative flex flex-col gap-[70px] items-center">
           <div className="flex flex-col items-center gap-5">
             <Text
               type="xxl"
@@ -92,7 +81,7 @@ export default function NotFound() {
                 </Text>
                 <Link
                   href="/"
-                  className="border-b border-[#FAFCFF] hover:border-[var(--accent)] w-fit transition-colors duration-200 lowercase"
+                  className="border-b border-[#FAFCFF] hover:border-[var(--accent1)] w-fit transition-colors duration-200 lowercase"
                   aria-label="Go to homepage"
                 >
                   <Text

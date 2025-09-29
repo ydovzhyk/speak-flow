@@ -55,9 +55,6 @@ const technical = createSlice({
     setDeepgramStatus: (store, action) => {
       store.deepgramStatus = action.payload;
     },
-    setCountdown: (store, action) => {
-      store.countdown = action.payload;
-    },
     setInputLanguage: (store, action) => {
       store.inputLanguage = action.payload;
     },
@@ -148,7 +145,6 @@ export const {
   setLine,
   setActiveBtn,
   setDeepgramStatus,
-  setCountdown,
   setInputLanguage,
   setOutputLanguage,
   setCloseButtonAuth,
