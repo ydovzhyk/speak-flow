@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Text from '../text/text';
 import { IoCopyOutline } from 'react-icons/io5';
+import LoaderDots from '../loader-dots';
 
 const AutoScrollBox = ({
   text,
@@ -10,6 +11,9 @@ const AutoScrollBox = ({
   height = '100%',
   className = '',
   showCopy = true,
+
+  trailingLoading = false,
+  trailingLabel = 'Listening…',
 }) => {
   const boxRef = useRef(null);
   const stickToBottomRef = useRef(true);
@@ -31,6 +35,12 @@ const AutoScrollBox = ({
     }
   }, [text]);
 
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    if (stickToBottomRef.current) el.scrollTop = el.scrollHeight;
+  }, [text, trailingLoading]);
+
   const handleCopy = async () => {
     if (!hasText) return;
     try {
@@ -42,7 +52,6 @@ const AutoScrollBox = ({
     }
   };
 
-
   return (
     <div className="relative" style={{ height }}>
       <div
@@ -51,10 +60,21 @@ const AutoScrollBox = ({
         className={`border border-[var(--accent2)] rounded-md p-2 text-[14px] leading-6 whitespace-pre-wrap break-words overflow-y-auto thin-scrollbar h-full ${className}`}
       >
         {hasText ? (
-          text
+          <>
+            {text}
+            {trailingLoading && (
+              <div className="mt-1">
+                <LoaderDots label={trailingLabel} />
+              </div>
+            )}
+          </>
+        ) : trailingLoading ? (
+          <div className="text-gray-600">
+            <LoaderDots label={trailingLabel} />
+          </div>
         ) : (
           <Text
-            type="tiny"
+            type="small"
             as="span"
             fontWeight="light"
             className="text-gray-600"

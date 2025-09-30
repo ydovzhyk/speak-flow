@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import {
   getInputLanguage,
   getOutputLanguage,
+  getActiveBtn,
+  getDeepgramStatus,
 } from '@/redux/technical/technical-selectors';
 import { getLangLabel } from '@/utils/langLabel';
 
@@ -17,6 +19,11 @@ const LiveTextPanels = ({ transcript, translation, className = '' }) => {
   const outputLang = useSelector(getOutputLanguage);
   const inputLabel = getLangLabel(inputLang);
   const outputLabel = getLangLabel(outputLang);
+  const activeBtn = useSelector(getActiveBtn);
+  const deepgramStatus = useSelector(getDeepgramStatus);
+  const recordingActive = deepgramStatus && activeBtn !== 'pause' && activeBtn !== 'stop';
+
+  console.log("recordingActive", recordingActive, activeBtn);
 
   return (
     <div
@@ -26,12 +33,16 @@ const LiveTextPanels = ({ transcript, translation, className = '' }) => {
         <AutoScrollBox
           text={transcriptText}
           placeholder={`Live transcription (${inputLabel})`}
+          trailingLoading={recordingActive}
+          trailingLabel="Listening"
         />
       </div>
       <div className="flex-1 min-h-0 overflow-auto">
         <AutoScrollBox
           text={translationText}
           placeholder={`Live translation (${outputLabel})`}
+          trailingLoading={recordingActive}
+          trailingLabel="Translating"
         />
       </div>
     </div>

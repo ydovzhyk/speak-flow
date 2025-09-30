@@ -186,11 +186,6 @@ const Info = () => {
             </Text>
           </li>
         </ul>
-        <Text type="small" as="p" fontWeight="light">
-          Clear ≠ Stop: <br />
-          - Clear removes the panel content and the session’s collected text,
-          but recording continues; <br />- Stop ends the recording session.
-        </Text>
       </section>
 
       <section className="flex flex-col gap-2">
@@ -292,10 +287,6 @@ const Info = () => {
           Choose your languages. Hit Record. Watch live Transcript & Translation
           flow. Copy, Clear, Save, or Reopen sessions anytime. Sign in for
           extended time and records.
-        </Text>
-        <Text type="small" as="p" fontWeight="light">
-          Pro Tip: SpeakFlow isn’t just for speech — try it with lectures,
-          YouTube videos, or calls. It transcribes & translates in real time.
         </Text>
       </section>
     </div>
