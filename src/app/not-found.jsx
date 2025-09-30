@@ -77,22 +77,19 @@ export default function NotFound() {
                   className="text-[#FAFCFF]"
                   textShadow="black"
                 >
-                  But don&apos;t worry, you can find your way back to my{' '}
+                  But don&apos;t worry, you can find your way back to{' '}
                 </Text>
                 <Link
                   href="/"
-                  className="border-b border-[#FAFCFF] hover:border-[var(--accent1)] w-fit transition-colors duration-200 lowercase"
+                  className="border-b border-[#FAFCFF] hover:border-[var(--accent1)] w-fit transition-colors duration-200"
                   aria-label="Go to homepage"
                 >
-                  <Text
-                    type="tiny"
-                    as="span"
-                    fontWeight="light"
-                    className="text-[#FAFCFF]"
-                    textShadow="black"
+                  <span
+                    className="text-[13px] font-light text-[#FAFCFF]"
+                    style={{ textShadow: '1px 1px 1px rgba(25, 25, 112, 0.7)' }}
                   >
-                    site.
-                  </Text>
+                    SpeakFlow.
+                  </span>
                 </Link>
               </div>
             </div>
