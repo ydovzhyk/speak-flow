@@ -118,4 +118,3 @@ const AutoScrollBox = ({
 };
 
 export default AutoScrollBox;
-

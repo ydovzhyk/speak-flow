@@ -100,7 +100,6 @@ const SettingsContent = () => {
 
   const handleConfirmDelete = async () => {
     setShowDeleteModal(false);
-    console.log('Deleting user:', user?._id);
     await dispatch(deleteUser(user._id)).unwrap();
   };
 

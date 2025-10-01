@@ -156,6 +156,11 @@ const useSocket = () => {
       handshakeIdRef.current = clientId;
     });
 
+    s.on('disconnect', () => {
+      console.log('🔴 WS disconnected');
+      dispatch(setDeepgramStatus(false));
+    });
+
     // ===== Transcriber connection status =====
     s.on('transcriber-ready', data => {
       if (data === 'Ready') {

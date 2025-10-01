@@ -23,8 +23,6 @@ const LiveTextPanels = ({ transcript, translation, className = '' }) => {
   const deepgramStatus = useSelector(getDeepgramStatus);
   const recordingActive = deepgramStatus && activeBtn !== 'pause' && activeBtn !== 'stop';
 
-  console.log("recordingActive", recordingActive, activeBtn);
-
   return (
     <div
       className={`w-full h-full min-h-0 flex flex-col gap-3 overflow-hidden ${className}`}
