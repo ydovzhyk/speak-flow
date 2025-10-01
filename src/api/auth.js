@@ -28,7 +28,8 @@ function isHardLogoutMessage(msg = '') {
     m.includes('please login again') ||
     m.includes('invalid session') ||
     m.includes('session timed out') ||
-    m.includes('refresh end')
+    m.includes('refresh end') ||
+    m.includes('invalid user')
   );
 }
 

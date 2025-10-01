@@ -101,7 +101,7 @@ const technical = createSlice({
       })
       .addCase(saveRecord.rejected, (store, { payload }) => {
         store.loading = false;
-        state.error = errMsg(payload);
+        store.error = errMsg(payload);
       })
       // * Get Records
       .addCase(getRecords.pending, store => {
@@ -115,7 +115,7 @@ const technical = createSlice({
       })
       .addCase(getRecords.rejected, (store, { payload }) => {
         store.loading = false;
-        state.error = errMsg(payload);
+        store.error = errMsg(payload);
       })
       // * Delete Record
       .addCase(deleteRecord.pending, store => {
@@ -129,7 +129,7 @@ const technical = createSlice({
       })
       .addCase(deleteRecord.rejected, (store, { payload }) => {
         store.loading = false;
-        state.error = errMsg(payload);
+        store.error = errMsg(payload);
       });
   },
 });
