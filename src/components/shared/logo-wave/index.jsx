@@ -1,11 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 
 const LogoWave = ({
-  widthLogo = 125,
-  logoSrc = '/images/clear-logo.svg',
   bars = 10,
   tickMs = 130,
   stepPx = 3,
@@ -14,8 +11,6 @@ const LogoWave = ({
   gapPx = 2,
   color = '#0299B5',
 }) => {
-  const aspectRatio = 7.79 / 21.78;
-  const heightLogo = widthLogo * aspectRatio;
 
   const [shift, setShift] = useState(0);
 
@@ -51,14 +46,6 @@ const LogoWave = ({
   return (
     <div className="flex flex-row items-center gap-1">
       <div className="flex items-center">{items}</div>
-      <Image
-        src={logoSrc}
-        alt="Logo"
-        width={widthLogo}
-        height={heightLogo}
-        className="object-contain"
-        priority
-      />
     </div>
   );
 };

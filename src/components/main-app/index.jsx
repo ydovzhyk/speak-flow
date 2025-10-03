@@ -36,6 +36,7 @@ import Timer from '@/components/shared/timer';
 import SaveRecordsPanel from '../save-records-panel';
 import Records from '../records';
 import Info from '../info';
+import Logo from '@/components/shared/logo/logo';
 
 const TABS = [
   { key: 'info', label: 'INFO' },
@@ -227,8 +228,9 @@ const ToolCard = () => {
 
         <div className="relative h-[85vh] landscape:!h-[85%] w-full rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
           <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center px-4 border-b">
-            <div>
-              <LogoWave widthLogo={100}/>
+            <div className='flex items-center gap-1'>
+              <LogoWave />
+              <Logo variant="clear" asLink={false} />
             </div>
             <div>
               <AuthInfo />
