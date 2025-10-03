@@ -19,7 +19,7 @@ export default function NotFound() {
     >
       {screenType === 'isDesktop' && (
         <div className="absolute top-[20px] left-[50px]">
-          <Logo variant="color" />
+          <Logo variant="color" eager />
         </div>
       )}
 
