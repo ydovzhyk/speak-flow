@@ -3,16 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint --max-warnings=0 --fix",
     "lint:watch": "nodemon -e js,jsx --exec \"npm run lint\"",
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@next/third-parties": "^15.4.6",
-    "@react-google-maps/api": "^2.20.6",
+    "@next/third-parties": "^16.0.8",
     "@reduxjs/toolkit": "^2.5.1",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
