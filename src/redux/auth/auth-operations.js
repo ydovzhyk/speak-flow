@@ -16,8 +16,8 @@ export const register = createAsyncThunk(
   async (userData, { dispatch, rejectWithValue }) => {
     try {
       const data = await axiosRegister(userData);
-      const { accessToken, refreshToken, sid } = data;
-      const authData = { accessToken, refreshToken, sid };
+      const { accessToken, sid } = data;
+      const authData = { accessToken, sid };
       localStorage.setItem('speakflow.authData', JSON.stringify(authData));
       if (data) { toast.success('User successfully created!'); }
       dispatch(setCloseButtonAuth(true));
@@ -35,8 +35,8 @@ export const login = createAsyncThunk(
   async (userData, { dispatch, rejectWithValue }) => {
     try {
       const data = await axiosLogin(userData);
-      const { accessToken, refreshToken, sid } = data;
-      const authData = { accessToken, refreshToken, sid };
+      const { accessToken, sid } = data;
+      const authData = { accessToken, sid };
       localStorage.setItem('speakflow.authData', JSON.stringify(authData));
       dispatch(setCloseButtonAuth(true));
       return data;
@@ -82,11 +82,33 @@ export const getCurrentUser = createAsyncThunk(
           status: 400,
         });
       }
-      const data = await axiosGetCurrentUser(authData);
+
+      if (!authData.sid) {
+        return rejectWithValue({
+          data: { message: 'Session id not found' },
+          status: 400,
+        });
+      }
+
+      const data = await axiosGetCurrentUser({ sid: authData.sid });
+
+      try {
+        const nextAuthData = {
+          accessToken: data.accessToken,
+          sid: data.sid,
+        };
+        localStorage.setItem(
+          'speakflow.authData',
+          JSON.stringify(nextAuthData)
+        );
+      } catch {}
+
       return data;
     } catch (error) {
-      const { data, status } = error.response;
-      toast.error(`Failed to get current user: ${data.message}`);
+      const { data, status } = error.response || {};
+      if (data?.message) {
+        toast.error(`Failed to get current user: ${data.message}`);
+      }
       return rejectWithValue({ data, status });
     }
   }

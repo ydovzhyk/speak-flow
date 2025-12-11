@@ -12,7 +12,6 @@ const initialState = {
   user: {},
   sid: null,
   accessToken: null,
-  refreshToken: null,
   isLogin: null,
   loading: false,
   isRefreshing: false,
@@ -35,8 +34,6 @@ const applyAuthPayload = (state, payload) => {
   if (payload?.sid !== undefined) state.sid = payload.sid;
   if (payload?.accessToken !== undefined)
     state.accessToken = payload.accessToken;
-  if (payload?.refreshToken !== undefined)
-    state.refreshToken = payload.refreshToken;
 };
 
 const auth = createSlice({
@@ -53,7 +50,6 @@ const auth = createSlice({
     setRefreshUserData: (state, action) => {
       state.sid = action.payload.sid ?? state.sid;
       state.accessToken = action.payload.accessToken ?? state.accessToken;
-      state.refreshToken = action.payload.refreshToken ?? state.refreshToken;
     },
   },
 

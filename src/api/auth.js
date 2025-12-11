@@ -1,25 +1,20 @@
 import axios from 'axios';
 import { getAuthDataFromStorage } from '@/utils/auth-data';
-import { setRefreshUserData } from '@/redux/auth/auth-slice';
+import { setRefreshUserData, clearUser } from '@/redux/auth/auth-slice';
 
 // const REACT_APP_URL = 'http://localhost:4000';
 const REACT_APP_URL = 'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 
 export const instance = axios.create({
   baseURL: `${REACT_APP_URL}/api`,
+  withCredentials: true, // 👈 обов'язково для HttpOnly cookies
 });
 
 function clearAuthData(store) {
   try {
     localStorage.removeItem('speakflow.authData');
   } catch {}
-  store.dispatch(
-    setRefreshUserData({
-      accessToken: null,
-      refreshToken: null,
-      sid: null,
-    })
-  );
+  store.dispatch(clearUser());
 }
 
 function isHardLogoutMessage(msg = '') {
@@ -39,12 +34,15 @@ export function setupInterceptors(store) {
     const authData = getAuthDataFromStorage(store);
     const u = config.url || '';
     const isRefresh = u.endsWith('/auth/refresh') || u === 'auth/refresh';
-    if (authData?.accessToken && !isRefresh) {
+    const isCurrent = u.endsWith('/auth/current') || u === 'auth/current';
+
+    if (authData?.accessToken && !isRefresh && !isCurrent) {
       config.headers = {
         ...(config.headers || {}),
         Authorization: `Bearer ${authData.accessToken}`,
       };
     }
+
     return config;
   });
 
@@ -64,6 +62,7 @@ export function setupInterceptors(store) {
       const isRefreshReq =
         url.endsWith('/auth/refresh') || url.includes('/auth/refresh');
 
+      // Якщо саме refresh впав — жорсткий логаут
       if (isRefreshReq) {
         clearAuthData(store);
         return Promise.reject(error);
@@ -83,6 +82,7 @@ export function setupInterceptors(store) {
         return Promise.reject(error);
       }
 
+      // Кейс: access токен протух → пробуємо 1 раз зробити /auth/refresh
       if (status === 401 && message === 'Unauthorized') {
         if (originalRequest._retry) {
           clearAuthData(store);
@@ -92,21 +92,20 @@ export function setupInterceptors(store) {
 
         try {
           const authData = getAuthDataFromStorage(store);
-          if (!authData?.refreshToken || !authData?.sid) {
+          // refresh тепер тільки в cookie, тому достатньо sid
+          if (!authData?.sid) {
             clearAuthData(store);
             return Promise.reject(error);
           }
 
-          const refreshResp = await instance.post(
-            '/auth/refresh',
-            { sid: authData.sid },
-            { headers: { Authorization: `Bearer ${authData.refreshToken}` } }
-          );
+          const refreshResp = await instance.post('/auth/refresh', {
+            sid: authData.sid,
+          });
+          const respData = refreshResp.data || {};
 
           const newData = {
-            accessToken: refreshResp.data.newAccessToken,
-            refreshToken: refreshResp.data.newRefreshToken,
-            sid: refreshResp.data.sid,
+            accessToken: respData.newAccessToken,
+            sid: respData.sid,
           };
 
           store.dispatch(setRefreshUserData(newData));
@@ -119,10 +118,9 @@ export function setupInterceptors(store) {
             Authorization: `Bearer ${newData.accessToken}`,
           };
 
+          // Якщо падав /auth/current — повторюємо запит з оновленим sid
           if (originalRequest.url === '/auth/current') {
             originalRequest.data = {
-              accessToken: newData.accessToken,
-              refreshToken: newData.refreshToken,
               sid: newData.sid,
             };
           }
@@ -134,6 +132,7 @@ export function setupInterceptors(store) {
         }
       }
 
+      // 403 для refresh-логіки: NO_TOKEN та інші — теж логаут
       if (status === 403) {
         clearAuthData(store);
       }
@@ -141,7 +140,6 @@ export function setupInterceptors(store) {
       return Promise.reject(error);
     }
   );
-
 }
 
 export const axiosRegister = async userData => {

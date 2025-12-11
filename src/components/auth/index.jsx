@@ -20,6 +20,7 @@ const Auth = () => {
     }
   }, []);
 
+  // const REACT_APP_API_URL = 'http://localhost:4000';
   const REACT_APP_API_URL =
     'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 

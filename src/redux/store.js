@@ -22,7 +22,7 @@ const createPersistedAuthReducer = () => {
   const cfg = {
     key: 'auth-sid',
     storage,
-    whitelist: ['sid', 'accessToken', 'refreshToken'],
+    whitelist: ['sid', 'accessToken'],
   };
   return persistReducer(cfg, authReducer);
 };
