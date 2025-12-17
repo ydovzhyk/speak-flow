@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import { getLogin, getUser } from '@/redux/auth/auth-selectors';
 import { setLine } from '@/redux/technical/technical-slice';
-import { getLine } from '@/redux/technical/technical-selectors';
+import { getLine, getScreenType } from '@/redux/technical/technical-selectors';
 import SelectLanguagePanel from '../select-language-panel';
 import Text from '@/components/shared/text/text';
 import TranslateMe from '@/utils/translating/translating';
@@ -22,12 +22,13 @@ const SettingsContent = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector(getLogin);
   const user = useSelector(getUser);
-  const {
-    initialize,
-    disconnect,
-    isConnected,
-    usageFormatted,
-  } = useSocketContext();
+  const screenType = useSelector(getScreenType);
+  const isMobileOrTablet =
+    screenType === 'isMobile' || screenType === 'isTablet';
+
+  const { initialize, disconnect, isConnected, usageFormatted } =
+    useSocketContext();
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const line = useSelector(getLine);
   const STORAGE_KEY = 'speakflow.settings';
@@ -68,14 +69,14 @@ const SettingsContent = () => {
 
   useEffect(() => {
     const wasConnected = isConnected();
-    initialize()
-      .catch(() => {});
+    initialize().catch(() => {});
     return () => {
       if (!wasConnected) disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ✅ Persist selected line to localStorage
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -86,9 +87,17 @@ const SettingsContent = () => {
     } catch {}
   }, [line]);
 
+  // ✅ Mobile/Tablet: force microphone (speaker/auto are not supported)
+  useEffect(() => {
+    if (!isMobileOrTablet) return;
+
+    if (line === 'speaker' || line === 'auto') {
+      dispatch(setLine('microphone'));
+    }
+  }, [isMobileOrTablet, line, dispatch]);
+
   const onSubmit = async data => {
     const nextUsername = (data.username ?? '').trim() || user?.username || '';
-
     let nextAvatar = user?.userAvatar || '';
 
     const file = data?.avatarFile?.[0];
@@ -117,9 +126,13 @@ const SettingsContent = () => {
     await dispatch(deleteUser(user._id)).unwrap();
   };
 
+  const radioBase =
+    "relative h-3 w-3 rounded-full appearance-none bg-white border-2 border-[var(--accent2)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(2,154,170,0.20)] checked:border-[rgb(2,154,170)] disabled:opacity-50 disabled:cursor-not-allowed after:content-[''] after:absolute after:inset-0 after:m-auto after:h-[8px] after:w-[8px] after:rounded-full after:bg-[rgb(2,154,170)] after:scale-0 after:transition checked:after:scale-100";
+
   return (
     <div className="w-full min-h-full rounded-md border border-[rgba(82,85,95,0.2)] p-4 bg-white flex flex-col justify-start gap-5">
       <SelectLanguagePanel />
+
       <div className="border-b border-[rgba(82,85,95,0.2)]" />
       <div className="w-full flex flex-col gap-5">
         <Text type="tiny" as="p" fontWeight="light">
@@ -140,11 +153,24 @@ const SettingsContent = () => {
         </div>
       </div>
 
+      {/* Audio source */}
       <div className="border-b border-[rgba(82,85,95,0.2)]" />
       <div className="w-full flex flex-col gap-3">
         <Text type="tiny" as="p" fontWeight="light">
           Select the audio recording source
         </Text>
+
+        {isMobileOrTablet && (
+          <Text
+            type="tiny"
+            as="p"
+            fontWeight="light"
+            className="text-[rgba(0,0,0,0.55)]"
+          >
+            Speaker and Auto modes are available on desktop only. Mobile and
+            tablet browsers can record microphone input only.
+          </Text>
+        )}
 
         <div className="flex flex-col gap-2">
           <label className="flex items-center gap-3 cursor-pointer select-none">
@@ -154,7 +180,7 @@ const SettingsContent = () => {
               value="microphone"
               checked={line === 'microphone'}
               onChange={() => dispatch(setLine('microphone'))}
-              className="relative h-3 w-3 rounded-full appearance-none bg-white border-2 border-[var(--accent2)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(2,154,170,0.20)] checked:border-[rgb(2,154,170)] disabled:opacity-50 disabled:cursor-not-allowed after:content-[''] after:absolute after:inset-0 after:m-auto after:h-[8px] after:w-[8px] after:rounded-full after:bg-[rgb(2,154,170)] after:scale-0 after:transition checked:after:scale-100"
+              className={radioBase}
             />
             <Text
               type="tiny"
@@ -166,14 +192,21 @@ const SettingsContent = () => {
             </Text>
           </label>
 
-          <label className="flex items-center gap-3 cursor-pointer select-none">
+          <label
+            className={`flex items-center gap-3 select-none ${
+              isMobileOrTablet
+                ? 'opacity-50 cursor-not-allowed'
+                : 'cursor-pointer'
+            }`}
+          >
             <input
               type="radio"
               name="line"
               value="speaker"
+              disabled={isMobileOrTablet}
               checked={line === 'speaker'}
               onChange={() => dispatch(setLine('speaker'))}
-              className="relative h-3 w-3 rounded-full appearance-none bg-white border-2 border-[var(--accent2)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(2,154,170,0.20)] checked:border-[rgb(2,154,170)] disabled:opacity-50 disabled:cursor-not-allowed after:content-[''] after:absolute after:inset-0 after:m-auto after:h-[8px] after:w-[8px] after:rounded-full after:bg-[rgb(2,154,170)] after:scale-0 after:transition checked:after:scale-100"
+              className={radioBase}
             />
             <Text
               type="tiny"
@@ -185,14 +218,21 @@ const SettingsContent = () => {
             </Text>
           </label>
 
-          <label className="flex items-center gap-3 cursor-pointer select-none">
+          <label
+            className={`flex items-center gap-3 select-none ${
+              isMobileOrTablet
+                ? 'opacity-50 cursor-not-allowed'
+                : 'cursor-pointer'
+            }`}
+          >
             <input
               type="radio"
               name="line"
               value="auto"
+              disabled={isMobileOrTablet}
               checked={line === 'auto'}
               onChange={() => dispatch(setLine('auto'))}
-              className="relative h-3 w-3 rounded-full appearance-none bg-white border-2 border-[var(--accent2)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(2,154,170,0.20)] checked:border-[rgb(2,154,170)] disabled:opacity-50 disabled:cursor-not-allowed after:content-[''] after:absolute after:inset-0 after:m-auto after:h-[8px] after:w-[8px] after:rounded-full after:bg-[rgb(2,154,170)] after:scale-0 after:transition checked:after:scale-100"
+              className={radioBase}
             />
             <Text
               type="tiny"
