@@ -5,6 +5,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useForm, Controller } from 'react-hook-form';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import { getLogin, getUser } from '@/redux/auth/auth-selectors';
+import { setLine } from '@/redux/technical/technical-slice';
+import { getLine } from '@/redux/technical/technical-selectors';
 import SelectLanguagePanel from '../select-language-panel';
 import Text from '@/components/shared/text/text';
 import TranslateMe from '@/utils/translating/translating';
@@ -27,6 +29,8 @@ const SettingsContent = () => {
     usageFormatted,
   } = useSocketContext();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const line = useSelector(getLine);
+  const STORAGE_KEY = 'speakflow.settings';
 
   const tUserNameReq = useTranslate('User name is required');
   const tNameMin = useTranslate('Name must have at least 2 characters');
@@ -71,6 +75,16 @@ const SettingsContent = () => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const prev = raw ? JSON.parse(raw) : {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...prev, line }));
+    } catch {}
+  }, [line]);
 
   const onSubmit = async data => {
     const nextUsername = (data.username ?? '').trim() || user?.username || '';
@@ -123,6 +137,72 @@ const SettingsContent = () => {
           <div className="ml-auto">
             <TranslateMe />
           </div>
+        </div>
+      </div>
+
+      <div className="border-b border-[rgba(82,85,95,0.2)]" />
+      <div className="w-full flex flex-col gap-3">
+        <Text type="tiny" as="p" fontWeight="light">
+          Select the audio recording source
+        </Text>
+
+        <div className="flex flex-col gap-2">
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              type="radio"
+              name="line"
+              value="microphone"
+              checked={line === 'microphone'}
+              onChange={() => dispatch(setLine('microphone'))}
+              className="relative h-3 w-3 rounded-full appearance-none bg-white border-2 border-[var(--accent2)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(2,154,170,0.20)] checked:border-[rgb(2,154,170)] disabled:opacity-50 disabled:cursor-not-allowed after:content-[''] after:absolute after:inset-0 after:m-auto after:h-[8px] after:w-[8px] after:rounded-full after:bg-[rgb(2,154,170)] after:scale-0 after:transition checked:after:scale-100"
+            />
+            <Text
+              type="tiny"
+              as="span"
+              fontWeight="normal"
+              className="text-[var(--text-main)]"
+            >
+              Microphone
+            </Text>
+          </label>
+
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              type="radio"
+              name="line"
+              value="speaker"
+              checked={line === 'speaker'}
+              onChange={() => dispatch(setLine('speaker'))}
+              className="relative h-3 w-3 rounded-full appearance-none bg-white border-2 border-[var(--accent2)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(2,154,170,0.20)] checked:border-[rgb(2,154,170)] disabled:opacity-50 disabled:cursor-not-allowed after:content-[''] after:absolute after:inset-0 after:m-auto after:h-[8px] after:w-[8px] after:rounded-full after:bg-[rgb(2,154,170)] after:scale-0 after:transition checked:after:scale-100"
+            />
+            <Text
+              type="tiny"
+              as="span"
+              fontWeight="normal"
+              className="text-[var(--text-main)]"
+            >
+              Speaker
+            </Text>
+          </label>
+
+          <label className="flex items-center gap-3 cursor-pointer select-none">
+            <input
+              type="radio"
+              name="line"
+              value="auto"
+              checked={line === 'auto'}
+              onChange={() => dispatch(setLine('auto'))}
+              className="relative h-3 w-3 rounded-full appearance-none bg-white border-2 border-[var(--accent2)] transition focus:outline-none focus-visible:ring-4 focus-visible:ring-[rgba(2,154,170,0.20)] checked:border-[rgb(2,154,170)] disabled:opacity-50 disabled:cursor-not-allowed after:content-[''] after:absolute after:inset-0 after:m-auto after:h-[8px] after:w-[8px] after:rounded-full after:bg-[rgb(2,154,170)] after:scale-0 after:transition checked:after:scale-100"
+            />
+            <Text
+              type="tiny"
+              as="span"
+              fontWeight="normal"
+              className="text-[var(--text-main)]"
+            >
+              Auto
+            </Text>
+          </label>
         </div>
       </div>
 
@@ -265,4 +345,3 @@ const SettingsContent = () => {
 };
 
 export default SettingsContent;
-

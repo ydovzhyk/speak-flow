@@ -8,6 +8,7 @@ const Info = () => {
       <Text type="regular" as="h2" fontWeight="bold">
         SpeakFlow — User Guide
       </Text>
+
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
           1. Open SpeakFlow
@@ -27,6 +28,7 @@ const Info = () => {
         <Text type="small" as="p" fontWeight="light">
           Before recording, open the SETTINGS tab and choose:
         </Text>
+
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
@@ -45,7 +47,39 @@ const Info = () => {
               in.
             </Text>
           </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              Audio Recording Source — choose where SpeakFlow captures sound
+              from (Microphone / Speaker / Auto).
+            </Text>
+          </li>
         </ul>
+
+        <Text type="small" as="p" fontWeight="light">
+          Audio Recording Source modes:
+        </Text>
+
+        <ul className="list-disc pl-5">
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              <strong>Microphone</strong> — records only your microphone input
+              (your voice, meetings, interviews).
+            </Text>
+          </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              <strong>Speaker</strong> — records only system audio (videos,
+              calls, presentations). Available on desktop browsers.
+            </Text>
+          </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              <strong>Auto</strong> — automatically detects the active source
+              and switches between microphone and speakers during recording.
+            </Text>
+          </li>
+        </ul>
+
         <Text type="small" as="p" fontWeight="light">
           If you are signed in, you can also customize your profile: update your
           profile picture, change your nickname, or delete your account along
@@ -181,8 +215,7 @@ const Info = () => {
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Clear — clears the panel and removes all text captured in this
-              session (use with care).
+              Clear — removes all text from the panel.
             </Text>
           </li>
         </ul>
@@ -190,34 +223,18 @@ const Info = () => {
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          6. Enjoy live audio feedback
+          6. Save your session (RECORDS tab)
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          The visualizer shows moving bars like an equalizer. Bars rise with
-          louder sounds. Color subtly shifts so you can “see” sound intensity at
-          a glance.
+          If you are signed in, you can save your session: transcript +
+          translation + languages + timestamps. Saved records can be reopened
+          later.
         </Text>
       </section>
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          7. Save your session (RECORDS tab)
-        </Text>
-        <Text type="small" as="p" fontWeight="light">
-          Click Save (bottom-right MAIN screen) or open the RECORDS tab → Save
-          Records. Add a Title to recognize it later. Transcript and Translation
-          are prefilled — edit if you like — then submit to store it in your
-          account.
-        </Text>
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <Text type="tiny" as="h3" fontWeight="medium">
-          8. Browse & manage your records (RECORDS tab)
-        </Text>
-        <Text type="small" as="p" fontWeight="light">
-          Open the RECORDS tab → Get Records. You’ll see your saved sessions
-          (newest first) with title, date, and a short preview.
+          7. Use Records (RECORDS tab)
         </Text>
         <ul className="list-disc pl-5">
           <li>

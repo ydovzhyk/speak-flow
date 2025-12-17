@@ -6,7 +6,6 @@ import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import useAudioRecorder from '@/utils/audio-recorder/useAudioRecorder';
 import {
   setCloseButtonAuth,
-  setLine,
   setTypeOperationRecords,
 } from '@/redux/technical/technical-slice';
 import {
@@ -18,9 +17,7 @@ import {
   getTypeOperationRecords,
   getSavedData,
 } from '@/redux/technical/technical-selectors';
-import {
-  getRecords,
-} from '@/redux/technical/technical-operations';
+import { getRecords } from '@/redux/technical/technical-operations';
 import { gaEvent } from '@/utils/gtag';
 import { getLogin } from '@/redux/auth/auth-selectors';
 import Auth from '../auth';
@@ -51,7 +48,7 @@ const PanelTitles = {
   info: 'Information',
   auth: 'Authentication',
   contact: 'Contact me',
-  records: 'Your Records'
+  records: 'Your Records',
 };
 
 const PanelContent = ({ active }) => {
@@ -106,6 +103,7 @@ const EarButton = memo(function EarButton({
 
 const ToolCard = () => {
   const dispatch = useDispatch();
+  const [activeChannel, setActiveChannel] = useState('speaker');
   const [panel, setPanel] = useState(
     /** @type {null | 'settings' | 'info' | 'auth' | 'contact'} */ null
   );
@@ -144,7 +142,10 @@ const ToolCard = () => {
   useEffect(() => {
     if (!isLogin) return;
     if (!showRecordsTab) return;
-    if (typeOperationRecords === 'SaveRecords' || typeOperationRecords === 'GetRecords') {
+    if (
+      typeOperationRecords === 'SaveRecords' ||
+      typeOperationRecords === 'GetRecords'
+    ) {
       setPanel('records');
     }
   }, [typeOperationRecords, isLogin, showRecordsTab]);
@@ -165,11 +166,14 @@ const ToolCard = () => {
     sourceNodeMic,
     sourceNodeSpeaker,
   } = useAudioRecorder({
+    mode: activeLine, // 'microphone' | 'speaker' | 'auto'
+    onActiveChannelChange: setActiveChannel,
     dataCb: (audioData, sampleRate, sourceType) => {
       sendAudio(audioData, sampleRate, sourceType);
-      dispatch(setLine(sourceType));
     },
   });
+
+  const uiIconMode = isRecording ? activeChannel : activeLine;
 
   // автозакриття після успішного логіну
   useEffect(() => {
@@ -211,6 +215,8 @@ const ToolCard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeBtn, isRecording, isPaused, deepgramStatus]);
 
+  const visualChannel = activeLine === 'auto' ? activeChannel : activeLine;
+
   return (
     <div className="flex flex-row items-center justify-center pr-[27px] w-full max-w-[390px] overflow-hidden">
       <div className="w-full h-[100vh] landscape:!h-[570px] lg:landscape:!h-[100vh] relative inline-flex items-center justify-center">
@@ -241,32 +247,36 @@ const ToolCard = () => {
             <Timer />
             <div className="h-full flex items-center justify-center flex-1">
               {audioContext &&
-                sourceNodeSpeaker &&
-                activeLine === 'speaker' && (
+                visualChannel === 'speaker' &&
+                sourceNodeSpeaker && (
                   <AudioBarsVisualizer
                     audioContext={audioContext}
                     sourceNode={sourceNodeSpeaker}
                   />
                 )}
-              {audioContext && sourceNodeMic && activeLine === 'mic' && (
-                <AudioBarsVisualizer
-                  audioContext={audioContext}
-                  sourceNode={sourceNodeMic}
-                />
-              )}
+              {audioContext &&
+                visualChannel === 'microphone' &&
+                sourceNodeMic && (
+                  <AudioBarsVisualizer
+                    audioContext={audioContext}
+                    sourceNode={sourceNodeMic}
+                  />
+                )}
             </div>
             <div className="w-[40px] h-full flex items-center justify-center">
               <img
                 src={
-                  activeLine === 'mic'
+                  uiIconMode === 'microphone'
                     ? '/images/buttons/microphone.png'
-                    : '/images/buttons/speaker.png'
+                    : uiIconMode === 'speaker'
+                      ? '/images/buttons/speaker.png'
+                      : '/images/buttons/auto.png'
                 }
                 alt="active channel"
                 className="w-5 h-5 mr-2"
                 style={{
-                  width: activeLine === 'mic' ? '25px' : '20px',
-                  height: activeLine === 'mic' ? '25px' : '20px',
+                  width: uiIconMode === 'speaker' ? '20px' : '25px',
+                  height: uiIconMode === 'speaker' ? '20px' : '25px',
                 }}
               />
             </div>
@@ -309,6 +319,6 @@ const ToolCard = () => {
       </div>
     </div>
   );
-}
+};
 
 export default ToolCard;
