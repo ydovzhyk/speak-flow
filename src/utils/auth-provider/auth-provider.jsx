@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { getLogin } from '@/redux/auth/auth-selectors';
@@ -14,13 +14,17 @@ const AuthProvider = () => {
   const isLogin = useSelector(getLogin);
   const authData = useSelector(state => state.auth);
 
+  const oauthInitRef = useRef(false);
+
   useEffect(() => {
+    // ⛔ якщо зараз ініт з URL (Google OAuth) — не робимо дубль
+    if (oauthInitRef.current) return;
+
     if (authData.sid && !isLogin) {
       dispatch(getCurrentUser());
     }
   }, [dispatch, authData.sid, isLogin]);
 
-  // ініт з URL-параметрів (наприклад, після Google OAuth / спец-лінків)
   useEffect(() => {
     const initAuthFromUrl = async () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -28,11 +32,15 @@ const AuthProvider = () => {
       const sid = urlParams.get('sid');
 
       if (accessToken && sid) {
+        oauthInitRef.current = true;
+
         const data = { accessToken, sid };
         try {
           localStorage.setItem('speakflow.authData', JSON.stringify(data));
         } catch {}
+
         dispatch(setRefreshUserData(data));
+
         try {
           const res = await dispatch(getCurrentUser());
           if (!res.error) {
@@ -40,6 +48,10 @@ const AuthProvider = () => {
           }
         } finally {
           router.replace(window.location.pathname);
+          // ✅ даємо шанс store оновити isLogin і тільки тоді дозволяємо авто-check
+          setTimeout(() => {
+            oauthInitRef.current = false;
+          }, 0);
         }
       }
     };

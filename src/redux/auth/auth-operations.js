@@ -106,6 +106,10 @@ export const getCurrentUser = createAsyncThunk(
       return data;
     } catch (error) {
       const { data, status } = error.response || {};
+      if (status === 401 || status === 403) {
+        return rejectWithValue({ data, status });
+      }
+
       if (data?.message) {
         toast.error(`Failed to get current user: ${data.message}`);
       }
