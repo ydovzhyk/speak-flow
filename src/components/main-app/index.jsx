@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import useAudioRecorder from '@/utils/audio-recorder/useAudioRecorder';
 import {
+  setActiveBtn,
   setCloseButtonAuth,
   setTypeOperationRecords,
 } from '@/redux/technical/technical-slice';
@@ -260,6 +261,7 @@ const ToolCard = () => {
   const stopListeningSession = () => {
     stopRecording();
     disconnect();
+    dispatch(setActiveBtn('stop'));
     setShowInactivityModal(false);
     setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
     inactivityConfirmedAtRef.current = null;
