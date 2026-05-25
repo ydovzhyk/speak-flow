@@ -44,6 +44,10 @@ const useSocket = () => {
   const inputLanguage = useSelector(getInputLanguage);
   const user = useSelector(getUser);
   const handshakeIdRef = useRef(null);
+  const [lastTranslationAt, setLastTranslationAt] = useState(null);
+  const [translationInactivityWarning, setTranslationInactivityWarning] =
+    useState(null);
+
 
   // ===== Usage state =====
   const [usage, setUsage] = useState(() => {
@@ -187,8 +191,22 @@ const useSocket = () => {
 
     s.on('final-transleted', translation => {
       console.log('🟢 Final translation received:', translation);
-      enqueueTranslation(translation);
-      dispatch(pushTranslation(translation));
+
+      const cleanTranslation = String(translation || '').trim();
+      if (!cleanTranslation) return;
+
+      setLastTranslationAt(Date.now());
+      enqueueTranslation(cleanTranslation);
+      dispatch(pushTranslation(cleanTranslation));
+    });
+
+    s.on('translation-inactivity-warning', payload => {
+      console.warn('⚠️ Translation inactivity warning:', payload);
+
+      setTranslationInactivityWarning({
+        ...payload,
+        receivedAt: Date.now(),
+      });
     });
 
     // ===== Response to usage:request =====
@@ -262,6 +280,9 @@ const useSocket = () => {
     s.disconnect();
     socketRef.current = null;
     handshakeIdRef.current = null;
+
+    setLastTranslationAt(null);
+    setTranslationInactivityWarning(null);
   };
 
   const isConnected = () => Boolean(socketRef.current?.connected);
@@ -283,6 +304,11 @@ const useSocket = () => {
       total: formatMs(usage.totalMs),
       lastSession: formatSeconds(usage.lastSession?.seconds || 0),
     },
+
+    lastTranslationAt,
+    markTranslationActivity: () => setLastTranslationAt(Date.now()),
+
+    translationInactivityWarning,
   };
 };
 

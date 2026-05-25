@@ -16,10 +16,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'pink-skirt-inna.firebasestorage.app',
-      },
-      {
-        protocol: 'https',
         hostname: 'robohash.org',
       },
       {

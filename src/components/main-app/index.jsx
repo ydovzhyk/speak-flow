@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import useAudioRecorder from '@/utils/audio-recorder/useAudioRecorder';
@@ -58,6 +58,72 @@ const PanelContent = ({ active }) => {
   if (active === 'settings') return <SettingsContent />;
   if (active === 'records') return <Records />;
   return null;
+};
+
+const InactivityConfirmModal = ({ secondsLeft, onContinue, onStop }) => {
+  return (
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/35 px-4">
+      <div className="w-full max-w-[330px] rounded-2xl border-2 border-[var(--accent2)] bg-white shadow-2xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-[var(--accent2)] bg-[var(--clear-white)]">
+          <Text
+            type="tiny"
+            as="h3"
+            fontWeight="bold"
+            className="text-[var(--accent2)]"
+            noTranslate
+          >
+            No translated text detected
+          </Text>
+        </div>
+
+        <div className="px-5 py-4">
+          <Text
+            type="small"
+            as="p"
+            fontWeight="normal"
+            lineHeight="snug"
+            className="text-[var(--text-accent)]"
+            noTranslate
+          >
+            We haven’t received translated text for 5 minutes. Do you want to
+            continue listening?
+          </Text>
+
+          <Text
+            type="extraSmall"
+            as="p"
+            fontWeight="normal"
+            className="mt-3 text-[var(--text-accent)]"
+            noTranslate
+          >
+            Auto stop in {secondsLeft}s
+          </Text>
+
+          <div className="mt-5 flex gap-3">
+            <button
+              type="button"
+              onClick={onStop}
+              className="flex-1 h-[38px] rounded-[5px] border border-[var(--accent2)] text-[var(--accent2)] hover:bg-[var(--clear-white)] transition-colors"
+            >
+              <Text type="small" as="span" noTranslate>
+                Stop
+              </Text>
+            </button>
+
+            <button
+              type="button"
+              onClick={onContinue}
+              className="flex-1 h-[38px] rounded-[5px] border border-[var(--accent2)] bg-[var(--accent2)] text-white hover:bg-[var(--accent2-hover)] transition-colors"
+            >
+              <Text type="small" as="span" className="text-white" noTranslate>
+                Continue
+              </Text>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const EarButton = memo(function EarButton({
@@ -155,7 +221,16 @@ const ToolCard = () => {
     if (!hasSaved) dispatch(getRecords());
   }, [dispatch, isLogin, hasSaved]);
 
-  const { initialize, sendAudio, pause, disconnect } = useSocketContext();
+  const {
+    initialize,
+    sendAudio,
+    pause,
+    disconnect,
+    lastTranslationAt,
+    markTranslationActivity,
+    translationInactivityWarning,
+  } = useSocketContext();
+
   const {
     startRecording,
     stopRecording,
@@ -173,7 +248,103 @@ const ToolCard = () => {
     },
   });
 
+  const NO_TRANSLATION_WARNING_MS = 5 * 60 * 1000;
+  const MODAL_AUTO_STOP_SECONDS = 60;
+
+  const [showInactivityModal, setShowInactivityModal] = useState(false);
+  const [modalSecondsLeft, setModalSecondsLeft] = useState(
+    MODAL_AUTO_STOP_SECONDS
+  );
+  const inactivityConfirmedAtRef = useRef(null);
+
+  const stopListeningSession = () => {
+    stopRecording();
+    disconnect();
+    setShowInactivityModal(false);
+    setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
+    inactivityConfirmedAtRef.current = null;
+  };
+
   const uiIconMode = isRecording ? activeChannel : activeLine;
+
+  useEffect(() => {
+    if (!isRecording || isPaused) {
+      setShowInactivityModal(false);
+      setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
+      inactivityConfirmedAtRef.current = null;
+      return;
+    }
+
+    if (showInactivityModal) return;
+
+    if (!lastTranslationAt) {
+      markTranslationActivity();
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      const now = Date.now();
+      const referenceTime =
+        inactivityConfirmedAtRef.current || lastTranslationAt;
+
+      if (now - referenceTime >= NO_TRANSLATION_WARNING_MS) {
+        setShowInactivityModal(true);
+        setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
+      }
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [
+    isRecording,
+    isPaused,
+    showInactivityModal,
+    lastTranslationAt,
+    markTranslationActivity,
+  ]);
+
+  useEffect(() => {
+    if (!showInactivityModal) return;
+
+    const intervalId = window.setInterval(() => {
+      setModalSecondsLeft(prev => {
+        if (prev <= 1) {
+          stopListeningSession();
+          return MODAL_AUTO_STOP_SECONDS;
+        }
+
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showInactivityModal]);
+
+  useEffect(() => {
+    if (!translationInactivityWarning?.receivedAt) return;
+    if (!isRecording || isPaused) return;
+    if (showInactivityModal) return;
+
+    setShowInactivityModal(true);
+    setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
+  }, [
+    translationInactivityWarning?.receivedAt,
+    isRecording,
+    isPaused,
+    showInactivityModal,
+    MODAL_AUTO_STOP_SECONDS,
+  ]);
+
+  const handleContinueListening = () => {
+    inactivityConfirmedAtRef.current = Date.now();
+    markTranslationActivity();
+    setShowInactivityModal(false);
+    setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
+  };
+
+  const handleStopListening = () => {
+    stopListeningSession();
+  };
 
   // автозакриття після успішного логіну
   useEffect(() => {
@@ -233,6 +404,14 @@ const ToolCard = () => {
         </div>
 
         <div className="relative h-[85vh] landscape:!h-[85%] w-full rounded-2xl border-2 border-teal-700 bg-white shadow-lg overflow-hidden">
+          {showInactivityModal && (
+            <InactivityConfirmModal
+              secondsLeft={modalSecondsLeft}
+              onContinue={handleContinueListening}
+              onStop={handleStopListening}
+            />
+          )}
+
           <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center px-4 border-b">
             <div className="flex items-center gap-1">
               <LogoWave />
