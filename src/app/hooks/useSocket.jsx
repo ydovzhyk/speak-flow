@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import io from 'socket.io-client';
-import { v4 as uuid } from 'uuid';
 import {
   setDeepgramStatus,
   pushTranscript,
@@ -14,8 +13,10 @@ import {
 import { getUser } from '@/redux/auth/auth-selectors';
 import { useStreamingParagraph } from '@/utils/useStreamingParagraph';
 import { codeToLabel } from '../../data/languages';
+import { axiosEnsureGuest } from '@/api/guest';
 
 const STORAGE_KEY = 'speakflow.settings';
+const AUTH_STORAGE_KEY = 'speakflow.authData';
 const serverURL = 'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 // const serverURL = 'http://localhost:4000';
 
@@ -36,6 +37,39 @@ function writeSettings(patch) {
   } catch {}
 }
 
+function readAuthData() {
+  try {
+    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function mapUsageState(payload, prev = {}) {
+  const last = payload?.lastSession || {};
+  return {
+    totalMs: Number(payload?.totalMs ?? prev.totalMs ?? 0),
+    monthlyRecordMs: Number(
+      payload?.monthlyRecordMs ?? prev.monthlyRecordMs ?? 0
+    ),
+    monthlyRemainingMs: Number(
+      payload?.monthlyRemainingMs ?? prev.monthlyRemainingMs ?? 5 * 60 * 1000
+    ),
+    monthlyLimitMs: Number(
+      payload?.monthlyLimitMs ?? prev.monthlyLimitMs ?? 5 * 60 * 1000
+    ),
+    unlimited: Boolean(payload?.unlimited ?? prev.unlimited),
+    lastSession: {
+      seconds: Number(
+        last.seconds ?? prev.lastSession?.seconds ?? 0
+      ),
+      startedAt: last.startedAt ?? prev.lastSession?.startedAt ?? null,
+      endedAt: last.endedAt ?? prev.lastSession?.endedAt ?? null,
+    },
+  };
+}
+
 const useSocket = () => {
   const socketRef = useRef(null);
   const readyResolverRef = useRef(null);
@@ -47,22 +81,20 @@ const useSocket = () => {
   const [lastTranslationAt, setLastTranslationAt] = useState(null);
   const [translationInactivityWarning, setTranslationInactivityWarning] =
     useState(null);
+  const [usageLimitReached, setUsageLimitReached] = useState(null);
 
-
-  // ===== Usage state =====
-  const [usage, setUsage] = useState(() => {
-    const u = user?.usage;
-    return {
-      totalMs: u?.totalRecordMs || 0,
+  const [usage, setUsage] = useState(() =>
+    mapUsageState({
+      totalMs: user?.usage?.totalRecordMs || 0,
+      monthlyRecordMs: user?.usage?.monthlyRecordMs || 0,
       lastSession: {
-        seconds: Math.floor((u?.lastSession?.durationMs || 0) / 1000),
-        startedAt: u?.lastSession?.startedAt || null,
-        endedAt: u?.lastSession?.endedAt || null,
+        seconds: Math.floor((user?.usage?.lastSession?.durationMs || 0) / 1000),
+        startedAt: user?.usage?.lastSession?.startedAt || null,
+        endedAt: user?.usage?.lastSession?.endedAt || null,
       },
-    };
-  });
+    })
+  );
 
-  // Utility: formatting time
   const pad = n => String(n).padStart(2, '0');
   const formatSeconds = (sec = 0) => {
     const s = Math.max(0, Math.floor(sec));
@@ -73,18 +105,23 @@ const useSocket = () => {
   };
   const formatMs = (ms = 0) => formatSeconds(Math.floor(ms / 1000));
 
-  // User loaded/changed — update initial usage
   useEffect(() => {
     const u = user?.usage;
     if (!u) return;
-    setUsage({
-      totalMs: u.totalRecordMs || 0,
-      lastSession: {
-        seconds: Math.floor((u.lastSession?.durationMs || 0) / 1000),
-        startedAt: u.lastSession?.startedAt || null,
-        endedAt: u.lastSession?.endedAt || null,
-      },
-    });
+    setUsage(prev =>
+      mapUsageState(
+        {
+          totalMs: u.totalRecordMs || 0,
+          monthlyRecordMs: u.monthlyRecordMs || 0,
+          lastSession: {
+            seconds: Math.floor((u.lastSession?.durationMs || 0) / 1000),
+            startedAt: u.lastSession?.startedAt || null,
+            endedAt: u.lastSession?.endedAt || null,
+          },
+        },
+        prev
+      )
+    );
   }, [user]);
 
   useEffect(() => {
@@ -107,6 +144,7 @@ const useSocket = () => {
 
       initialize();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?._id]);
 
   const {
@@ -121,40 +159,18 @@ const useSocket = () => {
     reset: resetTranslation,
   } = useStreamingParagraph(22);
 
-  const getOrCreateClientId = () => {
+  const resolveClientId = async () => {
     if (user?._id) {
-      const prev = readSettings();
-      if (prev.clientId !== user._id) writeSettings({ clientId: user._id });
+      writeSettings({ clientId: user._id });
       return user._id;
     }
 
-    let { clientId } = readSettings();
-    if (!clientId) {
-      clientId = uuid();
-      writeSettings({ clientId });
-    }
-    return clientId;
+    const { clientKey } = await axiosEnsureGuest();
+    writeSettings({ clientId: clientKey });
+    return clientKey;
   };
 
-  const initialize = () => {
-    if (socketRef.current) {
-      return Promise.resolve(socketRef.current);
-    }
-
-    const clientId = getOrCreateClientId();
-
-    socketRef.current = io(serverURL, {
-      transports: ['websocket'],
-      auth: { clientId },
-    });
-
-    const s = socketRef.current;
-
-    const readyPromise = new Promise(resolve => {
-      readyResolverRef.current = resolve;
-    });
-
-    // ===== WS connection =====
+  const attachSocketListeners = (s, clientId) => {
     s.on('connect', () => {
       console.log('🟢 WebSocket connected as', clientId);
       handshakeIdRef.current = clientId;
@@ -165,7 +181,6 @@ const useSocket = () => {
       dispatch(setDeepgramStatus(false));
     });
 
-    // ===== Transcriber connection status =====
     s.on('transcriber-ready', data => {
       if (data === 'Ready') {
         dispatch(setDeepgramStatus(true));
@@ -182,7 +197,6 @@ const useSocket = () => {
       }
     });
 
-    // ===== Get final transcript/translation =====
     s.on('final', transcript => {
       console.log('🟢 Final transcript received:', transcript);
       enqueueTranscript(transcript);
@@ -209,22 +223,17 @@ const useSocket = () => {
       });
     });
 
-    // ===== Response to usage:request =====
-    s.on('usage:current', payload => {
-      const totalMs = Number(payload?.totalMs || 0);
-      const last = payload?.lastSession || {};
-      const startedAt = last.startedAt || null;
-      const endedAt = last.endedAt || null;
-      const baseSeconds = Number(last.seconds || 0);
-
-      setUsage({
-        totalMs,
-        lastSession: {
-          seconds: baseSeconds,
-          startedAt,
-          endedAt,
-        },
+    s.on('usage-limit-reached', payload => {
+      console.warn('⚠️ Monthly usage limit reached:', payload);
+      dispatch(setDeepgramStatus(false));
+      setUsageLimitReached({
+        ...payload,
+        receivedAt: Date.now(),
       });
+    });
+
+    s.on('usage:current', payload => {
+      setUsage(prev => mapUsageState(payload, prev));
     });
 
     s.on('usage:progress', payload => {
@@ -232,33 +241,58 @@ const useSocket = () => {
       const seconds = Number(payload?.seconds || 0);
       const liveTotalMs = Number(payload?.liveTotalMs ?? NaN);
 
-      setUsage(u => ({
-        totalMs: Number.isFinite(liveTotalMs) ? liveTotalMs : u.totalMs,
+      setUsage(prev => ({
+        ...mapUsageState(payload, prev),
+        totalMs: Number.isFinite(liveTotalMs) ? liveTotalMs : prev.totalMs,
         lastSession: { startedAt, endedAt: null, seconds },
       }));
     });
 
     s.on('usage:final', payload => {
-      setUsage({
-        totalMs: Number(payload?.totalMs || 0),
-        lastSession: {
-          seconds: Number(payload?.seconds || 0),
-          startedAt: payload?.startedAt || null,
-          endedAt: payload?.endedAt || null,
-        },
-      });
+      setUsage(prev => mapUsageState(payload, prev));
     });
 
     s.on('error', e => console.error('socket error:', e));
+  };
+
+  const initialize = async () => {
+    if (socketRef.current) {
+      return socketRef.current;
+    }
+
+    const clientId = await resolveClientId();
+    const authData = readAuthData();
+
+    const readyPromise = new Promise(resolve => {
+      readyResolverRef.current = resolve;
+    });
+
+    const s = io(serverURL, {
+      transports: ['websocket'],
+      withCredentials: true,
+      auth: {
+        clientId,
+        ...(authData?.accessToken
+          ? { accessToken: authData.accessToken }
+          : {}),
+      },
+    });
+
+    socketRef.current = s;
+    attachSocketListeners(s, clientId);
 
     return readyPromise;
   };
 
-  const sendAudio = (audioData, sampleRate, sourceType) => {
+  const sendAudio = async (audioData, sampleRate, sourceType) => {
+    if (!socketRef.current) {
+      await initialize();
+    }
+
     const s = socketRef.current;
     if (!s) return;
 
-    const clientId = getOrCreateClientId();
+    const clientId = user?._id || readSettings().clientId;
     s.emit('incoming-audio', {
       audioData,
       sampleRate,
@@ -285,6 +319,8 @@ const useSocket = () => {
     setTranslationInactivityWarning(null);
   };
 
+  const clearUsageLimitReached = () => setUsageLimitReached(null);
+
   const isConnected = () => Boolean(socketRef.current?.connected);
 
   return {
@@ -303,12 +339,15 @@ const useSocket = () => {
     usageFormatted: {
       total: formatMs(usage.totalMs),
       lastSession: formatSeconds(usage.lastSession?.seconds || 0),
+      monthlyRemaining: formatMs(usage.monthlyRemainingMs),
     },
 
     lastTranslationAt,
     markTranslationActivity: () => setLastTranslationAt(Date.now()),
 
     translationInactivityWarning,
+    usageLimitReached,
+    clearUsageLimitReached,
   };
 };
 

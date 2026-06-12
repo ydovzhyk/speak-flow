@@ -20,6 +20,7 @@ import {
 } from '@/redux/technical/technical-selectors';
 import { getRecords } from '@/redux/technical/technical-operations';
 import { gaEvent } from '@/utils/gtag';
+import { toast } from 'react-toastify';
 import { getLogin } from '@/redux/auth/auth-selectors';
 import Auth from '../auth';
 import Contact from '../contact';
@@ -86,7 +87,7 @@ const InactivityConfirmModal = ({ secondsLeft, onContinue, onStop }) => {
             className="text-[var(--text-accent)]"
             noTranslate
           >
-            We haven’t received translated text for 5 minutes. Do you want to
+            We haven’t received translated text for 3 minutes. Do you want to
             continue listening?
           </Text>
 
@@ -230,6 +231,9 @@ const ToolCard = () => {
     lastTranslationAt,
     markTranslationActivity,
     translationInactivityWarning,
+    usageLimitReached,
+    clearUsageLimitReached,
+    usage,
   } = useSocketContext();
 
   const {
@@ -249,7 +253,7 @@ const ToolCard = () => {
     },
   });
 
-  const NO_TRANSLATION_WARNING_MS = 5 * 60 * 1000;
+  const NO_TRANSLATION_WARNING_MS = 3 * 60 * 1000;
   const MODAL_AUTO_STOP_SECONDS = 60;
 
   const [showInactivityModal, setShowInactivityModal] = useState(false);
@@ -348,6 +352,17 @@ const ToolCard = () => {
     stopListeningSession();
   };
 
+  useEffect(() => {
+    if (!usageLimitReached?.receivedAt) return;
+
+    stopListeningSession();
+    toast.error(
+      'You have used your 5 minutes of recording time for this month.'
+    );
+    clearUsageLimitReached();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [usageLimitReached?.receivedAt]);
+
   // автозакриття після успішного логіну
   useEffect(() => {
     if (closeButtonAuth && panel === 'auth') {
@@ -360,6 +375,13 @@ const ToolCard = () => {
     switch (activeBtn) {
       case 'record':
         if (!isRecording && !isPaused) {
+          if (!usage.unlimited && usage.monthlyRemainingMs <= 0) {
+            toast.error(
+              'You have used your 5 minutes of recording time for this month.'
+            );
+            dispatch(setActiveBtn('stop'));
+            break;
+          }
           initialize();
           startRecording();
         } else if (isRecording && isPaused) {
