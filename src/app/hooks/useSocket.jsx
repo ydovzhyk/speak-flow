@@ -14,6 +14,7 @@ import { getUser } from '@/redux/auth/auth-selectors';
 import { useStreamingParagraph } from '@/utils/useStreamingParagraph';
 import { codeToLabel } from '../../data/languages';
 import { axiosEnsureGuest } from '@/api/guest';
+import { toast } from 'react-toastify';
 
 const STORAGE_KEY = 'speakflow.settings';
 const AUTH_STORAGE_KEY = 'speakflow.authData';
@@ -59,6 +60,11 @@ function mapUsageState(payload, prev = {}) {
     monthlyLimitMs: Number(
       payload?.monthlyLimitMs ?? prev.monthlyLimitMs ?? 5 * 60 * 1000
     ),
+    usagePeriodMs: Number(
+      payload?.usagePeriodMs ?? prev.usagePeriodMs ?? 30 * 24 * 60 * 60 * 1000
+    ),
+    monthlyResetAt: payload?.monthlyResetAt ?? prev.monthlyResetAt ?? null,
+    isRegistered: Boolean(payload?.isRegistered ?? prev.isRegistered),
     unlimited: Boolean(payload?.unlimited ?? prev.unlimited),
     lastSession: {
       seconds: Number(
@@ -70,6 +76,59 @@ function mapUsageState(payload, prev = {}) {
   };
 }
 
+function formatSocketError(payload) {
+  if (!payload) return 'Connection error. Please try again.';
+  if (typeof payload === 'string') return payload;
+
+  const message = String(payload.message || '').trim();
+  const detail = String(payload.detail || payload.description || '').trim();
+  const code = String(payload.code || '').trim();
+
+  if (code === 'NO_IDENTITY' || message === 'Guest session required') {
+    return 'Session expired. Please refresh the page.';
+  }
+
+  if (message === 'translate failed' || code === 'TRANSLATION_UNAVAILABLE') {
+    if (
+      /api key|401|incorrect api key|invalid_api_key|authentication/i.test(
+        detail
+      )
+    ) {
+      return 'Translation is temporarily unavailable. Please try again later.';
+    }
+    return detail || 'Translation failed. Please try again.';
+  }
+
+  if (message === 'orchestrator failed') {
+    return detail || 'Something went wrong during translation.';
+  }
+
+  if (message === 'usage update failed') {
+    return 'Could not save session usage.';
+  }
+
+  return detail || message || 'Something went wrong. Please try again.';
+}
+
+function createSocketErrorNotifier() {
+  let lastText = '';
+  let timer = null;
+
+  return payload => {
+    const text = formatSocketError(payload);
+    if (!text || text === lastText) return;
+
+    lastText = text;
+    toast.error(text);
+
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => {
+      lastText = '';
+      timer = null;
+    }, 5000);
+  };
+}
+
 const useSocket = () => {
   const socketRef = useRef(null);
   const readyResolverRef = useRef(null);
@@ -78,8 +137,10 @@ const useSocket = () => {
   const inputLanguage = useSelector(getInputLanguage);
   const user = useSelector(getUser);
   const handshakeIdRef = useRef(null);
-  const [lastTranslationAt, setLastTranslationAt] = useState(null);
+  const notifySocketErrorRef = useRef(createSocketErrorNotifier());
   const [translationInactivityWarning, setTranslationInactivityWarning] =
+    useState(null);
+  const [translationInactivityStop, setTranslationInactivityStop] =
     useState(null);
   const [usageLimitReached, setUsageLimitReached] = useState(null);
 
@@ -209,7 +270,6 @@ const useSocket = () => {
       const cleanTranslation = String(translation || '').trim();
       if (!cleanTranslation) return;
 
-      setLastTranslationAt(Date.now());
       enqueueTranslation(cleanTranslation);
       dispatch(pushTranslation(cleanTranslation));
     });
@@ -221,6 +281,20 @@ const useSocket = () => {
         ...payload,
         receivedAt: Date.now(),
       });
+    });
+
+    s.on('translation-inactivity-stop', payload => {
+      console.warn('⚠️ Translation inactivity auto-stop:', payload);
+      dispatch(setDeepgramStatus(false));
+      setTranslationInactivityStop({
+        ...payload,
+        receivedAt: Date.now(),
+      });
+    });
+
+    s.on('translation-inactivity-cancelled', () => {
+      setTranslationInactivityWarning(null);
+      setTranslationInactivityStop(null);
     });
 
     s.on('usage-limit-reached', payload => {
@@ -252,7 +326,18 @@ const useSocket = () => {
       setUsage(prev => mapUsageState(payload, prev));
     });
 
-    s.on('error', e => console.error('socket error:', e));
+    s.on('error', payload => {
+      console.warn('socket error:', payload);
+      notifySocketErrorRef.current(payload);
+    });
+
+    s.on('connect_error', err => {
+      console.warn('socket connect_error:', err?.message || err);
+      notifySocketErrorRef.current({
+        message: 'connect_error',
+        detail: err?.message,
+      });
+    });
   };
 
   const initialize = async () => {
@@ -307,6 +392,12 @@ const useSocket = () => {
     socketRef.current?.emit('pause-deepgram', data);
   };
 
+  const confirmInactivityContinue = () => {
+    socketRef.current?.emit('inactivity-continue');
+    setTranslationInactivityWarning(null);
+    setTranslationInactivityStop(null);
+  };
+
   const disconnect = () => {
     const s = socketRef.current;
     if (!s) return;
@@ -315,8 +406,8 @@ const useSocket = () => {
     socketRef.current = null;
     handshakeIdRef.current = null;
 
-    setLastTranslationAt(null);
     setTranslationInactivityWarning(null);
+    setTranslationInactivityStop(null);
   };
 
   const clearUsageLimitReached = () => setUsageLimitReached(null);
@@ -342,10 +433,9 @@ const useSocket = () => {
       monthlyRemaining: formatMs(usage.monthlyRemainingMs),
     },
 
-    lastTranslationAt,
-    markTranslationActivity: () => setLastTranslationAt(Date.now()),
-
     translationInactivityWarning,
+    translationInactivityStop,
+    confirmInactivityContinue,
     usageLimitReached,
     clearUsageLimitReached,
   };

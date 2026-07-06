@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, memo, useRef } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import useAudioRecorder from '@/utils/audio-recorder/useAudioRecorder';
@@ -169,6 +169,14 @@ const EarButton = memo(function EarButton({
   );
 });
 
+const getUsageLimitMessage = ({ isRegistered, limitMinutes = 5 }) => {
+  if (isRegistered) {
+    return `You have used your ${limitMinutes} minutes of translation time. Your limit will reset 30 days after your last session.`;
+  }
+
+  return `You have used your ${limitMinutes} minutes of trial translation time. Please sign up to get more time (up to 15 minutes).`;
+};
+
 const ToolCard = () => {
   const dispatch = useDispatch();
   const [activeChannel, setActiveChannel] = useState('speaker');
@@ -228,9 +236,9 @@ const ToolCard = () => {
     sendAudio,
     pause,
     disconnect,
-    lastTranslationAt,
-    markTranslationActivity,
     translationInactivityWarning,
+    translationInactivityStop,
+    confirmInactivityContinue,
     usageLimitReached,
     clearUsageLimitReached,
     usage,
@@ -253,14 +261,12 @@ const ToolCard = () => {
     },
   });
 
-  const NO_TRANSLATION_WARNING_MS = 3 * 60 * 1000;
   const MODAL_AUTO_STOP_SECONDS = 60;
 
   const [showInactivityModal, setShowInactivityModal] = useState(false);
   const [modalSecondsLeft, setModalSecondsLeft] = useState(
     MODAL_AUTO_STOP_SECONDS
   );
-  const inactivityConfirmedAtRef = useRef(null);
 
   const stopListeningSession = () => {
     stopRecording();
@@ -268,82 +274,52 @@ const ToolCard = () => {
     dispatch(setActiveBtn('stop'));
     setShowInactivityModal(false);
     setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
-    inactivityConfirmedAtRef.current = null;
   };
 
   const uiIconMode = isRecording ? activeChannel : activeLine;
 
   useEffect(() => {
+    if (!translationInactivityWarning) {
+      setShowInactivityModal(false);
+      setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
+    }
+  }, [translationInactivityWarning, MODAL_AUTO_STOP_SECONDS]);
+
+  useEffect(() => {
     if (!isRecording || isPaused) {
       setShowInactivityModal(false);
       setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
-      inactivityConfirmedAtRef.current = null;
       return;
     }
 
-    if (showInactivityModal) return;
+    if (!translationInactivityWarning?.receivedAt) return;
 
-    if (!lastTranslationAt) {
-      markTranslationActivity();
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
-      const now = Date.now();
-      const referenceTime =
-        inactivityConfirmedAtRef.current || lastTranslationAt;
-
-      if (now - referenceTime >= NO_TRANSLATION_WARNING_MS) {
-        setShowInactivityModal(true);
-        setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
-      }
-    }, 1000);
-
-    return () => window.clearInterval(intervalId);
-  }, [
-    isRecording,
-    isPaused,
-    showInactivityModal,
-    lastTranslationAt,
-    markTranslationActivity,
-  ]);
+    const autoStopMs = Number(translationInactivityWarning.autoStopMs || 60000);
+    setModalSecondsLeft(Math.max(1, Math.ceil(autoStopMs / 1000)));
+    setShowInactivityModal(true);
+  }, [translationInactivityWarning?.receivedAt, isRecording, isPaused, translationInactivityWarning?.autoStopMs]);
 
   useEffect(() => {
     if (!showInactivityModal) return;
 
     const intervalId = window.setInterval(() => {
       setModalSecondsLeft(prev => {
-        if (prev <= 1) {
-          stopListeningSession();
-          return MODAL_AUTO_STOP_SECONDS;
-        }
-
+        if (prev <= 1) return 0;
         return prev - 1;
       });
     }, 1000);
 
     return () => window.clearInterval(intervalId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showInactivityModal]);
 
   useEffect(() => {
-    if (!translationInactivityWarning?.receivedAt) return;
-    if (!isRecording || isPaused) return;
-    if (showInactivityModal) return;
-
-    setShowInactivityModal(true);
-    setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
-  }, [
-    translationInactivityWarning?.receivedAt,
-    isRecording,
-    isPaused,
-    showInactivityModal,
-    MODAL_AUTO_STOP_SECONDS,
-  ]);
+    if (!translationInactivityStop?.receivedAt) return;
+    stopListeningSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [translationInactivityStop?.receivedAt]);
 
   const handleContinueListening = () => {
-    inactivityConfirmedAtRef.current = Date.now();
-    markTranslationActivity();
+    confirmInactivityContinue();
     setShowInactivityModal(false);
     setModalSecondsLeft(MODAL_AUTO_STOP_SECONDS);
   };
@@ -352,16 +328,29 @@ const ToolCard = () => {
     stopListeningSession();
   };
 
+  const monthlyLimitMinutes = Math.max(
+    1,
+    Math.round(
+      (usageLimitReached?.limitMs ||
+        usage.monthlyLimitMs ||
+        5 * 60 * 1000) / 60000
+    )
+  );
+  const monthlyLimitMessage = getUsageLimitMessage({
+    isRegistered: Boolean(
+      usageLimitReached?.isRegistered ?? usage.isRegistered ?? isLogin
+    ),
+    limitMinutes: monthlyLimitMinutes,
+  });
+
   useEffect(() => {
     if (!usageLimitReached?.receivedAt) return;
 
     stopListeningSession();
-    toast.error(
-      'You have used your 5 minutes of recording time for this month.'
-    );
+    toast.error(monthlyLimitMessage);
     clearUsageLimitReached();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [usageLimitReached?.receivedAt]);
+  }, [usageLimitReached?.receivedAt, monthlyLimitMessage]);
 
   // автозакриття після успішного логіну
   useEffect(() => {
@@ -376,9 +365,7 @@ const ToolCard = () => {
       case 'record':
         if (!isRecording && !isPaused) {
           if (!usage.unlimited && usage.monthlyRemainingMs <= 0) {
-            toast.error(
-              'You have used your 5 minutes of recording time for this month.'
-            );
+            toast.error(monthlyLimitMessage);
             dispatch(setActiveBtn('stop'));
             break;
           }
