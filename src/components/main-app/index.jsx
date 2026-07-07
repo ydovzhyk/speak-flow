@@ -242,6 +242,7 @@ const ToolCard = () => {
     usageLimitReached,
     clearUsageLimitReached,
     refreshUsageFromServer,
+    prepareForNewRecording,
     usage,
   } = useSocketContext();
 
@@ -383,6 +384,7 @@ const ToolCard = () => {
               return;
             }
 
+            prepareForNewRecording();
             initialize();
             startRecording();
           };

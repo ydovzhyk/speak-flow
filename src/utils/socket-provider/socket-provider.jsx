@@ -8,6 +8,7 @@ import {
   getTranscriptJoined,
   getTranslationJoined,
 } from '@/redux/technical/technical-selectors';
+import { mergeLiveText } from '@/utils/mergeLiveText';
 
 const SocketCtx = createContext(null);
 
@@ -36,13 +37,18 @@ export function SocketProvider({ children, autoconnect = false }) {
     () => ({
       ...value,
       transcriptText: mounted
-        ? value.transcriptText || persistedTranscript
+        ? mergeLiveText(persistedTranscript, value.transcriptText)
         : '',
       translationText: mounted
-        ? value.translationText || persistedTranslation
+        ? mergeLiveText(persistedTranslation, value.translationText)
         : '',
     }),
-    [mounted, value, persistedTranscript, persistedTranslation]
+    [
+      mounted,
+      value,
+      persistedTranscript,
+      persistedTranslation,
+    ]
   );
 
   return <SocketCtx.Provider value={memo}>{children}</SocketCtx.Provider>;

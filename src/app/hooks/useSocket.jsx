@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import io from 'socket.io-client';
 import {
@@ -9,6 +9,8 @@ import {
 import {
   getInputLanguage,
   getOutputLanguage,
+  getTranscriptJoined,
+  getTranslationJoined,
 } from '@/redux/technical/technical-selectors';
 import { getUser } from '@/redux/auth/auth-selectors';
 import { useStreamingParagraph } from '@/utils/useStreamingParagraph';
@@ -137,6 +139,8 @@ const useSocket = () => {
   const outputLanguage = codeToLabel(useSelector(getOutputLanguage));
   const inputLanguage = useSelector(getInputLanguage);
   const user = useSelector(getUser);
+  const persistedTranscript = useSelector(getTranscriptJoined);
+  const persistedTranslation = useSelector(getTranslationJoined);
   const handshakeIdRef = useRef(null);
   const notifySocketErrorRef = useRef(createSocketErrorNotifier());
   const recordingBlockedRef = useRef(false);
@@ -241,13 +245,36 @@ const useSocket = () => {
     displayedText: transcriptText,
     enqueueSentence: enqueueTranscript,
     reset: resetTranscript,
+    seed: seedTranscript,
   } = useStreamingParagraph(22);
 
   const {
     displayedText: translationText,
     enqueueSentence: enqueueTranslation,
     reset: resetTranslation,
+    seed: seedTranslation,
   } = useStreamingParagraph(22);
+
+  const prepareForNewRecording = useCallback(() => {
+    const pt = persistedTranscript.trim();
+    const pl = persistedTranslation.trim();
+    const lt = transcriptText.trim();
+    const lv = translationText.trim();
+
+    if (pt && (!lt || (pt.length > lt.length && !lt.startsWith(pt.slice(0, 32))))) {
+      seedTranscript(pt);
+    }
+    if (pl && (!lv || (pl.length > lv.length && !lv.startsWith(pl.slice(0, 32))))) {
+      seedTranslation(pl);
+    }
+  }, [
+    persistedTranscript,
+    persistedTranslation,
+    transcriptText,
+    translationText,
+    seedTranscript,
+    seedTranslation,
+  ]);
 
   const resolveClientId = async () => {
     if (user?._id) {
@@ -467,6 +494,7 @@ const useSocket = () => {
     translationText,
     resetTranscript,
     resetTranslation,
+    prepareForNewRecording,
 
     isConnected,
 

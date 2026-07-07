@@ -69,6 +69,14 @@ export function useStreamingParagraph(charsPerFrame = DEFAULT_CHARS_PER_FRAME) {
     setDisplayedText('');
   }, []);
 
+  const seed = useCallback(text => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+    queueRef.current = [];
+    typingRef.current = null;
+    setDisplayedText(String(text || ''));
+  }, []);
+
   useEffect(() => {
     if (!rafRef.current && (typingRef.current || queueRef.current.length)) {
       rafRef.current = requestAnimationFrame(step);
@@ -79,5 +87,5 @@ export function useStreamingParagraph(charsPerFrame = DEFAULT_CHARS_PER_FRAME) {
     };
   }, [step]);
 
-  return { displayedText, enqueueSentence, pause, resume, reset };
+  return { displayedText, enqueueSentence, pause, resume, reset, seed };
 }
