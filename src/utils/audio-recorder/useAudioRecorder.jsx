@@ -46,7 +46,6 @@ const useAudioRecorder = ({
   const [recordingTime, setRecordingTime] = useState(0);
   const [mediaRecorderMic, setMediaRecorderMic] = useState(null);
   const [mediaRecorderSpeaker, setMediaRecorderSpeaker] = useState(null);
-  const [timerInterval, setTimerInterval] = useState(null);
 
   // для UI/візуалізерів
   const [ctxState, setCtxState] = useState(null);
@@ -61,6 +60,9 @@ const useAudioRecorder = ({
   const scriptProcessorSpeaker = useRef(null);
   const micStreamRef = useRef(null);
   const spkStreamRef = useRef(null);
+  const silentGainMicRef = useRef(null);
+  const silentGainSpeakerRef = useRef(null);
+  const timerIntervalRef = useRef(null);
 
   // режим може мінятись під час запису — тримаємо в ref
   const modeRef = useRef(normalizeMode(mode));
@@ -76,14 +78,19 @@ const useAudioRecorder = ({
   };
 
   const _startTimer = useCallback(() => {
-    const interval = setInterval(() => setRecordingTime(t => t + 1), 1500);
-    setTimerInterval(interval);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    timerIntervalRef.current = setInterval(
+      () => setRecordingTime(t => t + 1),
+      1000
+    );
   }, []);
 
   const _stopTimer = useCallback(() => {
-    if (timerInterval) clearInterval(timerInterval);
-    setTimerInterval(null);
-  }, [timerInterval]);
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+  }, []);
 
   const float32To16BitPCM = float32Arr => {
     const pcm16bit = new Int16Array(float32Arr.length);
@@ -95,7 +102,7 @@ const useAudioRecorder = ({
   };
 
   const startRecording = async () => {
-    if (timerInterval) throw new Error('timerInterval not null');
+    if (timerIntervalRef.current) throw new Error('timerInterval not null');
 
     if (!isSecureContextOk()) {
       toast.error(
@@ -239,23 +246,25 @@ const useAudioRecorder = ({
       }
 
       // Підключення без звуку (щоб не було еха)
-      const silentGain = audioContext.current.createGain();
-      silentGain.gain.value = 0;
+      silentGainMicRef.current = audioContext.current.createGain();
+      silentGainMicRef.current.gain.value = 0;
 
       sourceNodeMic.current.connect(scriptProcessorMic.current);
-      scriptProcessorMic.current.connect(silentGain);
-      silentGain.connect(audioContext.current.destination);
+      scriptProcessorMic.current.connect(silentGainMicRef.current);
+      silentGainMicRef.current.connect(audioContext.current.destination);
 
       if (
         streamSpeaker &&
         sourceNodeSpeaker.current &&
         scriptProcessorSpeaker.current
       ) {
-        const silentGain2 = audioContext.current.createGain();
-        silentGain2.gain.value = 0;
+        silentGainSpeakerRef.current = audioContext.current.createGain();
+        silentGainSpeakerRef.current.gain.value = 0;
         sourceNodeSpeaker.current.connect(scriptProcessorSpeaker.current);
-        scriptProcessorSpeaker.current.connect(silentGain2);
-        silentGain2.connect(audioContext.current.destination);
+        scriptProcessorSpeaker.current.connect(silentGainSpeakerRef.current);
+        silentGainSpeakerRef.current.connect(audioContext.current.destination);
+      } else {
+        silentGainSpeakerRef.current = null;
       }
 
       setIsRecording(true);
@@ -302,6 +311,8 @@ const useAudioRecorder = ({
     spkStreamRef.current?.getTracks?.().forEach(t => t.stop());
     micStreamRef.current = null;
     spkStreamRef.current = null;
+    silentGainMicRef.current = null;
+    silentGainSpeakerRef.current = null;
 
     _stopTimer();
     setRecordingTime(0);
@@ -318,10 +329,20 @@ const useAudioRecorder = ({
       mediaRecorderSpeaker?.resume?.();
       _startTimer();
 
-      // повертаємо підключення (через silent gains ми вже зробили destination)
+      if (audioContext.current?.state === 'suspended') {
+        audioContext.current.resume().catch(() => {});
+      }
+
       sourceNodeMic.current?.connect?.(scriptProcessorMic.current);
-      if (sourceNodeSpeaker.current && scriptProcessorSpeaker.current) {
+      scriptProcessorMic.current?.connect?.(silentGainMicRef.current);
+
+      if (
+        sourceNodeSpeaker.current &&
+        scriptProcessorSpeaker.current &&
+        silentGainSpeakerRef.current
+      ) {
         sourceNodeSpeaker.current.connect(scriptProcessorSpeaker.current);
+        scriptProcessorSpeaker.current.connect(silentGainSpeakerRef.current);
       }
     } else {
       setIsPaused(true);
