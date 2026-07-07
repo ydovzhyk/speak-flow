@@ -169,12 +169,16 @@ const EarButton = memo(function EarButton({
   );
 });
 
-const getUsageLimitMessage = ({ isRegistered, limitMinutes = 5 }) => {
+const getUsageLimitMessage = ({
+  isRegistered,
+  limitMinutes = 20,
+  registeredLimitMinutes = 40,
+}) => {
   if (isRegistered) {
     return `You have used your ${limitMinutes} minutes of translation time. Your limit will reset 30 days after your last session.`;
   }
 
-  return `You have used your ${limitMinutes} minutes of trial translation time. Please sign up to get more time (up to 15 minutes).`;
+  return `You have used your ${limitMinutes} minutes of trial translation time. Please sign up to get more time (up to ${registeredLimitMinutes} minutes).`;
 };
 
 const ToolCard = () => {
@@ -335,7 +339,15 @@ const ToolCard = () => {
     Math.round(
       (usageLimitReached?.limitMs ||
         usage.monthlyLimitMs ||
-        5 * 60 * 1000) / 60000
+        20 * 60 * 1000) / 60000
+    )
+  );
+  const registeredLimitMinutes = Math.max(
+    1,
+    Math.round(
+      (usageLimitReached?.registeredMonthlyLimitMs ||
+        usage.registeredMonthlyLimitMs ||
+        40 * 60 * 1000) / 60000
     )
   );
   const monthlyLimitMessage = getUsageLimitMessage({
@@ -343,6 +355,7 @@ const ToolCard = () => {
       usageLimitReached?.isRegistered ?? usage.isRegistered ?? isLogin
     ),
     limitMinutes: monthlyLimitMinutes,
+    registeredLimitMinutes,
   });
 
   useEffect(() => {

@@ -58,10 +58,20 @@ function mapUsageState(payload, prev = {}) {
       payload?.monthlyRecordMs ?? prev.monthlyRecordMs ?? 0
     ),
     monthlyRemainingMs: Number(
-      payload?.monthlyRemainingMs ?? prev.monthlyRemainingMs ?? 5 * 60 * 1000
+      payload?.monthlyRemainingMs ?? prev.monthlyRemainingMs ?? 20 * 60 * 1000
     ),
     monthlyLimitMs: Number(
-      payload?.monthlyLimitMs ?? prev.monthlyLimitMs ?? 5 * 60 * 1000
+      payload?.monthlyLimitMs ?? prev.monthlyLimitMs ?? 20 * 60 * 1000
+    ),
+    guestMonthlyLimitMs: Number(
+      payload?.guestMonthlyLimitMs ??
+        prev.guestMonthlyLimitMs ??
+        20 * 60 * 1000
+    ),
+    registeredMonthlyLimitMs: Number(
+      payload?.registeredMonthlyLimitMs ??
+        prev.registeredMonthlyLimitMs ??
+        40 * 60 * 1000
     ),
     usagePeriodMs: Number(
       payload?.usagePeriodMs ?? prev.usagePeriodMs ?? 30 * 24 * 60 * 60 * 1000
