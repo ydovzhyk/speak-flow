@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import useAudioRecorder from '@/utils/audio-recorder/useAudioRecorder';
@@ -267,6 +267,7 @@ const ToolCard = () => {
   const [modalSecondsLeft, setModalSecondsLeft] = useState(
     MODAL_AUTO_STOP_SECONDS
   );
+  const limitToastShownRef = useRef(false);
 
   const stopListeningSession = () => {
     stopRecording();
@@ -347,10 +348,21 @@ const ToolCard = () => {
     if (!usageLimitReached?.receivedAt) return;
 
     stopListeningSession();
-    toast.error(monthlyLimitMessage);
+
+    if (!limitToastShownRef.current) {
+      toast.error(monthlyLimitMessage);
+      limitToastShownRef.current = true;
+    }
+
     clearUsageLimitReached();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usageLimitReached?.receivedAt, monthlyLimitMessage]);
+
+  useEffect(() => {
+    if (usage.unlimited || usage.monthlyRemainingMs > 0) {
+      limitToastShownRef.current = false;
+    }
+  }, [usage.unlimited, usage.monthlyRemainingMs]);
 
   // автозакриття після успішного логіну
   useEffect(() => {
@@ -365,7 +377,10 @@ const ToolCard = () => {
       case 'record':
         if (!isRecording && !isPaused) {
           if (!usage.unlimited && usage.monthlyRemainingMs <= 0) {
-            toast.error(monthlyLimitMessage);
+            if (!limitToastShownRef.current) {
+              toast.error(monthlyLimitMessage);
+              limitToastShownRef.current = true;
+            }
             dispatch(setActiveBtn('stop'));
             break;
           }

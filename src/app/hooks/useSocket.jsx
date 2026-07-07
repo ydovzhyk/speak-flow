@@ -138,6 +138,7 @@ const useSocket = () => {
   const user = useSelector(getUser);
   const handshakeIdRef = useRef(null);
   const notifySocketErrorRef = useRef(createSocketErrorNotifier());
+  const recordingBlockedRef = useRef(false);
   const [translationInactivityWarning, setTranslationInactivityWarning] =
     useState(null);
   const [translationInactivityStop, setTranslationInactivityStop] =
@@ -299,7 +300,19 @@ const useSocket = () => {
 
     s.on('usage-limit-reached', payload => {
       console.warn('⚠️ Monthly usage limit reached:', payload);
+      recordingBlockedRef.current = true;
       dispatch(setDeepgramStatus(false));
+      setUsage(prev =>
+        mapUsageState(
+          {
+            ...payload,
+            monthlyRemainingMs: 0,
+            monthlyRecordMs:
+              payload.monthlyRecordMs ?? prev.monthlyLimitMs ?? 0,
+          },
+          prev
+        )
+      );
       setUsageLimitReached({
         ...payload,
         receivedAt: Date.now(),
@@ -307,7 +320,13 @@ const useSocket = () => {
     });
 
     s.on('usage:current', payload => {
-      setUsage(prev => mapUsageState(payload, prev));
+      setUsage(prev => {
+        const next = mapUsageState(payload, prev);
+        if (next.unlimited || next.monthlyRemainingMs > 0) {
+          recordingBlockedRef.current = false;
+        }
+        return next;
+      });
     });
 
     s.on('usage:progress', payload => {
@@ -323,7 +342,15 @@ const useSocket = () => {
     });
 
     s.on('usage:final', payload => {
-      setUsage(prev => mapUsageState(payload, prev));
+      setUsage(prev => {
+        const next = mapUsageState(payload, prev);
+        if (next.unlimited || next.monthlyRemainingMs > 0) {
+          recordingBlockedRef.current = false;
+        } else if (next.monthlyRemainingMs <= 0) {
+          recordingBlockedRef.current = true;
+        }
+        return next;
+      });
     });
 
     s.on('error', payload => {
@@ -370,12 +397,14 @@ const useSocket = () => {
   };
 
   const sendAudio = async (audioData, sampleRate, sourceType) => {
+    if (recordingBlockedRef.current) return;
+
     if (!socketRef.current) {
       await initialize();
     }
 
     const s = socketRef.current;
-    if (!s) return;
+    if (!s || recordingBlockedRef.current) return;
 
     const clientId = user?._id || readSettings().clientId;
     s.emit('incoming-audio', {
@@ -405,6 +434,7 @@ const useSocket = () => {
     s.disconnect();
     socketRef.current = null;
     handshakeIdRef.current = null;
+    recordingBlockedRef.current = false;
 
     setTranslationInactivityWarning(null);
     setTranslationInactivityStop(null);
