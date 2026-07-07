@@ -14,6 +14,7 @@ import { getUser } from '@/redux/auth/auth-selectors';
 import { useStreamingParagraph } from '@/utils/useStreamingParagraph';
 import { codeToLabel } from '../../data/languages';
 import { axiosEnsureGuest } from '@/api/guest';
+import { axiosGetUsageCurrent } from '@/api/usage';
 import { toast } from 'react-toastify';
 
 const STORAGE_KEY = 'speakflow.settings';
@@ -167,26 +168,53 @@ const useSocket = () => {
   };
   const formatMs = (ms = 0) => formatSeconds(Math.floor(ms / 1000));
 
-  useEffect(() => {
-    const u = user?.usage;
-    if (!u) return;
-    setUsage(prev =>
-      mapUsageState(
-        {
-          totalMs: u.totalRecordMs || 0,
-          monthlyRecordMs: u.monthlyRecordMs || 0,
-          lastSession: {
-            seconds: Math.floor((u.lastSession?.durationMs || 0) / 1000),
-            startedAt: u.lastSession?.startedAt || null,
-            endedAt: u.lastSession?.endedAt || null,
-          },
-        },
-        prev
-      )
-    );
-  }, [user]);
+  const applyUsagePayload = payload => {
+    if (
+      payload?.monthlyRemainingMs == null &&
+      payload?.monthlyLimitMs == null &&
+      payload?.totalMs == null
+    ) {
+      return;
+    }
+
+    setUsage(prev => {
+      const next = mapUsageState(payload, prev);
+      if (next.unlimited || next.monthlyRemainingMs > 0) {
+        recordingBlockedRef.current = false;
+      } else if (!next.unlimited && next.monthlyRemainingMs <= 0) {
+        recordingBlockedRef.current = true;
+      }
+      return next;
+    });
+  };
+
+  const refreshUsageFromServer = async () => {
+    try {
+      const data = await axiosGetUsageCurrent();
+      if (data?.ok) {
+        applyUsagePayload(data);
+        return data;
+      }
+    } catch {
+      if (!user?._id) {
+        try {
+          const data = await axiosEnsureGuest();
+          if (data?.ok) applyUsagePayload(data);
+        } catch {}
+      }
+    }
+    return null;
+  };
 
   useEffect(() => {
+    refreshUsageFromServer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    recordingBlockedRef.current = false;
+    refreshUsageFromServer();
+
     const desiredId = user?._id || readSettings().clientId;
     const currentId = handshakeIdRef.current;
 
@@ -207,7 +235,7 @@ const useSocket = () => {
       initialize();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?._id]);
+  }, [user?._id, user?.email]);
 
   const {
     displayedText: transcriptText,
@@ -320,13 +348,7 @@ const useSocket = () => {
     });
 
     s.on('usage:current', payload => {
-      setUsage(prev => {
-        const next = mapUsageState(payload, prev);
-        if (next.unlimited || next.monthlyRemainingMs > 0) {
-          recordingBlockedRef.current = false;
-        }
-        return next;
-      });
+      applyUsagePayload({ ok: true, ...payload });
     });
 
     s.on('usage:progress', payload => {
@@ -342,15 +364,7 @@ const useSocket = () => {
     });
 
     s.on('usage:final', payload => {
-      setUsage(prev => {
-        const next = mapUsageState(payload, prev);
-        if (next.unlimited || next.monthlyRemainingMs > 0) {
-          recordingBlockedRef.current = false;
-        } else if (next.monthlyRemainingMs <= 0) {
-          recordingBlockedRef.current = true;
-        }
-        return next;
-      });
+      applyUsagePayload({ ok: true, ...payload });
     });
 
     s.on('error', payload => {
@@ -468,6 +482,7 @@ const useSocket = () => {
     confirmInactivityContinue,
     usageLimitReached,
     clearUsageLimitReached,
+    refreshUsageFromServer,
   };
 };
 

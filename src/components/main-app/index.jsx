@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, memo, useRef } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import useAudioRecorder from '@/utils/audio-recorder/useAudioRecorder';
@@ -241,6 +241,7 @@ const ToolCard = () => {
     confirmInactivityContinue,
     usageLimitReached,
     clearUsageLimitReached,
+    refreshUsageFromServer,
     usage,
   } = useSocketContext();
 
@@ -267,7 +268,6 @@ const ToolCard = () => {
   const [modalSecondsLeft, setModalSecondsLeft] = useState(
     MODAL_AUTO_STOP_SECONDS
   );
-  const limitToastShownRef = useRef(false);
 
   const stopListeningSession = () => {
     stopRecording();
@@ -348,21 +348,10 @@ const ToolCard = () => {
     if (!usageLimitReached?.receivedAt) return;
 
     stopListeningSession();
-
-    if (!limitToastShownRef.current) {
-      toast.error(monthlyLimitMessage);
-      limitToastShownRef.current = true;
-    }
-
+    toast.error(monthlyLimitMessage);
     clearUsageLimitReached();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usageLimitReached?.receivedAt, monthlyLimitMessage]);
-
-  useEffect(() => {
-    if (usage.unlimited || usage.monthlyRemainingMs > 0) {
-      limitToastShownRef.current = false;
-    }
-  }, [usage.unlimited, usage.monthlyRemainingMs]);
 
   // автозакриття після успішного логіну
   useEffect(() => {
@@ -376,16 +365,29 @@ const ToolCard = () => {
     switch (activeBtn) {
       case 'record':
         if (!isRecording && !isPaused) {
-          if (!usage.unlimited && usage.monthlyRemainingMs <= 0) {
-            if (!limitToastShownRef.current) {
-              toast.error(monthlyLimitMessage);
-              limitToastShownRef.current = true;
+          const attemptStart = async () => {
+            let remaining = usage.monthlyRemainingMs;
+            let unlimited = usage.unlimited;
+
+            if (!unlimited && remaining <= 0) {
+              const data = await refreshUsageFromServer();
+              if (data) {
+                remaining = Number(data.monthlyRemainingMs ?? remaining);
+                unlimited = Boolean(data.unlimited);
+              }
             }
-            dispatch(setActiveBtn('stop'));
-            break;
-          }
-          initialize();
-          startRecording();
+
+            if (!unlimited && remaining <= 0) {
+              toast.error(monthlyLimitMessage);
+              dispatch(setActiveBtn('stop'));
+              return;
+            }
+
+            initialize();
+            startRecording();
+          };
+
+          attemptStart();
         } else if (isRecording && isPaused) {
           togglePauseResume();
           pause(false);
