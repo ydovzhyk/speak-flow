@@ -17,10 +17,14 @@ import { useStreamingParagraph } from '@/utils/useStreamingParagraph';
 import { codeToLabel } from '../../data/languages';
 import { axiosEnsureGuest } from '@/api/guest';
 import { axiosGetUsageCurrent } from '@/api/usage';
+import {
+  ensureFreshAccessToken,
+  isAccessTokenExpired,
+  readStoredAuth,
+} from '@/utils/auth-token';
 import { toast } from 'react-toastify';
 
 const STORAGE_KEY = 'speakflow.settings';
-const AUTH_STORAGE_KEY = 'speakflow.authData';
 const serverURL = 'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 // const serverURL = 'http://localhost:4000';
 
@@ -39,15 +43,6 @@ function writeSettings(patch) {
     const next = { ...prev, ...patch };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {}
-}
-
-function readAuthData() {
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
 }
 
 function mapUsageState(payload, prev = {}) {
@@ -152,6 +147,7 @@ const useSocket = () => {
   const persistedTranscript = useSelector(getTranscriptJoined);
   const persistedTranslation = useSelector(getTranslationJoined);
   const handshakeIdRef = useRef(null);
+  const identityRetryRef = useRef(false);
   const notifySocketErrorRef = useRef(createSocketErrorNotifier());
   const recordingBlockedRef = useRef(false);
   const [translationInactivityWarning, setTranslationInactivityWarning] =
@@ -297,8 +293,51 @@ const useSocket = () => {
     return clientKey;
   };
 
+  const reconnectSocket = async () => {
+    const existing = socketRef.current;
+    if (existing) {
+      existing.removeAllListeners();
+      existing.disconnect();
+      socketRef.current = null;
+    }
+    handshakeIdRef.current = null;
+    return initialize();
+  };
+
+  const recoverSocketIdentity = async payload => {
+    const isIdentityError =
+      payload?.code === 'NO_IDENTITY' ||
+      payload?.message === 'Guest session required';
+
+    if (!isIdentityError) {
+      notifySocketErrorRef.current(payload);
+      return;
+    }
+
+    if (identityRetryRef.current) {
+      notifySocketErrorRef.current(payload);
+      return;
+    }
+
+    identityRetryRef.current = true;
+
+    try {
+      const stored = readStoredAuth();
+      if (stored?.sid) {
+        await ensureFreshAccessToken({ dispatch });
+      } else {
+        await axiosEnsureGuest();
+      }
+      await reconnectSocket();
+    } catch (err) {
+      console.warn('WS identity recovery failed:', err);
+      notifySocketErrorRef.current(payload);
+    }
+  };
+
   const attachSocketListeners = (s, clientId) => {
     s.on('connect', () => {
+      identityRetryRef.current = false;
       console.log('🟢 WebSocket connected as', clientId);
       handshakeIdRef.current = clientId;
     });
@@ -406,7 +445,7 @@ const useSocket = () => {
 
     s.on('error', payload => {
       console.warn('socket error:', payload);
-      notifySocketErrorRef.current(payload);
+      recoverSocketIdentity(payload);
     });
 
     s.on('connect_error', err => {
@@ -424,7 +463,16 @@ const useSocket = () => {
     }
 
     const clientId = await resolveClientId();
-    const authData = readAuthData();
+    let authData = readStoredAuth();
+
+    if (authData?.sid) {
+      authData = (await ensureFreshAccessToken({ dispatch })) ?? authData;
+    }
+
+    const socketAuth = { clientId };
+    if (authData?.accessToken && !isAccessTokenExpired(authData.accessToken)) {
+      socketAuth.accessToken = authData.accessToken;
+    }
 
     const readyPromise = new Promise(resolve => {
       readyResolverRef.current = resolve;
@@ -433,12 +481,7 @@ const useSocket = () => {
     const s = io(serverURL, {
       transports: ['websocket'],
       withCredentials: true,
-      auth: {
-        clientId,
-        ...(authData?.accessToken
-          ? { accessToken: authData.accessToken }
-          : {}),
-      },
+      auth: socketAuth,
     });
 
     socketRef.current = s;
