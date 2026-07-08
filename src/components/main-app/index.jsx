@@ -259,6 +259,7 @@ const ToolCard = () => {
     audioContext,
     sourceNodeMic,
     sourceNodeSpeaker,
+    audioGraphEpoch,
   } = useAudioRecorder({
     mode: activeLine, // 'microphone' | 'speaker' | 'auto'
     onActiveChannelChange: setActiveChannel,
@@ -472,6 +473,7 @@ const ToolCard = () => {
                 visualChannel === 'speaker' &&
                 sourceNodeSpeaker && (
                   <AudioBarsVisualizer
+                    key={`speaker-${audioGraphEpoch}`}
                     audioContext={audioContext}
                     sourceNode={sourceNodeSpeaker}
                   />
@@ -480,6 +482,7 @@ const ToolCard = () => {
                 visualChannel === 'microphone' &&
                 sourceNodeMic && (
                   <AudioBarsVisualizer
+                    key={`mic-${audioGraphEpoch}`}
                     audioContext={audioContext}
                     sourceNode={sourceNodeMic}
                   />

@@ -51,6 +51,7 @@ const useAudioRecorder = ({
   const [ctxState, setCtxState] = useState(null);
   const [micNodeState, setMicNodeState] = useState(null);
   const [spkNodeState, setSpkNodeState] = useState(null);
+  const [audioGraphEpoch, setAudioGraphEpoch] = useState(0);
 
   // refs
   const audioContext = useRef(null);
@@ -320,6 +321,52 @@ const useAudioRecorder = ({
     setIsPaused(false);
   };
 
+  const disconnectProcessingChain = () => {
+    try {
+      sourceNodeMic.current?.disconnect(scriptProcessorMic.current);
+    } catch {}
+    try {
+      scriptProcessorMic.current?.disconnect();
+    } catch {}
+
+    if (sourceNodeSpeaker.current && scriptProcessorSpeaker.current) {
+      try {
+        sourceNodeSpeaker.current.disconnect(scriptProcessorSpeaker.current);
+      } catch {}
+      try {
+        scriptProcessorSpeaker.current.disconnect();
+      } catch {}
+    }
+  };
+
+  const connectProcessingChain = () => {
+    if (
+      sourceNodeMic.current &&
+      scriptProcessorMic.current &&
+      silentGainMicRef.current
+    ) {
+      try {
+        sourceNodeMic.current.connect(scriptProcessorMic.current);
+      } catch {}
+      try {
+        scriptProcessorMic.current.connect(silentGainMicRef.current);
+      } catch {}
+    }
+
+    if (
+      sourceNodeSpeaker.current &&
+      scriptProcessorSpeaker.current &&
+      silentGainSpeakerRef.current
+    ) {
+      try {
+        sourceNodeSpeaker.current.connect(scriptProcessorSpeaker.current);
+      } catch {}
+      try {
+        scriptProcessorSpeaker.current.connect(silentGainSpeakerRef.current);
+      } catch {}
+    }
+  };
+
   const togglePauseResume = useCallback(() => {
     if (!audioContext.current) return;
 
@@ -329,31 +376,18 @@ const useAudioRecorder = ({
       mediaRecorderSpeaker?.resume?.();
       _startTimer();
 
-      if (audioContext.current?.state === 'suspended') {
+      if (audioContext.current.state === 'suspended') {
         audioContext.current.resume().catch(() => {});
       }
 
-      sourceNodeMic.current?.connect?.(scriptProcessorMic.current);
-      scriptProcessorMic.current?.connect?.(silentGainMicRef.current);
-
-      if (
-        sourceNodeSpeaker.current &&
-        scriptProcessorSpeaker.current &&
-        silentGainSpeakerRef.current
-      ) {
-        sourceNodeSpeaker.current.connect(scriptProcessorSpeaker.current);
-        scriptProcessorSpeaker.current.connect(silentGainSpeakerRef.current);
-      }
+      connectProcessingChain();
+      setAudioGraphEpoch(epoch => epoch + 1);
     } else {
       setIsPaused(true);
       _stopTimer();
       mediaRecorderMic?.pause?.();
       mediaRecorderSpeaker?.pause?.();
-
-      scriptProcessorMic.current?.disconnect?.();
-      scriptProcessorSpeaker.current?.disconnect?.();
-      sourceNodeMic.current?.disconnect?.();
-      sourceNodeSpeaker.current?.disconnect?.();
+      disconnectProcessingChain();
     }
   }, [
     _startTimer,
@@ -373,6 +407,7 @@ const useAudioRecorder = ({
     audioContext: ctxState,
     sourceNodeMic: micNodeState,
     sourceNodeSpeaker: spkNodeState,
+    audioGraphEpoch,
   };
 };
 
