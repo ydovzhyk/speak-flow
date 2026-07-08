@@ -29,19 +29,18 @@ const AutoScrollBox = ({
   };
 
   useLayoutEffect(() => {
-    if (!boxRef.current || !endRef.current) return;
-    if (stickToBottomRef.current) {
-      requestAnimationFrame(() => {
-        endRef.current.scrollIntoView({ block: 'end' });
-      });
-    }
+    if (!stickToBottomRef.current) return;
+
+    requestAnimationFrame(() => {
+      endRef.current?.scrollIntoView({ block: 'end' });
+    });
   }, [text, trailingLoading]);
 
   useEffect(() => {
     const onVisible = () => {
       if (!document || document.visibilityState !== 'visible') return;
-      if (stickToBottomRef.current && endRef.current) {
-        endRef.current.scrollIntoView({ block: 'end' });
+      if (stickToBottomRef.current) {
+        endRef.current?.scrollIntoView({ block: 'end' });
       }
     };
     document.addEventListener('visibilitychange', onVisible);
