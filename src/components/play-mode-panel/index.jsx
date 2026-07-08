@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveBtn } from '@/redux/technical/technical-slice';
 import { getActiveBtn } from '@/redux/technical/technical-selectors';
+import RetroPlayerButton from '@/components/shared/retro-player-button';
+import {
+  PauseIcon,
+  PlayIcon,
+  RecIcon,
+  StopIcon,
+} from '@/components/shared/retro-player-button/icons';
 
 const PlayModePanel = () => {
   const dispatch = useDispatch();
@@ -24,54 +31,40 @@ const PlayModePanel = () => {
     dispatch(setActiveBtn(btnType));
   };
 
+  const isRecording = isActiveBtn === 'record';
+
   return (
     <div className="flex items-center gap-2">
-      <div className="relative h-[27px] w-[42px] flex items-center justify-center">
-        {isActiveBtn !== 'record' ? (
-          <img
-            src={'/images/buttons/play_white.png'}
-            alt="record"
-            className="h-[27px] w-auto cursor-pointer select-none"
-            onClick={() => handleButtonClick('record')}
-          />
+      <RetroPlayerButton
+        ariaLabel={isRecording ? 'Recording' : 'Record'}
+        pressed={isRecording}
+        wide
+        onClick={() => handleButtonClick('record')}
+      >
+        {isRecording ? (
+          <RecIcon bright={showFirstImage} />
         ) : (
-          <div className="relative h-[27px] w-auto">
-            <img
-              src="/images/buttons/rec_white.png"
-              alt="recording"
-              className={`h-[28px] w-auto transition-opacity duration-500 ${showFirstImage ? 'opacity-100' : 'opacity-0'}`}
-            />
-            <img
-              src="/images/buttons/rec_dark.png"
-              alt="recording"
-              className={`absolute left-0 top-0 h-[27px] w-auto transition-opacity duration-500 ${showFirstImage ? 'opacity-0' : 'opacity-100'}`}
-            />
-          </div>
+          <PlayIcon />
         )}
-      </div>
-      <img
-        src={
-          isActiveBtn === 'pause'
-            ? '/images/buttons/pause_dark.png'
-            : '/images/buttons/pause_white.png'
-        }
-        alt="pause"
-        className="h-[27px] w-auto cursor-pointer select-none"
+      </RetroPlayerButton>
+
+      <RetroPlayerButton
+        ariaLabel="Pause"
+        pressed={isActiveBtn === 'pause'}
         onClick={() => handleButtonClick('pause')}
-      />
-      <img
-        src={
-          isActiveBtn === 'stop'
-            ? '/images/buttons/stop_dark.png'
-            : '/images/buttons/stop_white.png'
-        }
-        alt="stop"
-        className="h-[27px] w-auto cursor-pointer select-none"
+      >
+        <PauseIcon />
+      </RetroPlayerButton>
+
+      <RetroPlayerButton
+        ariaLabel="Stop"
+        pressed={isActiveBtn === 'stop'}
         onClick={() => handleButtonClick('stop')}
-      />
+      >
+        <StopIcon />
+      </RetroPlayerButton>
     </div>
   );
 };
 
 export default PlayModePanel;
-

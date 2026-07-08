@@ -7,6 +7,12 @@ import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import { getSavedData } from '@/redux/technical/technical-selectors';
 import { clearLocalTexts, setTypeOperationRecords } from '@/redux/technical/technical-slice';
 import { useTranslate } from '@/utils/translating/translating';
+import RetroPlayerButton from '@/components/shared/retro-player-button';
+import {
+  ClearIcon,
+  OpenIcon,
+  SaveIcon,
+} from '@/components/shared/retro-player-button/icons';
 
 const SaveRecordsPanel = () => {
   const dispatch = useDispatch();
@@ -56,27 +62,19 @@ const SaveRecordsPanel = () => {
   };
 
   return (
-    <div className="flex items-center justify-between gap-2">
-      <button
-        type="button"
-        aria-label="Save records"
-        onClick={() => dispatch(setTypeOperationRecords('SaveRecords'))}
+    <div className="flex items-center gap-2">
+      <RetroPlayerButton
+        ariaLabel="Save records"
+        utility
         disabled={saveDisabled}
+        onClick={() => dispatch(setTypeOperationRecords('SaveRecords'))}
         data-tooltip-id={saveDisabled ? 'save-tooltip' : undefined}
         data-tooltip-content={
           saveDisabled ? saveTip || saveDisabledReason : undefined
         }
-        className="
-          relative inline-block
-          h-[27px] w-[40px] min-h-[27px] min-w-[40px]
-          p-0 border-0 appearance-none
-          bg-no-repeat bg-center bg-[length:40px_27px]
-          bg-[url('/images/buttons/save_white.png')]
-          hover:bg-[url('/images/buttons/save_dark.png')]
-          disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed
-          disabled:hover:bg-[url('/images/buttons/save_white.png')]
-        "
-      />
+      >
+        <SaveIcon />
+      </RetroPlayerButton>
       <Tooltip
         id="save-tooltip"
         place="left"
@@ -91,26 +89,18 @@ const SaveRecordsPanel = () => {
         }}
       />
 
-      <button
-        type="button"
-        aria-label="Open saved records"
-        onClick={() => dispatch(setTypeOperationRecords('GetRecords'))}
+      <RetroPlayerButton
+        ariaLabel="Open saved records"
+        utility
         disabled={openDisabled}
+        onClick={() => dispatch(setTypeOperationRecords('GetRecords'))}
         data-tooltip-id={openDisabled ? 'open-tooltip' : undefined}
         data-tooltip-content={
           openDisabled ? openTip || openDisabledReason : undefined
         }
-        className="
-          relative inline-block
-          h-[27px] w-[40px] min-h-[27px] min-w-[40px]
-          p-0 border-0 appearance-none
-          bg-no-repeat bg-center bg-[length:40px_27px]
-          bg-[url('/images/buttons/open_white.png')]
-          hover:bg-[url('/images/buttons/open_black.png')]
-          disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed
-          disabled:hover:bg-[url('/images/buttons/open_white.png')]
-        "
-      />
+      >
+        <OpenIcon />
+      </RetroPlayerButton>
       <Tooltip
         id="open-tooltip"
         place="left"
@@ -125,26 +115,18 @@ const SaveRecordsPanel = () => {
         }}
       />
 
-      <button
-        type="button"
-        aria-label="Clear records"
-        onClick={handleClear}
+      <RetroPlayerButton
+        ariaLabel="Clear records"
+        utility
         disabled={clearDisabled}
+        onClick={handleClear}
         data-tooltip-id={clearDisabled ? 'clear-tooltip' : undefined}
         data-tooltip-content={
-          clearDisabled ? (clearTip || clearDisabledReason) : undefined
+          clearDisabled ? clearTip || clearDisabledReason : undefined
         }
-        className="
-          relative inline-block
-          h-[27px] w-[40px] min-h-[27px] min-w-[40px]
-          p-0 border-0 appearance-none
-          bg-no-repeat bg-center bg-[length:40px_27px]
-          bg-[url('/images/buttons/clear_white.png')]
-          hover:bg-[url('/images/buttons/clear_black.png')]
-          disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed
-          disabled:hover:bg-[url('/images/buttons/clear_white.png')]
-        "
-      />
+      >
+        <ClearIcon />
+      </RetroPlayerButton>
       <Tooltip
         id="clear-tooltip"
         place="left"
@@ -163,4 +145,3 @@ const SaveRecordsPanel = () => {
 };
 
 export default SaveRecordsPanel;
-
