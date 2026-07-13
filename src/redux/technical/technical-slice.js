@@ -13,7 +13,7 @@ const initialState = {
   closeButtonAuth: false,
   closeButtonRecords: false,
   inputLanguage: 'en',
-  outputLanguage: 'Ukrainian',
+  outputLanguage: 'uk',
   countdown: true,
   deepgramStatus: false,
   activeBtn: 'stop',

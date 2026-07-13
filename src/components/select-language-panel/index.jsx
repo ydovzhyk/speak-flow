@@ -42,13 +42,21 @@ const SelectLanguagePanel = () => {
     writeSettings({ inputLanguage, outputLanguage });
   }, [inputLanguage, outputLanguage]);
 
+  const findLanguage = useCallback(
+    codeOrLabel =>
+      LANGUAGES.find(
+        o => o.value === codeOrLabel || o.label === codeOrLabel
+      ) || LANGUAGES.find(o => o.value === 'uk'),
+    []
+  );
+
   const inputValue = useMemo(
-    () => LANGUAGES.find(o => o.value === inputLanguage) || LANGUAGES[0],
-    [inputLanguage]
+    () => findLanguage(inputLanguage) || LANGUAGES[0],
+    [inputLanguage, findLanguage]
   );
   const outputValue = useMemo(
-    () => LANGUAGES.find(o => o.value === outputLanguage) || LANGUAGES[0],
-    [outputLanguage]
+    () => findLanguage(outputLanguage),
+    [outputLanguage, findLanguage]
   );
 
   const handleChangeInput = useCallback(
