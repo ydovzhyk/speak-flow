@@ -18,7 +18,7 @@ const inter = Inter({
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 export const metadata = {
-  metadataBase: new URL('https://speakflow.space'),
+  metadataBase: new URL('https://speakflow.art'),
   title: {
     default: 'SpeakFlow — Live Speech Translation & Transcription',
     template: '%s | SpeakFlow',
@@ -29,7 +29,7 @@ export const metadata = {
     title: 'SpeakFlow — Live Speech Translation & Transcription',
     description:
       'Transcribe speech in real time and get instant translations. Simple UI, fast results, and saved records when you need them.',
-    url: 'https://speakflow.space/',
+    url: 'https://speakflow.art/',
     siteName: 'SpeakFlow',
     images: [
       {
@@ -66,8 +66,8 @@ export const metadata = {
     'перекладач голосу',
     'розпізнавання мовлення',
   ],
-  authors: [{ name: 'Yuriy Dovzhyk', url: 'https://speakflow.space' }],
-  alternates: { canonical: 'https://speakflow.space/' },
+  authors: [{ name: 'Yuriy Dovzhyk', url: 'https://speakflow.art' }],
+  alternates: { canonical: 'https://speakflow.art/' },
   robots: { index: true, follow: true },
   icons: {
     icon: '/favicon.ico',
