@@ -17,7 +17,7 @@ const Logo = ({
 
   const common = {
     src: logoSrc,
-    alt: 'Logo',
+    alt: 'SpeakFlow',
     width: !asLink ? 125 : width,
     height: !asLink ? 37 : height,
     className: 'object-contain h-auto',
@@ -26,7 +26,7 @@ const Logo = ({
   };
 
   return asLink ? (
-    <Link href="/" aria-label="Home">
+    <Link href="/" aria-label="SpeakFlow home">
       <Image {...common} />
     </Link>
   ) : (
