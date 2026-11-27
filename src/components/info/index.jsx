@@ -19,14 +19,36 @@ const Info = () => {
           a live travel translator when someone speaks near you. The tool stays
           in the center of the page; this INFO tab is the in-app guide.
         </Text>
-        <a
-          href="/how-it-works"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[13px] text-[var(--accent2)] underline underline-offset-2 hover:text-[var(--text-main)] w-fit"
-        >
-          Open full “How it works” page →
-        </a>
+        <Text type="small" as="p" fontWeight="light">
+          Live recognition and translation use cloud services (not fully
+          on-device). See Privacy for details.
+        </Text>
+        <div className="flex flex-col gap-1">
+          <a
+            href="/how-it-works"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[13px] text-[var(--accent2)] underline underline-offset-2 hover:text-[var(--text-main)] w-fit"
+          >
+            How it works →
+          </a>
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[13px] text-[var(--accent2)] underline underline-offset-2 hover:text-[var(--text-main)] w-fit"
+          >
+            Privacy Policy →
+          </a>
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[13px] text-[var(--accent2)] underline underline-offset-2 hover:text-[var(--text-main)] w-fit"
+          >
+            Terms of Use →
+          </a>
+        </div>
       </section>
 
       <section className="flex flex-col gap-2">
@@ -335,8 +357,9 @@ const Info = () => {
           9. Contact me (CONTACT tab)
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          Open the CONTACT tab, fill out the form (name, email, message), and
-          send your question or feedback.
+          SpeakFlow is operated by Yuriy Dovzhyk. Open the CONTACT tab, fill
+          out the form (name, email, message), and send your question or
+          feedback — including privacy requests.
         </Text>
       </section>
 

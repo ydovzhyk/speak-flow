@@ -5,6 +5,8 @@ export async function GET() {
   const urls = [
     { loc: `${base}/`, priority: '1.0', changefreq: 'weekly' },
     { loc: `${base}/how-it-works`, priority: '0.8', changefreq: 'monthly' },
+    { loc: `${base}/privacy`, priority: '0.6', changefreq: 'yearly' },
+    { loc: `${base}/terms`, priority: '0.6', changefreq: 'yearly' },
   ];
 
   const body = urls

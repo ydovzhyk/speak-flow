@@ -161,13 +161,22 @@ export default function HowItWorksPage() {
           </p>
         </section>
 
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
           <Link
             href="/"
             className="inline-flex items-center justify-center rounded-md bg-[#017683] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#0299b5] transition-colors"
           >
             Open the SpeakFlow tool
           </Link>
+          <p className="text-sm text-[#9ec4c9]">
+            <Link href="/privacy" className="text-[#7fd4de] hover:text-white">
+              Privacy
+            </Link>
+            {' · '}
+            <Link href="/terms" className="text-[#7fd4de] hover:text-white">
+              Terms
+            </Link>
+          </p>
         </div>
       </div>
     </div>

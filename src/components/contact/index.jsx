@@ -59,10 +59,30 @@ function Contact() {
   return (
     <div className="w-full rounded-md border border-[rgba(82,85,95,0.2)] p-4 bg-white h-full landscape:!h-auto landscape:min-h-0"
     >
-      <div className="mb-5">
+      <div className="mb-5 flex flex-col gap-2">
         <Text type="tiny" as="p" fontWeight="light">
-          Have questions about the app or ideas for new features? I’d love to
-          hear from you — just fill out the form below to get in touch.
+          SpeakFlow is operated by <strong>Yuriy Dovzhyk</strong>. Have
+          questions about the app, privacy, or ideas for new features? Fill out
+          the form below — your message goes to me.
+        </Text>
+        <Text type="tiny" as="p" fontWeight="light">
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent2)] underline underline-offset-2"
+          >
+            Privacy Policy
+          </a>
+          {' · '}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[var(--accent2)] underline underline-offset-2"
+          >
+            Terms of Use
+          </a>
         </Text>
       </div>
       <form className="flex flex-col gap-10" onSubmit={handleSendMail}>
