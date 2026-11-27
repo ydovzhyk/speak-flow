@@ -104,6 +104,7 @@ const LiveTextPanels = ({
           showExpand={showExpand && !expanded}
           onExpand={onExpand}
           showCopy
+          followLive={liveMode}
         />
       );
     }

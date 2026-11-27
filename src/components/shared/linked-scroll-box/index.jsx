@@ -7,10 +7,39 @@ import { MdOpenInFull } from 'react-icons/md';
 import LoaderDots from '../loader-dots';
 import PanelActionButton from '../panel-action-button';
 
+/** Scroll a child into view inside `box` only — never touch ancestor scrollers. */
+const scrollChildIntoBox = (box, node, { block = 'nearest', smooth = false } = {}) => {
+  if (!box || !node) return;
+
+  const boxRect = box.getBoundingClientRect();
+  const nodeRect = node.getBoundingClientRect();
+  const behavior = smooth ? 'smooth' : 'auto';
+
+  if (block === 'start') {
+    box.scrollBy({
+      top: nodeRect.top - boxRect.top - 8,
+      behavior,
+    });
+    return;
+  }
+
+  if (nodeRect.top < boxRect.top + 8) {
+    box.scrollBy({
+      top: nodeRect.top - boxRect.top - 8,
+      behavior,
+    });
+  } else if (nodeRect.bottom > boxRect.bottom - 8) {
+    box.scrollBy({
+      top: nodeRect.bottom - boxRect.bottom + 8,
+      behavior,
+    });
+  }
+};
+
 /**
  * Renders sentence segments as interactive spans.
  * Hover/click activates a shared id so the paired panel can highlight + scroll.
- * While the user is at the bottom, new sentences auto-scroll into view.
+ * While followLive + stuck to bottom, new sentences auto-scroll into view.
  */
 const LinkedScrollBox = ({
   segments = [],
@@ -24,15 +53,21 @@ const LinkedScrollBox = ({
   onExpand,
   trailingLoading = false,
   trailingLabel = 'Listening…',
+  followLive = true,
 }) => {
   const boxRef = useRef(null);
   const endRef = useRef(null);
   const spanRefs = useRef(new Map());
-  const stickToBottomRef = useRef(true);
+  const stickToBottomRef = useRef(followLive);
   const prevCountRef = useRef(0);
   const [copied, setCopied] = useState(false);
 
   const hasText = Array.isArray(segments) && segments.some(s => s?.text?.trim());
+
+  useEffect(() => {
+    // Saved-record view must not start in "stick to bottom" mode.
+    if (!followLive) stickToBottomRef.current = false;
+  }, [followLive]);
 
   const onScroll = () => {
     const el = boxRef.current;
@@ -41,8 +76,15 @@ const LinkedScrollBox = ({
       el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
   };
 
-  // Live follow: when stuck to bottom and a new sentence arrives, show its start.
+  // Live follow only — skipped for saved records / static previews.
   useLayoutEffect(() => {
+    if (!followLive) {
+      prevCountRef.current = Array.isArray(segments)
+        ? segments.filter(s => s?.text?.trim()).length
+        : 0;
+      return;
+    }
+
     const usable = Array.isArray(segments)
       ? segments.filter(s => s?.text?.trim())
       : [];
@@ -52,44 +94,43 @@ const LinkedScrollBox = ({
 
     if (!stickToBottomRef.current) return;
 
+    const box = boxRef.current;
     requestAnimationFrame(() => {
       if (grew && count > 0) {
         const last = usable[count - 1];
         const node = last?.id
           ? spanRefs.current.get(String(last.id))
           : null;
-        if (node) {
-          node.scrollIntoView({ block: 'start', behavior: 'auto' });
+        if (node && box) {
+          scrollChildIntoBox(box, node, { block: 'start' });
           return;
         }
       }
       endRef.current?.scrollIntoView({ block: 'end', behavior: 'auto' });
     });
-  }, [segments, trailingLoading]);
+  }, [segments, trailingLoading, followLive]);
 
-  // Pair sync: scroll to active sentence only when the active id changes
-  // (hover/click) — not on every new segment, so live follow keeps working.
+  // Pair sync: scroll only this box to the active sentence.
   useEffect(() => {
     if (!activeId) return;
-    const node = spanRefs.current.get(String(activeId));
-    const box = boxRef.current;
-    if (!node || !box) return;
 
-    const boxRect = box.getBoundingClientRect();
-    const nodeRect = node.getBoundingClientRect();
+    const run = () => {
+      const node = spanRefs.current.get(String(activeId));
+      const box = boxRef.current;
+      if (!node || !box) return false;
+      scrollChildIntoBox(box, node, { block: 'nearest', smooth: true });
+      return true;
+    };
 
-    if (nodeRect.top < boxRect.top + 8) {
-      box.scrollBy({
-        top: nodeRect.top - boxRect.top - 8,
-        behavior: 'smooth',
-      });
-    } else if (nodeRect.bottom > boxRect.bottom - 8) {
-      box.scrollBy({
-        top: nodeRect.bottom - boxRect.bottom + 8,
-        behavior: 'smooth',
-      });
-    }
-  }, [activeId]);
+    // First paint after open may not have laid out yet — retry briefly.
+    if (run()) return undefined;
+    let tries = 0;
+    const id = window.setInterval(() => {
+      tries += 1;
+      if (run() || tries >= 10) window.clearInterval(id);
+    }, 50);
+    return () => window.clearInterval(id);
+  }, [activeId, segments]);
 
   const handleCopy = async () => {
     if (!hasText) return;
