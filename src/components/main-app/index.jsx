@@ -456,7 +456,7 @@ const ToolCard = () => {
             />
           )}
 
-          <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center px-4 border-b">
+          <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center px-4 border-b shrink-0">
             <div className="flex items-center gap-1">
               <LogoWave />
               <Logo variant="clear" asLink={false} eager />
@@ -466,54 +466,59 @@ const ToolCard = () => {
             </div>
           </div>
 
-          <div className="h-[6vh] landscape:!h-[9%] border border-[var(--accent2)] rounded-md mx-4 my-3 flex items-center justify-between">
-            <Timer />
-            <div className="h-full flex items-center justify-center flex-1">
-              {audioContext &&
-                visualChannel === 'speaker' &&
-                sourceNodeSpeaker && (
-                  <AudioBarsVisualizer
-                    key={`speaker-${audioGraphEpoch}`}
-                    audioContext={audioContext}
-                    sourceNode={sourceNodeSpeaker}
-                  />
-                )}
-              {audioContext &&
-                visualChannel === 'microphone' &&
-                sourceNodeMic && (
-                  <AudioBarsVisualizer
-                    key={`mic-${audioGraphEpoch}`}
-                    audioContext={audioContext}
-                    sourceNode={sourceNodeMic}
-                  />
-                )}
+          <div
+            id="speakflow-tool-body"
+            className="relative h-[76vh] landscape:!h-[88%] flex flex-col"
+          >
+            <div className="h-[6vh] landscape:!h-[9%] border border-[var(--accent2)] rounded-md mx-4 my-3 flex items-center justify-between shrink-0">
+              <Timer />
+              <div className="h-full flex items-center justify-center flex-1">
+                {audioContext &&
+                  visualChannel === 'speaker' &&
+                  sourceNodeSpeaker && (
+                    <AudioBarsVisualizer
+                      key={`speaker-${audioGraphEpoch}`}
+                      audioContext={audioContext}
+                      sourceNode={sourceNodeSpeaker}
+                    />
+                  )}
+                {audioContext &&
+                  visualChannel === 'microphone' &&
+                  sourceNodeMic && (
+                    <AudioBarsVisualizer
+                      key={`mic-${audioGraphEpoch}`}
+                      audioContext={audioContext}
+                      sourceNode={sourceNodeMic}
+                    />
+                  )}
+              </div>
+              <div className="w-[40px] h-full flex items-center justify-center">
+                <img
+                  src={
+                    uiIconMode === 'microphone'
+                      ? '/images/buttons/microphone.png'
+                      : uiIconMode === 'speaker'
+                        ? '/images/buttons/speaker.png'
+                        : '/images/buttons/auto.png'
+                  }
+                  alt="active channel"
+                  className="w-5 h-5 mr-2"
+                  style={{
+                    width: uiIconMode === 'speaker' ? '20px' : '25px',
+                    height: uiIconMode === 'speaker' ? '20px' : '25px',
+                  }}
+                />
+              </div>
             </div>
-            <div className="w-[40px] h-full flex items-center justify-center">
-              <img
-                src={
-                  uiIconMode === 'microphone'
-                    ? '/images/buttons/microphone.png'
-                    : uiIconMode === 'speaker'
-                      ? '/images/buttons/speaker.png'
-                      : '/images/buttons/auto.png'
-                }
-                alt="active channel"
-                className="w-5 h-5 mr-2"
-                style={{
-                  width: uiIconMode === 'speaker' ? '20px' : '25px',
-                  height: uiIconMode === 'speaker' ? '20px' : '25px',
-                }}
-              />
-            </div>
-          </div>
 
-          <div className="h-[66vh] landscape:!h-[75%] px-4 pb-4 flex flex-col gap-3">
-            <div className="flex-1 min-h-0">
-              <LiveTextPanels />
-            </div>
-            <div className="h-[6vh] landscape:!h-[12%] flex flex-row items-center justify-between">
-              <PlayModePanel />
-              <SaveRecordsPanel />
+            <div className="flex-1 min-h-0 px-4 pb-4 flex flex-col gap-3">
+              <div className="flex-1 min-h-0">
+                <LiveTextPanels />
+              </div>
+              <div className="h-[6vh] landscape:!h-[12%] flex flex-row items-center justify-between shrink-0">
+                <PlayModePanel />
+                <SaveRecordsPanel />
+              </div>
             </div>
           </div>
 

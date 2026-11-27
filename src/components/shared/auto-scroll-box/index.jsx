@@ -3,7 +3,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import Text from '../text/text';
 import { IoCopyOutline } from 'react-icons/io5';
+import { MdOpenInFull } from 'react-icons/md';
 import LoaderDots from '../loader-dots';
+import PanelActionButton from '../panel-action-button';
 
 const AutoScrollBox = ({
   text,
@@ -11,6 +13,8 @@ const AutoScrollBox = ({
   height = '100%',
   className = '',
   showCopy = true,
+  showExpand = false,
+  onExpand,
   trailingLoading = false,
   trailingLabel = 'Listening…',
 }) => {
@@ -92,19 +96,28 @@ const AutoScrollBox = ({
       </div>
 
       {showCopy && (
-        <button
-          type="button"
+        <PanelActionButton
           onClick={handleCopy}
           disabled={!hasText}
-          aria-label="Copy text"
-          className="absolute top-2 right-2 rounded-full w-10 h-10 backdrop-blur-[2px] bg-white/30 border border-gray-400 hover:bg-white/70 disabled:opacity-20 flex items-center justify-center transition-opacity outline-none focus:ring-2 focus:ring-[var(--accent)]"
+          ariaLabel="Copy text"
+          className="top-2 right-2"
         >
-          <IoCopyOutline size={20} color="#017683" />
-        </button>
+          <IoCopyOutline size={16} color="#017683" />
+        </PanelActionButton>
+      )}
+
+      {showExpand && (
+        <PanelActionButton
+          onClick={onExpand}
+          ariaLabel="Expand panel"
+          className="bottom-2 right-2"
+        >
+          <MdOpenInFull size={16} color="#017683" />
+        </PanelActionButton>
       )}
 
       <div
-        className={`pointer-events-none absolute bottom-2 right-2 rounded-md px-2 py-1 bg-black/70 text-white transition-opacity ${
+        className={`pointer-events-none absolute bottom-2 left-2 rounded-md px-2 py-1 bg-black/70 text-white transition-opacity ${
           copied ? 'opacity-100' : 'opacity-0'
         }`}
       >

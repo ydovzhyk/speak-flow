@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import AutoScrollBox from '@/components/shared/auto-scroll-box';
 import LinkedScrollBox from '@/components/shared/linked-scroll-box';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
@@ -12,6 +13,8 @@ import {
   getDeepgramStatus,
 } from '@/redux/technical/technical-selectors';
 import { getLangLabel } from '@/utils/langLabel';
+
+const TOOL_BODY_ID = 'speakflow-tool-body';
 
 const LiveTextPanels = ({ transcript, translation, className = '' }) => {
   const ctx = typeof useSocketContext === 'function' ? useSocketContext() : {};
@@ -28,12 +31,17 @@ const LiveTextPanels = ({ transcript, translation, className = '' }) => {
     deepgramStatus && activeBtn !== 'pause' && activeBtn !== 'stop';
 
   const [activeId, setActiveId] = useState(null);
+  const [expandedPanel, setExpandedPanel] = useState(null); // 'transcript' | 'translation' | null
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(typeof document !== 'undefined');
+  }, []);
 
   const onActivate = useCallback(id => {
     setActiveId(id ? String(id) : null);
   }, []);
 
-  // Linked mode only for live session segments (not for plain saved record strings).
   const useLinked =
     !transcript &&
     !translation &&
@@ -51,50 +59,88 @@ const LiveTextPanels = ({ transcript, translation, className = '' }) => {
         .map(s => ({ id: String(s.id), text: s.target }))
     : [];
 
+  const showExpand = !transcript && !translation;
+
+  const renderPanel = (kind, { expanded = false } = {}) => {
+    const isTranscript = kind === 'transcript';
+    const placeholder = isTranscript
+      ? `Live transcription (${inputLabel})`
+      : `Live translation (${outputLabel})`;
+    const trailingLabel = isTranscript ? 'Listening' : 'Translating';
+    const onExpand = showExpand
+      ? () => setExpandedPanel(kind)
+      : undefined;
+
+    if (useLinked) {
+      return (
+        <LinkedScrollBox
+          segments={isTranscript ? sourceSegments : targetSegments}
+          activeId={activeId}
+          onActivate={onActivate}
+          placeholder={placeholder}
+          trailingLoading={recordingActive}
+          trailingLabel={trailingLabel}
+          showExpand={showExpand && !expanded}
+          onExpand={onExpand}
+          showCopy
+        />
+      );
+    }
+
+    return (
+      <AutoScrollBox
+        text={isTranscript ? transcriptText : translationText}
+        placeholder={placeholder}
+        trailingLoading={recordingActive}
+        trailingLabel={trailingLabel}
+        showExpand={showExpand && !expanded}
+        onExpand={onExpand}
+        showCopy
+      />
+    );
+  };
+
+  const toolBody =
+    portalReady && typeof document !== 'undefined'
+      ? document.getElementById(TOOL_BODY_ID)
+      : null;
+
+  const expandedOverlay =
+    expandedPanel && toolBody
+      ? createPortal(
+          <div className="absolute inset-0 z-20 bg-white flex flex-col px-4 pb-4 pt-2">
+            <div className="flex justify-end items-center shrink-0 mb-2 min-h-[28px]">
+              <button
+                type="button"
+                onClick={() => setExpandedPanel(null)}
+                className="text-sm text-[var(--text-accent)] hover:text-[var(--text-main)]"
+                aria-label="Close expanded panel"
+              >
+                ✖
+              </button>
+            </div>
+            <div className="flex-1 min-h-0">
+              {renderPanel(expandedPanel, { expanded: true })}
+            </div>
+          </div>,
+          toolBody
+        )
+      : null;
+
   return (
     <div
       className={`w-full h-full min-h-0 flex flex-col gap-3 overflow-hidden ${className}`}
     >
       <div className="flex-1 min-h-0 overflow-auto">
-        {useLinked ? (
-          <LinkedScrollBox
-            segments={sourceSegments}
-            activeId={activeId}
-            onActivate={onActivate}
-            placeholder={`Live transcription (${inputLabel})`}
-            trailingLoading={recordingActive}
-            trailingLabel="Listening"
-          />
-        ) : (
-          <AutoScrollBox
-            text={transcriptText}
-            placeholder={`Live transcription (${inputLabel})`}
-            trailingLoading={recordingActive}
-            trailingLabel="Listening"
-          />
-        )}
+        {renderPanel('transcript')}
       </div>
       <div className="flex-1 min-h-0 overflow-auto">
-        {useLinked ? (
-          <LinkedScrollBox
-            segments={targetSegments}
-            activeId={activeId}
-            onActivate={onActivate}
-            placeholder={`Live translation (${outputLabel})`}
-            trailingLoading={recordingActive}
-            trailingLabel="Translating"
-          />
-        ) : (
-          <AutoScrollBox
-            text={translationText}
-            placeholder={`Live translation (${outputLabel})`}
-            trailingLoading={recordingActive}
-            trailingLabel="Translating"
-          />
-        )}
+        {renderPanel('translation')}
       </div>
+      {expandedOverlay}
     </div>
   );
 };
 
 export default LiveTextPanels;
+export { TOOL_BODY_ID };
