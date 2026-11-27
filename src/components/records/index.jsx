@@ -342,7 +342,7 @@ const Records = () => {
           <div>
             <Button
               btnClass="btnPlain"
-              text="Get Records"
+              text="Saved Records"
               onClick={() => dispatch(setTypeOperationRecords('GetRecords'))}
               textColor="text-black"
             />
@@ -356,7 +356,7 @@ const Records = () => {
           <div>
             <Button
               btnClass="btnPlain"
-              text="Save Records"
+              text="Save"
               onClick={() => dispatch(setTypeOperationRecords('SaveRecords'))}
               textColor="text-black"
             />
