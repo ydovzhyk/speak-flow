@@ -523,9 +523,9 @@ const ToolCard = () => {
           </div>
 
           <div
-            className={`absolute top-0 right-0 h-full w-full bg-white border-l-2 border-teal-700 shadow-lg transform transition-transform duration-300 ${panel ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
+            className={`absolute inset-0 bg-white overflow-hidden transform transition-transform duration-300 ${panel ? 'translate-x-0' : 'translate-x-full'} flex flex-col`}
           >
-            <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center p-4 border-b">
+            <div className="h-[9vh] landscape:!h-[12%] flex justify-between items-center p-4 border-b shrink-0">
               <h2 className="font-semibold text-[var(--accent2)]">
                 {panel ? PanelTitles[panel] : ''}
               </h2>
@@ -541,15 +541,22 @@ const ToolCard = () => {
                 ✖
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto thin-scrollbar p-4 min-h-[74vh] landscape:!min-h-[74%]">
-              <PanelContent active={panel} />
+            <div className="relative flex-1 min-h-0 overflow-hidden">
+              <div className="h-full overflow-y-auto thin-scrollbar p-4">
+                <PanelContent active={panel} />
+              </div>
+              {/* Expand from Records/Save stays inside the side panel — no card-border clash */}
+              <div
+                id="speakflow-panel-expand-host"
+                className="absolute inset-0 z-30 pointer-events-none overflow-hidden"
+              />
             </div>
           </div>
 
-          {/* Above side panels so expand from Records matches live behavior */}
+          {/* Live-tool expand: below main header, clipped by the card */}
           <div
             id="speakflow-expand-host"
-            className="absolute left-0 right-0 bottom-0 top-[9vh] landscape:!top-[12%] z-[70] pointer-events-none"
+            className="absolute inset-x-0 bottom-0 top-[9vh] landscape:!top-[12%] z-[60] pointer-events-none overflow-hidden"
           />
         </div>
       </div>

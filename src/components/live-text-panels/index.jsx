@@ -15,6 +15,7 @@ import {
 import { getLangLabel } from '@/utils/langLabel';
 
 const EXPAND_HOST_ID = 'speakflow-expand-host';
+const PANEL_EXPAND_HOST_ID = 'speakflow-panel-expand-host';
 const TOOL_BODY_ID = 'speakflow-tool-body';
 
 const LiveTextPanels = ({
@@ -120,11 +121,21 @@ const LiveTextPanels = ({
     );
   };
 
-  const expandHost =
-    portalReady && typeof document !== 'undefined'
-      ? document.getElementById(EXPAND_HOST_ID) ||
+  const expandHost = (() => {
+    if (!portalReady || typeof document === 'undefined') return null;
+    // Saved Records / Save: expand inside the side panel so it cannot overlap the card border.
+    if (!liveMode) {
+      return (
+        document.getElementById(PANEL_EXPAND_HOST_ID) ||
+        document.getElementById(EXPAND_HOST_ID) ||
         document.getElementById(TOOL_BODY_ID)
-      : null;
+      );
+    }
+    return (
+      document.getElementById(EXPAND_HOST_ID) ||
+      document.getElementById(TOOL_BODY_ID)
+    );
+  })();
 
   const expandedOverlay =
     expandedPanel && expandHost
@@ -166,4 +177,4 @@ const LiveTextPanels = ({
 };
 
 export default LiveTextPanels;
-export { TOOL_BODY_ID, EXPAND_HOST_ID };
+export { TOOL_BODY_ID, EXPAND_HOST_ID, PANEL_EXPAND_HOST_ID };

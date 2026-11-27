@@ -337,9 +337,9 @@ const Records = () => {
         ]: '100%',
       }}
     >
-      <div className="w-full h-[40px] flex flex-row justify-around gap-[3px] mt-[-1px] mr-[-4px]">
+      <div className="w-full h-[40px] flex flex-row justify-around gap-[3px] mt-[-1px] overflow-hidden">
         <div
-          className={`w-[calc(50%)] rounded-t-md border border-[rgba(82,85,95,0.2)] border-l-transparent flex justify-center items-center ${
+          className={`w-[calc(50%)] rounded-t-md border border-[rgba(82,85,95,0.2)] border-l-0 flex justify-center items-center ${
             effectiveType === 'GetRecords' ? 'border-b-0' : ''
           }`}
         >
