@@ -19,7 +19,6 @@ import Button from '../shared/button';
 import { useTranslate } from '@/utils/translating/translating';
 import { fields } from '../shared/text-field/fields';
 import TextField from '../shared/text-field';
-import TextareaField from '../shared/textarea-field';
 import Text from '../shared/text/text';
 import LiveTextPanels from '../live-text-panels';
 
@@ -33,8 +32,6 @@ const SaveForm = () => {
     resetTranslation,
   } = useSocketContext();
 
-  const tTranscript = useTranslate('Transcript');
-  const tTranslation = useTranslate('Translation');
   const tRequired = useTranslate('Required field');
   const tTitleMin = useTranslate('Title must have at least 2 characters');
   const tNothingToSave = useTranslate('Nothing to save yet.');
@@ -53,15 +50,15 @@ const SaveForm = () => {
               : String(s.target),
         }))
     : [];
+  const hasPairedSegments = pairedSegments.length > 0;
+  const hasAnyText = !!(trimmedTranscript || trimmedTranslation);
 
   const [btnStatus, setBtnStatus] = useState('Save');
 
-  const { control, register, handleSubmit, reset } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     mode: 'onSubmit',
     defaultValues: {
       title: '',
-      transcript: trimmedTranscript ? trimmedTranscript : '',
-      translation: trimmedTranslation ? trimmedTranslation : '',
     },
   });
 
@@ -72,7 +69,7 @@ const SaveForm = () => {
       transcript: trimmedTranscript,
       translation: trimmedTranslation,
       savedAt: new Date().toISOString(),
-      ...(pairedSegments.length > 0 ? { segments: pairedSegments } : {}),
+      ...(hasPairedSegments ? { segments: pairedSegments } : {}),
     };
     try {
       await dispatch(saveRecord(userData)).unwrap();
@@ -80,17 +77,18 @@ const SaveForm = () => {
       resetTranscript();
       resetTranslation();
       setBtnStatus('Save');
-      reset({ title: '', transcript: '', translation: '' });
+      reset({ title: '' });
     } catch (err) {
       setBtnStatus('Save');
     }
   };
 
   return (
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={handleSubmit(onSubmit)}
-      >
+    <form
+      className="flex flex-col gap-1.5 h-full min-h-0"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <div className="shrink-0">
         <Controller
           control={control}
           name="title"
@@ -108,36 +106,33 @@ const SaveForm = () => {
             />
           )}
         />
+      </div>
 
-        <div className="grid grid-cols-1 gap-3">
-          <TextareaField
-            label={tTranscript}
-            name="transcript"
-            register={register}
-            placeholder={tNothingToSave}
-            rows={3}
-            showCounter={false}
+      <div className="flex-1 min-h-0">
+        {hasPairedSegments ? (
+          <LiveTextPanels segments={pairedSegments} compact />
+        ) : hasAnyText ? (
+          <LiveTextPanels
+            transcript={trimmedTranscript}
+            translation={trimmedTranslation}
+            compact
           />
-          <TextareaField
-            label={tTranslation}
-            name="translation"
-            register={register}
-            placeholder={tNothingToSave}
-            rows={3}
-            showCounter={false}
-          />
-        </div>
+        ) : (
+          <div className="h-full min-h-[160px] rounded-md border border-[var(--accent2)] p-3 text-sm text-gray-600">
+            {tNothingToSave}
+          </div>
+        )}
+      </div>
 
-        <div className="flex items-center justify-center">
-          <Button
-            text={btnStatus}
-            btnClass="btnDark"
-            type="submit"
-            disabled={!trimmedTranscript && !trimmedTranslation}
-          />
-        </div>
-      </form>
-
+      <div className="flex items-center justify-center shrink-0 pt-1">
+        <Button
+          text={btnStatus}
+          btnClass="btnDark"
+          type="submit"
+          disabled={!hasAnyText}
+        />
+      </div>
+    </form>
   );
 };
 
@@ -338,9 +333,12 @@ const Records = () => {
     <div
       className="flex flex-col border border-[rgba(82,85,95,0.2)] border-t-transparent rounded-md"
       style={{
-        [effectiveType === 'GetRecords' && selectedRecord
-          ? 'height'
-          : 'minHeight']: '100%',
+        [
+          (effectiveType === 'GetRecords' && selectedRecord) ||
+          effectiveType === 'SaveRecords'
+            ? 'height'
+            : 'minHeight'
+        ]: '100%',
       }}
     >
       <div className="w-full h-[40px] flex flex-row justify-around gap-[3px] mt-[-1px] mr-[-4px]">
@@ -376,7 +374,8 @@ const Records = () => {
 
       <div
         className={`w-full lg:landscape:!h-[calc(100%-40px)] portrait:h-[calc(100%-40px)] landscape:!h-auto landscape:max-h-[calc(100%-40px)] flex flex-col ${
-          effectiveType === 'GetRecords' && selectedRecord
+          (effectiveType === 'GetRecords' && selectedRecord) ||
+          effectiveType === 'SaveRecords'
             ? 'gap-2 pt-3 px-3 pb-3'
             : 'gap-5 pt-9 px-5 pb-5'
         }`}
