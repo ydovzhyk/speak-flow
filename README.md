@@ -4,6 +4,10 @@ Live speech transcription and translation web app. Captures microphone or tab au
 
 **Live:** [https://speakflow.art](https://speakflow.art)
 
+SpeakFlow is **under active development**. While in this stage, monthly recording time is limited to **20 minutes** for guests and **40 minutes** for registered users (enforced by the backend).
+
+**Public pages:** [How it works](https://speakflow.art/how-it-works) · [Privacy](https://speakflow.art/privacy) · [Terms](https://speakflow.art/terms)
+
 ---
 
 ## Features
@@ -12,10 +16,11 @@ Live speech transcription and translation web app. Captures microphone or tab au
 - Input/output language selection (30+ languages)
 - Audio sources: microphone, speaker (tab capture), auto-switch
 - Record, pause, and stop with active-time usage tracking
-- Guest and registered user modes with monthly quotas
+- Guest and registered user modes with monthly quotas (20 / 40 min while in development)
 - Email/password auth and Google OAuth
-- Saved transcription records
+- Saved transcription records with linked sentence highlight
 - Settings, contact form, responsive layout
+- INFO guide + Privacy / Terms / How it works pages
 
 ---
 
