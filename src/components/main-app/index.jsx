@@ -433,9 +433,9 @@ const ToolCard = () => {
   const visualChannel = activeLine === 'auto' ? activeChannel : activeLine;
 
   return (
-    <div className="flex flex-row items-center justify-center pr-[27px] w-full max-w-[390px] overflow-hidden">
-      <div className="w-full h-[100vh] landscape:!h-[570px] lg:landscape:!h-[100vh] relative inline-flex items-center justify-center">
-        <div className="absolute top-1/2 -translate-y-1/2 -right-[54px] flex flex-col gap-[55px]">
+    <div className="box-border w-full max-w-[442px] px-2 overflow-visible">
+      <div className="relative w-[calc(100%-48px)] h-[100vh] landscape:!h-[570px] lg:landscape:!h-[100vh] inline-flex items-center justify-center">
+        <div className="absolute top-1/2 -translate-y-1/2 left-full ml-1 flex flex-col gap-[55px]">
           {visibleTabs.map(t => (
             <EarButton
               key={t.key}
