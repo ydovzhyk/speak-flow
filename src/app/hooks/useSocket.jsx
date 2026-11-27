@@ -5,12 +5,19 @@ import {
   setDeepgramStatus,
   pushTranscript,
   pushTranslation,
+  upsertSourceSegment,
+  upsertTargetSegment,
+  hydrateSegmentsFromArrays,
+  clearLocalTexts,
 } from '@/redux/technical/technical-slice';
 import {
   getInputLanguage,
   getOutputLanguage,
   getTranscriptJoined,
   getTranslationJoined,
+  getTranscriptArr,
+  getTranslationArr,
+  getSegments,
 } from '@/redux/technical/technical-selectors';
 import { getUser } from '@/redux/auth/auth-selectors';
 import { useStreamingParagraph } from '@/utils/useStreamingParagraph';
@@ -28,7 +35,6 @@ import { normalizeSocketSegment } from '@/utils/normalizeSocketSegment';
 const STORAGE_KEY = 'speakflow.settings';
 const serverURL = 'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 // const serverURL = 'http://localhost:4000';
-const MAX_LIVE_SEGMENTS = 200;
 
 function readSettings() {
   try {
@@ -148,6 +154,10 @@ const useSocket = () => {
   const user = useSelector(getUser);
   const persistedTranscript = useSelector(getTranscriptJoined);
   const persistedTranslation = useSelector(getTranslationJoined);
+  const transcriptArr = useSelector(getTranscriptArr);
+  const translationArr = useSelector(getTranslationArr);
+  const segments = useSelector(getSegments);
+  const hydratedLegacyRef = useRef(false);
   const handshakeIdRef = useRef(null);
   const identityRetryRef = useRef(false);
   const notifySocketErrorRef = useRef(createSocketErrorNotifier());
@@ -263,16 +273,14 @@ const useSocket = () => {
     seed: seedTranslation,
   } = useStreamingParagraph(22);
 
-  // Paired sentence segments for linked highlight (id shared with translation).
-  const [segments, setSegments] = useState([]);
-
+  // Segments are source of truth when present (also after reload from persist).
   const transcriptText =
     segments.length > 0
       ? segments
           .map(s => s.source)
           .filter(Boolean)
           .join(' ')
-      : streamTranscriptText;
+      : streamTranscriptText.trim() || persistedTranscript;
 
   const translationText =
     segments.length > 0
@@ -280,13 +288,31 @@ const useSocket = () => {
           .map(s => s.target)
           .filter(Boolean)
           .join(' ')
-      : streamTranslationText;
+      : streamTranslationText.trim() || persistedTranslation;
+
+  // After reload: restore linked pairs from redux segments, or migrate legacy arrays.
+  useEffect(() => {
+    if (hydratedLegacyRef.current) return;
+    if (segments.length > 0) {
+      hydratedLegacyRef.current = true;
+      return;
+    }
+    if (!transcriptArr?.length && !translationArr?.length) return;
+
+    hydratedLegacyRef.current = true;
+    dispatch(
+      hydrateSegmentsFromArrays({
+        sources: transcriptArr,
+        targets: translationArr,
+      })
+    );
+  }, [dispatch, segments.length, transcriptArr, translationArr]);
 
   const resetTranscript = useCallback(() => {
     resetTranscriptStream();
-    // Linked pairs live with the transcript session — clear both sides here.
-    setSegments([]);
-  }, [resetTranscriptStream]);
+    resetTranslationStream();
+    dispatch(clearLocalTexts());
+  }, [resetTranscriptStream, resetTranslationStream, dispatch]);
 
   const resetTranslation = useCallback(() => {
     resetTranslationStream();
@@ -403,17 +429,7 @@ const useSocket = () => {
       dispatch(pushTranscript(text));
 
       if (id) {
-        setSegments(prev => {
-          const next = prev.some(seg => seg.id === id)
-            ? prev.map(seg =>
-                seg.id === id ? { ...seg, source: text } : seg
-              )
-            : [...prev, { id, source: text, target: null }];
-
-          return next.length > MAX_LIVE_SEGMENTS
-            ? next.slice(-MAX_LIVE_SEGMENTS)
-            : next;
-        });
+        dispatch(upsertSourceSegment({ id, text }));
       }
     });
 
@@ -426,18 +442,7 @@ const useSocket = () => {
       dispatch(pushTranslation(text));
 
       if (id) {
-        setSegments(prev => {
-          if (prev.some(seg => seg.id === id)) {
-            return prev.map(seg =>
-              seg.id === id ? { ...seg, target: text } : seg
-            );
-          }
-          // Translation arrived without a known source (shouldn't happen often).
-          const next = [...prev, { id, source: '', target: text }];
-          return next.length > MAX_LIVE_SEGMENTS
-            ? next.slice(-MAX_LIVE_SEGMENTS)
-            : next;
-        });
+        dispatch(upsertTargetSegment({ id, text }));
       }
     });
 

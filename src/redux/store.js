@@ -33,7 +33,7 @@ const createPersistedTechnicalReducer = () => {
   const cfg = {
     key: 'tech-local',
     storage,
-    whitelist: ['transcriptArr', 'translationArr'],
+    whitelist: ['transcriptArr', 'translationArr', 'segments'],
   };
   return persistReducer(cfg, technicalReducer);
 };

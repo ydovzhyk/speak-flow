@@ -9,10 +9,7 @@ import {
   getSavedData,
   getHasAnyText,
 } from '@/redux/technical/technical-selectors';
-import {
-  setTypeOperationRecords,
-  clearLocalTexts,
-} from '@/redux/technical/technical-slice';
+import { setTypeOperationRecords } from '@/redux/technical/technical-slice';
 import {
   saveRecord,
   getRecords,
@@ -64,7 +61,6 @@ const SaveForm = () => {
       await dispatch(getRecords()).unwrap();
       resetTranscript();
       resetTranslation();
-      dispatch(clearLocalTexts());
       setBtnStatus('Save');
       reset({ title: '', transcript: '', translation: '' });
     } catch (err) {

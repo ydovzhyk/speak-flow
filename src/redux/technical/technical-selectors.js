@@ -17,11 +17,30 @@ export const getLine = ({ technical }) => technical.line;
 export const getSavedData = ({ technical }) => technical.savedData;
 export const getTranscriptArr = ({ technical }) => technical.transcriptArr;
 export const getTranslationArr = ({ technical }) => technical.translationArr;
-export const getTranscriptJoined = createSelector([getTranscriptArr], arr =>
-  arr.join(' ')
+export const getSegments = ({ technical }) => technical.segments || [];
+export const getTranscriptJoined = createSelector(
+  [getSegments, getTranscriptArr],
+  (segments, arr) => {
+    if (segments?.length) {
+      return segments
+        .map(s => s?.source)
+        .filter(Boolean)
+        .join(' ');
+    }
+    return (arr || []).join(' ');
+  }
 );
-export const getTranslationJoined = createSelector([getTranslationArr], arr =>
-  arr.join(' ')
+export const getTranslationJoined = createSelector(
+  [getSegments, getTranslationArr],
+  (segments, arr) => {
+    if (segments?.length) {
+      return segments
+        .map(s => s?.target)
+        .filter(Boolean)
+        .join(' ');
+    }
+    return (arr || []).join(' ');
+  }
 );
 export const getHasAnyText = createSelector(
   [getTranscriptJoined, getTranslationJoined],

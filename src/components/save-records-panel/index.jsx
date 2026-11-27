@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { getLogin } from '@/redux/auth/auth-selectors';
 import { useSocketContext } from '@/utils/socket-provider/socket-provider';
 import { getSavedData } from '@/redux/technical/technical-selectors';
-import { clearLocalTexts, setTypeOperationRecords } from '@/redux/technical/technical-slice';
+import { setTypeOperationRecords } from '@/redux/technical/technical-slice';
 import { useTranslate } from '@/utils/translating/translating';
 import RetroPlayerButton from '@/components/shared/retro-player-button';
 import {
@@ -56,10 +56,9 @@ const SaveRecordsPanel = () => {
 
   const handleClear = () => {
     if (clearDisabled) return;
-    // resetTranscript also clears linked sentence segments
+    // resetTranscript clears streams + persisted segments/arrays
     resetTranscript();
     resetTranslation();
-    dispatch(clearLocalTexts());
   };
 
   return (
