@@ -68,8 +68,6 @@ function Contact() {
         <Text type="tiny" as="p" fontWeight="light">
           <a
             href="/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-[var(--accent2)] underline underline-offset-2"
           >
             Privacy Policy
@@ -77,8 +75,6 @@ function Contact() {
           {' · '}
           <a
             href="/terms"
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-[var(--accent2)] underline underline-offset-2"
           >
             Terms of Use

@@ -33,24 +33,18 @@ const Info = () => {
         <div className="flex flex-col gap-1">
           <a
             href="/how-it-works"
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-[13px] text-[var(--accent2)] underline underline-offset-2 hover:text-[var(--text-main)] w-fit"
           >
             How it works →
           </a>
           <a
             href="/privacy"
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-[13px] text-[var(--accent2)] underline underline-offset-2 hover:text-[var(--text-main)] w-fit"
           >
             Privacy Policy →
           </a>
           <a
             href="/terms"
-            target="_blank"
-            rel="noopener noreferrer"
             className="text-[13px] text-[var(--accent2)] underline underline-offset-2 hover:text-[var(--text-main)] w-fit"
           >
             Terms of Use →
