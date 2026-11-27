@@ -45,10 +45,26 @@ const LinkedScrollBox = ({
   useEffect(() => {
     if (!activeId) return;
     const node = spanRefs.current.get(String(activeId));
-    if (!node) return;
+    const box = boxRef.current;
+    if (!node || !box) return;
 
     stickToBottomRef.current = false;
-    node.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    // Scroll only inside the panel, not the whole page.
+    const boxRect = box.getBoundingClientRect();
+    const nodeRect = node.getBoundingClientRect();
+
+    if (nodeRect.top < boxRect.top + 8) {
+      box.scrollBy({
+        top: nodeRect.top - boxRect.top - 8,
+        behavior: 'smooth',
+      });
+    } else if (nodeRect.bottom > boxRect.bottom - 8) {
+      box.scrollBy({
+        top: nodeRect.bottom - boxRect.bottom + 8,
+        behavior: 'smooth',
+      });
+    }
   }, [activeId, segments]);
 
   const handleCopy = async () => {
@@ -115,11 +131,15 @@ const LinkedScrollBox = ({
                         onActivate?.(id);
                       }
                     }}
-                    className={`cursor-pointer transition-colors duration-150 px-1 py-0.5 rounded-md [box-decoration-break:clone] [-webkit-box-decoration-break:clone] ${
+                    className="cursor-pointer transition-colors duration-150 px-1 py-0.5 rounded-md [box-decoration-break:clone] [-webkit-box-decoration-break:clone] hover:bg-[#017683]/20"
+                    style={
                       isActive
-                        ? 'bg-[var(--accent1)]/45'
-                        : 'hover:bg-[var(--accent2)]/20'
-                    }`}
+                        ? {
+                            backgroundColor: 'rgba(2, 153, 181, 0.45)',
+                            borderRadius: '6px',
+                          }
+                        : undefined
+                    }
                   >
                     {text}
                   </span>
