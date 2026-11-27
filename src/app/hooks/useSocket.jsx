@@ -3,11 +3,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import io from 'socket.io-client';
 import {
   setDeepgramStatus,
-  pushTranscript,
-  pushTranslation,
   upsertSourceSegment,
-  upsertTargetSegment,
-  hydrateSegmentsFromArrays,
+  upsertPairSegment,
   clearLocalTexts,
 } from '@/redux/technical/technical-slice';
 import {
@@ -15,8 +12,6 @@ import {
   getOutputLanguage,
   getTranscriptJoined,
   getTranslationJoined,
-  getTranscriptArr,
-  getTranslationArr,
   getSegments,
 } from '@/redux/technical/technical-selectors';
 import { getUser } from '@/redux/auth/auth-selectors';
@@ -154,10 +149,7 @@ const useSocket = () => {
   const user = useSelector(getUser);
   const persistedTranscript = useSelector(getTranscriptJoined);
   const persistedTranslation = useSelector(getTranslationJoined);
-  const transcriptArr = useSelector(getTranscriptArr);
-  const translationArr = useSelector(getTranslationArr);
   const segments = useSelector(getSegments);
-  const hydratedLegacyRef = useRef(false);
   const handshakeIdRef = useRef(null);
   const identityRetryRef = useRef(false);
   const notifySocketErrorRef = useRef(createSocketErrorNotifier());
@@ -290,24 +282,6 @@ const useSocket = () => {
           .join(' ')
       : streamTranslationText.trim() || persistedTranslation;
 
-  // After reload: restore linked pairs from redux segments, or migrate legacy arrays.
-  useEffect(() => {
-    if (hydratedLegacyRef.current) return;
-    if (segments.length > 0) {
-      hydratedLegacyRef.current = true;
-      return;
-    }
-    if (!transcriptArr?.length && !translationArr?.length) return;
-
-    hydratedLegacyRef.current = true;
-    dispatch(
-      hydrateSegmentsFromArrays({
-        sources: transcriptArr,
-        targets: translationArr,
-      })
-    );
-  }, [dispatch, segments.length, transcriptArr, translationArr]);
-
   const resetTranscript = useCallback(() => {
     resetTranscriptStream();
     resetTranslationStream();
@@ -420,30 +394,68 @@ const useSocket = () => {
       }
     });
 
+    // Immediate transcript (may arrive before translation is ready).
     s.on('final', payload => {
       const { id, text } = normalizeSocketSegment(payload);
       if (!text) return;
 
       console.log('🟢 Final transcript received:', id || '(no-id)', text);
       enqueueTranscript(text);
-      dispatch(pushTranscript(text));
 
       if (id) {
-        dispatch(upsertSourceSegment({ id, text }));
+        dispatch(upsertSourceSegment({ id, source: text }));
       }
     });
 
+    // Canonical paired update — never pair by array index on the client.
+    s.on('final-pair', payload => {
+      const id =
+        payload?.id != null && String(payload.id).length > 0
+          ? String(payload.id)
+          : '';
+      const source = String(payload?.source || '').trim();
+      const targetRaw = payload?.target;
+      const target =
+        targetRaw == null || String(targetRaw).trim() === ''
+          ? null
+          : String(targetRaw).trim();
+
+      if (!id) return;
+
+      console.log(
+        '🟢 Final pair received:',
+        id,
+        target ? 'translated' : 'skipped'
+      );
+
+      dispatch(
+        upsertPairSegment({
+          id,
+          source,
+          target,
+        })
+      );
+
+      if (target) {
+        enqueueTranslation(target);
+      }
+    });
+
+    // Legacy translation event (older servers / fallback).
     s.on('final-transleted', payload => {
       const { id, text } = normalizeSocketSegment(payload);
-      if (!text) return;
+      const source = String(payload?.source || '').trim();
+      if (!text || !id) return;
 
-      console.log('🟢 Final translation received:', id || '(no-id)', text);
+      console.log('🟢 Final translation received (legacy):', id, text);
       enqueueTranslation(text);
-      dispatch(pushTranslation(text));
-
-      if (id) {
-        dispatch(upsertTargetSegment({ id, text }));
-      }
+      dispatch(
+        upsertPairSegment({
+          id,
+          source,
+          target: text,
+        })
+      );
     });
 
     s.on('translation-inactivity-warning', payload => {

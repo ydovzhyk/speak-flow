@@ -46,7 +46,9 @@ const technical = createSlice({
     },
     upsertSourceSegment: (store, action) => {
       const id = String(action.payload?.id || '');
-      const source = String(action.payload?.text || '').trim();
+      const source = String(
+        action.payload?.source ?? action.payload?.text ?? ''
+      ).trim();
       if (!id || !source) return;
 
       const idx = store.segments.findIndex(s => s.id === id);
@@ -59,47 +61,52 @@ const technical = createSlice({
       if (store.segments.length > MAX_SEGMENTS) {
         store.segments = store.segments.slice(-MAX_SEGMENTS);
       }
+
+      // Keep legacy arrays derived from pairs (never used for linking).
+      store.transcriptArr = store.segments
+        .map(s => s.source)
+        .filter(Boolean)
+        .slice(-MAX_SEGMENTS);
     },
-    upsertTargetSegment: (store, action) => {
+    /**
+     * Full pair upsert — source + target bound by the same id.
+     * target may be null when translation was skipped.
+     */
+    upsertPairSegment: (store, action) => {
       const id = String(action.payload?.id || '');
-      const target = String(action.payload?.text || '').trim();
-      if (!id || !target) return;
+      if (!id) return;
+
+      const source = String(action.payload?.source || '').trim();
+      const rawTarget = action.payload?.target;
+      const target =
+        rawTarget == null || String(rawTarget).trim() === ''
+          ? null
+          : String(rawTarget).trim();
 
       const idx = store.segments.findIndex(s => s.id === id);
       if (idx >= 0) {
+        if (source) store.segments[idx].source = source;
         store.segments[idx].target = target;
       } else {
-        store.segments.push({ id, source: '', target });
+        store.segments.push({
+          id,
+          source: source || '',
+          target,
+        });
       }
 
       if (store.segments.length > MAX_SEGMENTS) {
         store.segments = store.segments.slice(-MAX_SEGMENTS);
       }
-    },
-    /**
-     * Rebuild linked segments from legacy plain string arrays (pre-id persist).
-     * Index pairing is best-effort when translation skips exist.
-     */
-    hydrateSegmentsFromArrays: (store, action) => {
-      if (store.segments.length > 0) return;
 
-      const sources = action.payload?.sources || store.transcriptArr || [];
-      const targets = action.payload?.targets || store.translationArr || [];
-      if (!sources.length && !targets.length) return;
-
-      const len = Math.max(sources.length, targets.length);
-      const next = [];
-      for (let i = 0; i < len; i += 1) {
-        const source = String(sources[i] || '').trim();
-        const target = String(targets[i] || '').trim();
-        if (!source && !target) continue;
-        next.push({
-          id: `restored-${i}`,
-          source: source || '',
-          target: target || null,
-        });
-      }
-      store.segments = next.slice(-MAX_SEGMENTS);
+      store.transcriptArr = store.segments
+        .map(s => s.source)
+        .filter(Boolean)
+        .slice(-MAX_SEGMENTS);
+      store.translationArr = store.segments
+        .map(s => s.target)
+        .filter(Boolean)
+        .slice(-MAX_SEGMENTS);
     },
     clearLocalTexts: store => {
       store.transcriptArr = [];
@@ -202,8 +209,7 @@ export const {
   pushTranscript,
   pushTranslation,
   upsertSourceSegment,
-  upsertTargetSegment,
-  hydrateSegmentsFromArrays,
+  upsertPairSegment,
   clearLocalTexts,
   setLine,
   setActiveBtn,
