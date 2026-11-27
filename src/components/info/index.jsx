@@ -15,9 +15,9 @@ const Info = () => {
         </Text>
         <Text type="small" as="p" fontWeight="light">
           When you open the website, you’ll see the main tool right away.
-          SpeakFlow works in any modern browser: on desktop you can record both
-          from your microphone and system audio (speakers), while on mobile you
-          can record only from the microphone.
+          SpeakFlow works in any modern browser: on desktop you can capture both
+          your microphone and meeting/tab audio; on mobile you can record only
+          from the microphone.
         </Text>
       </section>
 
@@ -37,8 +37,8 @@ const Info = () => {
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Transcription Language — the language you will speak or play audio
-              in.
+              Transcription Language — the language you will speak or hear in
+              the meeting.
             </Text>
           </li>
           <li>
@@ -49,8 +49,7 @@ const Info = () => {
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Audio Recording Source — choose where SpeakFlow captures sound
-              from (Microphone / Speaker / Auto).
+              Audio Recording Source — Microphone / Speaker / Auto.
             </Text>
           </li>
         </ul>
@@ -62,42 +61,93 @@ const Info = () => {
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Microphone</strong> — records only your microphone input
-              (your voice, meetings, interviews).
+              <strong>Microphone</strong> — only your mic (your own voice).
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Speaker</strong> — records only system audio (videos,
-              calls, presentations). Available on desktop browsers.
+              <strong>Speaker</strong> — tab/system audio from a shared browser
+              tab (colleagues in a meeting, videos). Desktop browsers.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Auto</strong> — automatically detects the active source
-              and switches between microphone and speakers during recording.
+              <strong>Auto</strong> — switches between microphone and shared
+              tab audio during recording.
             </Text>
           </li>
         </ul>
 
         <Text type="small" as="p" fontWeight="light">
-          If you are signed in, you can also customize your profile: update your
-          profile picture, change your nickname, or delete your account along
-          with all saved data if needed.
-        </Text>
-        <Text type="small" as="p" fontWeight="light">
-          Here you can also see your recording statistics — the total time
-          you’ve recorded with SpeakFlow and the duration of your last session.
-        </Text>
-        <Text type="small" as="p" fontWeight="light">
-          All preferences are saved automatically for the next time you open
-          SpeakFlow.
+          If you are signed in, you can also customize your profile and see your
+          recording statistics. Preferences are saved automatically.
         </Text>
       </section>
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          3. Sign in for extended features (AUTH tab)
+          3. Meetings (Google Meet, Zoom in browser, Teams, etc.)
+        </Text>
+        <Text type="small" as="p" fontWeight="light">
+          To hear and translate your colleagues, SpeakFlow needs the{' '}
+          <strong>meeting tab’s audio</strong> — not your whole screen.
+        </Text>
+        <ol className="list-decimal pl-5">
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              <strong>Join the meeting first</strong> (Google Meet or another
+              browser-based call) and keep that tab open.
+            </Text>
+          </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              Open SpeakFlow in a <strong>separate tab</strong> (or window).
+            </Text>
+          </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              In SETTINGS, set source to <strong>Speaker</strong> or{' '}
+              <strong>Auto</strong>.
+            </Text>
+          </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              Press <strong>Record</strong>. In the browser share dialog choose{' '}
+              <strong>Chrome Tab</strong> (or “A tab”) — select the{' '}
+              <strong>exact meeting tab</strong>, enable{' '}
+              <strong>Share tab audio</strong>, then click Share.
+            </Text>
+          </li>
+        </ol>
+        <Text type="small" as="p" fontWeight="light">
+          Important:
+        </Text>
+        <ul className="list-disc pl-5">
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              Do <strong>not</strong> share Entire Screen for meetings — tab
+              audio is more reliable and captures only the call.
+            </Text>
+          </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              Start the meeting <strong>before</strong> sharing. If you share
+              first and then open Meet, you may need to share the Meet tab
+              again.
+            </Text>
+          </li>
+          <li>
+            <Text type="small" as="span" fontWeight="light">
+              Your mic still captures only you; shared tab audio captures what
+              you hear from the meeting.
+            </Text>
+          </li>
+        </ul>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <Text type="tiny" as="h3" fontWeight="medium">
+          4. Sign in for extended features (AUTH tab)
         </Text>
         <ul className="list-disc pl-5">
           <li>
@@ -120,10 +170,10 @@ const Info = () => {
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          4. Start recording (MAIN screen)
+          5. Start recording (MAIN screen)
         </Text>
 
-        <ol className="list-disc pl-5">
+        <ol className="list-decimal pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
               Press <strong>Play/Record</strong> (bottom-left button).
@@ -131,60 +181,48 @@ const Info = () => {
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Your browser will ask for permission:
-              <br />– choose <strong>Entire Screen</strong>,
-              <br />– enable <strong>System Audio</strong>,
+              If Speaker/Auto is selected, your browser asks what to share:
+              <br />– prefer <strong>Chrome Tab</strong> + the meeting (or
+              media) tab,
+              <br />– turn on <strong>Share tab audio</strong>,
               <br />– click <strong>Share</strong>.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Start speaking (microphone) or play audio (speakers).
+              Speak into the mic and/or let meeting audio play — SpeakFlow
+              transcribes and translates live.
             </Text>
           </li>
         </ol>
 
         <Text type="small" as="p" fontWeight="light">
-          SpeakFlow automatically detects the active source: the mic/speaker
-          icon updates and the audio bars react to sound in real time.
+          The mic/speaker icon and audio bars show which source is active.
         </Text>
 
-        {/* PAUSE vs STOP */}
         <Text type="small" as="p" fontWeight="medium">
           Pause vs Stop
         </Text>
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Pause</strong> temporarily suspends recording but{' '}
-              <em>does not end</em> the current session. You can resume
-              instantly and continue in the same transcript. If a pause lasts
-              too long, the browser connection may drop and you might be asked
-              to grant microphone permissions again. All text captured{' '}
-              <em>before</em> the pause stays available. Press{' '}
-              <strong>Record</strong> again to continue — new text will be
-              appended to the existing content.
+              <strong>Pause</strong> temporarily suspends recording but does not
+              end the session. Resume with Record — new text is appended. A long
+              pause may drop the browser connection.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Stop</strong> fully stops recording and closes the active
-              session/connection. The captured <em>Transcript</em> and{' '}
-              <em>Translation</em> remain on screen so you can copy, clear, or
-              save them.
+              <strong>Stop</strong> ends the session. Transcript and Translation
+              stay on screen so you can copy or save them.
             </Text>
           </li>
         </ul>
-
-        <Text type="small" as="p" fontWeight="light">
-          The session timer above the visualizer shows how long you’ve been
-          recording.
-        </Text>
       </section>
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          5. Watch your live text appear (MAIN screen)
+          6. Watch your live text appear (MAIN screen)
         </Text>
         <Text type="small" as="p" fontWeight="light">
           The main screen is split into two panels:
@@ -192,30 +230,32 @@ const Info = () => {
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Transcript (top) — your original speech.
+              Transcript (top) — original speech.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Translation (bottom) — automatic live translation.
+              Translation (bottom) — live translation.
             </Text>
           </li>
         </ul>
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Auto-scroll — text flows to the bottom as it arrives.
+              Linked sentences — hover or click a sentence to highlight its pair
+              and scroll the other panel to it.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Copy — use the round button in the top-right of each panel to copy
-              all text.
+              Auto-scroll — while you stay at the bottom, new sentences come into
+              view.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Clear — removes all text from the panel.
+              Copy / Expand — buttons on each panel to copy text or open it full
+              size under the header.
             </Text>
           </li>
         </ul>
@@ -223,42 +263,20 @@ const Info = () => {
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          6. Save your session (RECORDS tab)
+          7. Save &amp; reopen (RECORDS tab)
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          If you are signed in, you can save your session: transcript +
-          translation + languages + timestamps. Saved records can be reopened
-          later.
+          If you are signed in: use <strong>Save</strong> to store the current
+          transcript and translation, then open them later under{' '}
+          <strong>Saved Records</strong> with the same linked highlight and
+          scroll. Search by word, phrase, or date. Delete records you no longer
+          need.
         </Text>
       </section>
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          7. Use Records (RECORDS tab)
-        </Text>
-        <ul className="list-disc pl-5">
-          <li>
-            <Text type="small" as="span" fontWeight="light">
-              Open a record to view details.
-            </Text>
-          </li>
-          <li>
-            <Text type="small" as="span" fontWeight="light">
-              Delete a record you no longer need.
-            </Text>
-          </li>
-          <li>
-            <Text type="small" as="span" fontWeight="light">
-              Search instantly: type any word, phrase, or a date (e.g.,
-              2025-09-03, 03.09.2025, 03/09/2025) — results filter as you type.
-            </Text>
-          </li>
-        </ul>
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <Text type="tiny" as="h3" fontWeight="medium">
-          9. Small but important details
+          8. Small but important details
         </Text>
         <ul className="list-disc pl-5">
           <li>
@@ -268,18 +286,12 @@ const Info = () => {
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Disabled buttons show tooltips (e.g., “Please sign in…”).
-            </Text>
-          </li>
-          <li>
-            <Text type="small" as="span" fontWeight="light">
               Nothing is saved automatically — you decide when to Save.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Copy works even while recording. If text gets long, use Clear,
-              Save, or both.
+              Copy works even while recording.
             </Text>
           </li>
         </ul>
@@ -287,12 +299,11 @@ const Info = () => {
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          10. Contact me (CONTACT tab)
+          9. Contact me (CONTACT tab)
         </Text>
         <Text type="small" as="p" fontWeight="light">
           Open the CONTACT tab, fill out the form (name, email, message), and
-          send your question or feedback. Your request goes directly to me — I’m
-          happy to help.
+          send your question or feedback.
         </Text>
       </section>
 
@@ -301,9 +312,8 @@ const Info = () => {
           That’s SpeakFlow
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          Choose your languages. Hit Record. Watch live Transcript & Translation
-          flow. Copy, Clear, Save, or Reopen sessions anytime. Sign in for
-          extended time and records.
+          Join the meeting → share that tab’s audio → hit Record → follow live
+          transcript and translation. Copy, expand, save, and reopen anytime.
         </Text>
       </section>
     </div>
