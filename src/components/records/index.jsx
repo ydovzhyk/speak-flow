@@ -25,8 +25,13 @@ import LiveTextPanels from '../live-text-panels';
 
 const SaveForm = () => {
   const dispatch = useDispatch();
-  const { transcriptText, translationText, resetTranscript, resetTranslation } =
-    useSocketContext();
+  const {
+    transcriptText,
+    translationText,
+    segments,
+    resetTranscript,
+    resetTranslation,
+  } = useSocketContext();
 
   const tTranscript = useTranslate('Transcript');
   const tTranslation = useTranslate('Translation');
@@ -36,6 +41,18 @@ const SaveForm = () => {
 
   const trimmedTranscript = (transcriptText || '').trim();
   const trimmedTranslation = (translationText || '').trim();
+  const pairedSegments = Array.isArray(segments)
+    ? segments
+        .filter(s => s?.id && s?.source)
+        .map(s => ({
+          id: String(s.id),
+          source: String(s.source || ''),
+          target:
+            s.target == null || String(s.target).trim() === ''
+              ? null
+              : String(s.target),
+        }))
+    : [];
 
   const [btnStatus, setBtnStatus] = useState('Save');
 
@@ -55,6 +72,7 @@ const SaveForm = () => {
       transcript: trimmedTranscript,
       translation: trimmedTranslation,
       savedAt: new Date().toISOString(),
+      ...(pairedSegments.length > 0 ? { segments: pairedSegments } : {}),
     };
     try {
       await dispatch(saveRecord(userData)).unwrap();
@@ -237,10 +255,15 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
             {selectedRecord.title || '(no title)'}
           </div>
           <div className="flex-1 min-h-0">
-            <LiveTextPanels
-              transcript={selectedRecord.transcript}
-              translation={selectedRecord.translation}
-            />
+            {Array.isArray(selectedRecord.segments) &&
+            selectedRecord.segments.length > 0 ? (
+              <LiveTextPanels segments={selectedRecord.segments} />
+            ) : (
+              <LiveTextPanels
+                transcript={selectedRecord.transcript}
+                translation={selectedRecord.translation}
+              />
+            )}
           </div>
           <div className="mb-[-10px]">
             <Button

@@ -16,11 +16,22 @@ import { getLangLabel } from '@/utils/langLabel';
 
 const TOOL_BODY_ID = 'speakflow-tool-body';
 
-const LiveTextPanels = ({ transcript, translation, className = '' }) => {
+const LiveTextPanels = ({
+  transcript,
+  translation,
+  segments: segmentsProp,
+  className = '',
+}) => {
   const ctx = typeof useSocketContext === 'function' ? useSocketContext() : {};
   const transcriptText = transcript ?? ctx?.transcriptText ?? '';
   const translationText = translation ?? ctx?.translationText ?? '';
-  const segments = Array.isArray(ctx?.segments) ? ctx.segments : [];
+  const liveMode =
+    transcript == null && translation == null && segmentsProp == null;
+  const segments = Array.isArray(segmentsProp)
+    ? segmentsProp
+    : liveMode && Array.isArray(ctx?.segments)
+      ? ctx.segments
+      : [];
   const inputLang = useSelector(getInputLanguage);
   const outputLang = useSelector(getOutputLanguage);
   const inputLabel = getLangLabel(inputLang);
@@ -28,7 +39,10 @@ const LiveTextPanels = ({ transcript, translation, className = '' }) => {
   const activeBtn = useSelector(getActiveBtn);
   const deepgramStatus = useSelector(getDeepgramStatus);
   const recordingActive =
-    deepgramStatus && activeBtn !== 'pause' && activeBtn !== 'stop';
+    liveMode &&
+    deepgramStatus &&
+    activeBtn !== 'pause' &&
+    activeBtn !== 'stop';
 
   const [activeId, setActiveId] = useState(null);
   const [expandedPanel, setExpandedPanel] = useState(null); // 'transcript' | 'translation' | null
@@ -38,14 +52,16 @@ const LiveTextPanels = ({ transcript, translation, className = '' }) => {
     setPortalReady(typeof document !== 'undefined');
   }, []);
 
+  // Reset highlight when opening another saved record.
+  useEffect(() => {
+    setActiveId(null);
+  }, [segmentsProp, transcript, translation]);
+
   const onActivate = useCallback(id => {
     setActiveId(id ? String(id) : null);
   }, []);
 
-  const useLinked =
-    !transcript &&
-    !translation &&
-    segments.some(s => s?.id && s?.source);
+  const useLinked = segments.some(s => s?.id && s?.source);
 
   const sourceSegments = useLinked
     ? segments
@@ -59,7 +75,7 @@ const LiveTextPanels = ({ transcript, translation, className = '' }) => {
         .map(s => ({ id: String(s.id), text: s.target }))
     : [];
 
-  const showExpand = !transcript && !translation;
+  const showExpand = liveMode;
 
   const renderPanel = (kind, { expanded = false } = {}) => {
     const isTranscript = kind === 'transcript';
