@@ -115,10 +115,10 @@ const LinkedScrollBox = ({
                         onActivate?.(id);
                       }
                     }}
-                    className={`rounded-sm cursor-pointer transition-colors duration-150 ${
+                    className={`cursor-pointer transition-colors duration-150 px-1 py-0.5 rounded-md [box-decoration-break:clone] [-webkit-box-decoration-break:clone] ${
                       isActive
-                        ? 'bg-[var(--accent1)]/35 outline outline-1 outline-[var(--accent1)]'
-                        : 'hover:bg-[var(--accent2)]/15'
+                        ? 'bg-[var(--accent1)]/45'
+                        : 'hover:bg-[var(--accent2)]/20'
                     }`}
                   >
                     {text}
