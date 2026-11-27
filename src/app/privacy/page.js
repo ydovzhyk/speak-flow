@@ -48,7 +48,10 @@ export default function PrivacyPage() {
           browser tab you choose to share (for example Google Meet, YouTube, or
           a movie tab). It turns speech into text and translates that text in
           near real time. Processing is <strong>not fully on-device</strong>:
-          audio and text are sent to cloud services through our backend.
+          audio and text are sent to cloud services through our backend. The
+          product is under active development; monthly recording time is
+          currently limited (about 20 minutes for guests, 40 minutes when signed
+          in).
         </p>
       </section>
 

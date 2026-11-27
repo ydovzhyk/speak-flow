@@ -147,7 +147,20 @@ export default function HowItWorksPage() {
 
       <section className="flex flex-col gap-2">
         <h2 className="text-xl font-medium text-[var(--accent2)]">
-          5. Save sessions
+          5. Development stage &amp; monthly limits
+        </h2>
+        <p className="text-[15px] leading-7">
+          SpeakFlow is under active development. While it is in this stage,
+          available recording time is limited to about{' '}
+          <strong>20 minutes per month</strong> for guests and about{' '}
+          <strong>40 minutes per month</strong> for registered users. Limits may
+          change as the product grows.
+        </p>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-xl font-medium text-[var(--accent2)]">
+          6. Save sessions
         </h2>
         <p className="text-[15px] leading-7">
           Sign in to save transcript and translation, reopen them later with the

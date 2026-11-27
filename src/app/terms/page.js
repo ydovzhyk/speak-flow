@@ -95,10 +95,13 @@ export default function TermsPage() {
           4. Accounts &amp; limits
         </h2>
         <p className="text-[15px] leading-7">
-          Guests and registered users may have different monthly recording
-          limits. You are responsible for keeping login credentials secure.
-          Saved records belong to your account workflow; export or copy text if
-          you need an offline copy. We may suspend abuse or technical harm.
+          SpeakFlow is under active development. During this stage, monthly
+          recording time is capped at about <strong>20 minutes</strong> for
+          guests (not signed in) and about <strong>40 minutes</strong> for
+          registered users. These limits may change. You are responsible for
+          keeping login credentials secure. Saved records belong to your account
+          workflow; export or copy text if you need an offline copy. We may
+          suspend abuse or technical harm.
         </p>
       </section>
 

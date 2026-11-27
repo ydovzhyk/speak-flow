@@ -14,6 +14,13 @@ const Info = () => {
           Live transcription &amp; translation for your voice and your computer
         </Text>
         <Text type="small" as="p" fontWeight="light">
+          SpeakFlow is under active development. While it is in this stage,
+          monthly recording time is limited:{' '}
+          <strong>20 minutes</strong> for guests (not signed in) and{' '}
+          <strong>40 minutes</strong> for registered users. Limits may change as
+          the product evolves.
+        </Text>
+        <Text type="small" as="p" fontWeight="light">
           On desktop: your microphone and audio playing on the computer —
           Google Meet, YouTube, movies, lectures. On mobile: microphone only —
           a live travel translator when someone speaks near you. The tool stays
@@ -207,7 +214,8 @@ const Info = () => {
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Extended recording time (guests have shorter sessions).
+              Higher monthly limit when signed in (40 min vs 20 min for
+              guests), while the product is in development.
             </Text>
           </li>
           <li>
