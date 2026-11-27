@@ -251,26 +251,22 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
       }`}
     >
       {selectedRecord && (
-        <div className="flex h-full flex-col gap-1.5">
-          <div className="font-medium text-sm leading-tight shrink-0">
+        <div className="flex h-full flex-col gap-3">
+          <div className="font-medium shrink-0">
             {selectedRecord.title || '(no title)'}
           </div>
           <div className="flex-1 min-h-0">
             {Array.isArray(selectedRecord.segments) &&
             selectedRecord.segments.length > 0 ? (
-              <LiveTextPanels
-                segments={selectedRecord.segments}
-                compact
-              />
+              <LiveTextPanels segments={selectedRecord.segments} />
             ) : (
               <LiveTextPanels
                 transcript={selectedRecord.transcript}
                 translation={selectedRecord.translation}
-                compact
               />
             )}
           </div>
-          <div className="shrink-0 -mb-1">
+          <div className="shrink-0">
             <Button
               text="Back to List"
               btnClass="btnPlain"
@@ -374,10 +370,11 @@ const Records = () => {
 
       <div
         className={`w-full lg:landscape:!h-[calc(100%-40px)] portrait:h-[calc(100%-40px)] landscape:!h-auto landscape:max-h-[calc(100%-40px)] flex flex-col ${
-          (effectiveType === 'GetRecords' && selectedRecord) ||
-          effectiveType === 'SaveRecords'
-            ? 'gap-2 pt-3 px-3 pb-3'
-            : 'gap-5 pt-9 px-5 pb-5'
+          effectiveType === 'GetRecords' && selectedRecord
+            ? 'gap-3 pt-5 px-4 pb-4'
+            : effectiveType === 'SaveRecords'
+              ? 'gap-2 pt-3 px-3 pb-3'
+              : 'gap-5 pt-9 px-5 pb-5'
         }`}
       >
         {effectiveType === 'GetRecords' ? (
