@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SitePageShell from '@/components/seo/site-page-shell';
 
 const SITE_URL = 'https://speakflow.art';
 
@@ -59,126 +60,124 @@ const howToJsonLd = {
 
 export default function HowItWorksPage() {
   return (
-    <div className="min-h-screen w-full bg-[#0b3d44] text-[#e8f4f5]">
+    <SitePageShell>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
       />
 
-      <div className="mx-auto max-w-3xl px-5 py-12 flex flex-col gap-10">
-        <header className="flex flex-col gap-4">
+      <header className="flex flex-col gap-3 -mt-2">
+        <h1 className="text-3xl font-semibold tracking-tight text-[var(--accent2)]">
+          How SpeakFlow works
+        </h1>
+        <p className="text-[16px] leading-7">
+          SpeakFlow is a live speech companion: it transcribes what it hears
+          and translates it instantly. On a computer that can be{' '}
+          <strong>your voice</strong> and{' '}
+          <strong>anything playing through a shared browser tab</strong> —
+          meetings, YouTube, movies. On a phone it uses the microphone as a
+          live translator when you travel or talk to people around you.
+        </p>
+      </header>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-xl font-medium text-[var(--accent2)]">
+          1. The tool in the center
+        </h2>
+        <p className="text-[15px] leading-7">
+          Open{' '}
           <Link
             href="/"
-            className="text-sm text-[#7fd4de] hover:text-white w-fit"
+            className="text-[var(--accent2)] underline underline-offset-2"
           >
-            ← Back to SpeakFlow tool
+            speakflow.art
           </Link>
-          <h1 className="text-3xl font-semibold tracking-tight text-white">
-            How SpeakFlow works
-          </h1>
-          <p className="text-[16px] leading-7 text-[#c5e0e4]">
-            SpeakFlow is a live speech companion: it transcribes what it hears
-            and translates it instantly. On a computer that can be{' '}
-            <strong className="text-white">your voice</strong> and{' '}
-            <strong className="text-white">
-              anything playing through a shared browser tab
-            </strong>{' '}
-            — meetings, YouTube, movies. On a phone it uses the microphone as a
-            live translator when you travel or talk to people around you.
-          </p>
-        </header>
+          . You land straight on the tool — no extra dashboard. Set languages
+          in SETTINGS, press Record, and watch Transcript and Translation fill
+          in live. Hover a sentence to highlight its pair.
+        </p>
+      </section>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-medium text-white">
-            1. The tool in the center
-          </h2>
-          <p className="text-[15px] leading-7 text-[#c5e0e4]">
-            Open{' '}
-            <Link href="/" className="text-white underline underline-offset-2">
-              speakflow.art
-            </Link>
-            . You land straight on the tool — no extra dashboard. Set languages
-            in SETTINGS, press Record, and watch Transcript and Translation
-            fill in live. Hover a sentence to highlight its pair.
-          </p>
-        </section>
+      <section className="flex flex-col gap-2">
+        <h2 className="text-xl font-medium text-[var(--accent2)]">
+          2. Desktop: microphone + computer audio
+        </h2>
+        <p className="text-[15px] leading-7">
+          <strong>Microphone</strong> captures what you say in a call or while
+          dictating. <strong>Speaker / tab audio</strong> captures what your
+          computer plays. <strong>Auto</strong> switches between them.
+        </p>
+        <p className="text-[15px] leading-7">
+          For Google Meet or another browser meeting: join the call first, keep
+          that tab open, open SpeakFlow in another tab, press Record, choose{' '}
+          <strong>Chrome Tab</strong>, select the meeting tab, enable{' '}
+          <strong>Share tab audio</strong>, then Share. Prefer a tab over Entire
+          Screen for reliable meeting audio.
+        </p>
+        <p className="text-[15px] leading-7">
+          The same tab-share flow works for YouTube and many browser-based
+          players when you want live captions and translation of what you are
+          watching.
+        </p>
+      </section>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-medium text-white">
-            2. Desktop: microphone + computer audio
-          </h2>
-          <p className="text-[15px] leading-7 text-[#c5e0e4]">
-            <strong className="text-white">Microphone</strong> captures what you
-            say in a call or while dictating.{' '}
-            <strong className="text-white">Speaker / tab audio</strong> captures
-            what your computer plays. <strong className="text-white">Auto</strong>{' '}
-            switches between them.
-          </p>
-          <p className="text-[15px] leading-7 text-[#c5e0e4]">
-            For Google Meet or another browser meeting: join the call first,
-            keep that tab open, open SpeakFlow in another tab, press Record,
-            choose <strong className="text-white">Chrome Tab</strong>, select
-            the meeting tab, enable{' '}
-            <strong className="text-white">Share tab audio</strong>, then Share.
-            Prefer a tab over Entire Screen for reliable meeting audio.
-          </p>
-          <p className="text-[15px] leading-7 text-[#c5e0e4]">
-            The same tab-share flow works for YouTube and many browser-based
-            players when you want live captions and translation of what you are
-            watching.
-          </p>
-        </section>
+      <section className="flex flex-col gap-2">
+        <h2 className="text-xl font-medium text-[var(--accent2)]">
+          3. Mobile: microphone travel mode
+        </h2>
+        <p className="text-[15px] leading-7">
+          Mobile browsers cannot share system audio. Use the microphone instead:
+          when someone explains directions in another language, or you need to
+          follow a conversation nearby, open SpeakFlow, allow the mic, and read
+          the live transcript and translation.
+        </p>
+      </section>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-medium text-white">
-            3. Mobile: microphone travel mode
-          </h2>
-          <p className="text-[15px] leading-7 text-[#c5e0e4]">
-            Mobile browsers cannot share system audio. Use the microphone
-            instead: when someone explains directions in another language, or
-            you need to follow a conversation nearby, open SpeakFlow, allow the
-            mic, and read the live transcript and translation.
-          </p>
-        </section>
+      <section className="flex flex-col gap-2">
+        <h2 className="text-xl font-medium text-[var(--accent2)]">
+          4. Why it exists
+        </h2>
+        <p className="text-[15px] leading-7">
+          SpeakFlow grew out of real international teamwork — keeping up when
+          meetings and content move quickly in another language. The goal is
+          simple: make foreign speech readable in the moment, whether it comes
+          from your mic or from your computer speakers.
+        </p>
+      </section>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-medium text-white">
-            4. Why it exists
-          </h2>
-          <p className="text-[15px] leading-7 text-[#c5e0e4]">
-            SpeakFlow grew out of real international teamwork — keeping up when
-            meetings and content move quickly in another language. The goal is
-            simple: make foreign speech readable in the moment, whether it comes
-            from your mic or from your computer speakers.
-          </p>
-        </section>
+      <section className="flex flex-col gap-2">
+        <h2 className="text-xl font-medium text-[var(--accent2)]">
+          5. Save sessions
+        </h2>
+        <p className="text-[15px] leading-7">
+          Sign in to save transcript and translation, reopen them later with the
+          same linked sentence highlighting, and search your records.
+        </p>
+      </section>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-xl font-medium text-white">5. Save sessions</h2>
-          <p className="text-[15px] leading-7 text-[#c5e0e4]">
-            Sign in to save transcript and translation, reopen them later with
-            the same linked sentence highlighting, and search your records.
-          </p>
-        </section>
-
-        <div className="pt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div className="pt-1 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <Link
+          href="/"
+          className="inline-flex items-center justify-center rounded-md bg-[#017683] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#0299b5] transition-colors"
+        >
+          Open the SpeakFlow tool
+        </Link>
+        <p className="text-sm">
           <Link
-            href="/"
-            className="inline-flex items-center justify-center rounded-md bg-[#017683] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#0299b5] transition-colors"
+            href="/privacy"
+            className="text-[var(--accent2)] underline underline-offset-2"
           >
-            Open the SpeakFlow tool
+            Privacy
           </Link>
-          <p className="text-sm text-[#9ec4c9]">
-            <Link href="/privacy" className="text-[#7fd4de] hover:text-white">
-              Privacy
-            </Link>
-            {' · '}
-            <Link href="/terms" className="text-[#7fd4de] hover:text-white">
-              Terms
-            </Link>
-          </p>
-        </div>
+          {' · '}
+          <Link
+            href="/terms"
+            className="text-[var(--accent2)] underline underline-offset-2"
+          >
+            Terms
+          </Link>
+        </p>
       </div>
-    </div>
+    </SitePageShell>
   );
 }
