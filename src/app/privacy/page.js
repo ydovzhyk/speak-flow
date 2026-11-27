@@ -41,9 +41,9 @@ export default function PrivacyPage() {
           an independent browser tool by{' '}
           <strong className="text-white">Yuriy Dovzhyk</strong>. This policy
           explains what data we process when you use live transcription and
-          translation. The previous domain{' '}
-          <strong className="text-white">speakflow.space</strong> pointed to
-          the same product before the move to speakflow.art.
+          translation. The product previously used the domain{' '}
+          <strong className="text-white">speakflow.space</strong>; that domain
+          is no longer operated by us. The only official site is speakflow.art.
         </p>
 
         <section className="flex flex-col gap-2">
