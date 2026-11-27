@@ -23,10 +23,12 @@ import {
   readStoredAuth,
 } from '@/utils/auth-token';
 import { toast } from 'react-toastify';
+import { normalizeSocketSegment } from '@/utils/normalizeSocketSegment';
 
 const STORAGE_KEY = 'speakflow.settings';
 const serverURL = 'https://speak-flow-server-fe4ec363ae5c.herokuapp.com';
 // const serverURL = 'http://localhost:4000';
+const MAX_LIVE_SEGMENTS = 200;
 
 function readSettings() {
   try {
@@ -248,24 +250,53 @@ const useSocket = () => {
   }, [user?._id, user?.email]);
 
   const {
-    displayedText: transcriptText,
+    displayedText: streamTranscriptText,
     enqueueSentence: enqueueTranscript,
-    reset: resetTranscript,
+    reset: resetTranscriptStream,
     seed: seedTranscript,
   } = useStreamingParagraph(22);
 
   const {
-    displayedText: translationText,
+    displayedText: streamTranslationText,
     enqueueSentence: enqueueTranslation,
-    reset: resetTranslation,
+    reset: resetTranslationStream,
     seed: seedTranslation,
   } = useStreamingParagraph(22);
+
+  // Paired sentence segments for linked highlight (id shared with translation).
+  const [segments, setSegments] = useState([]);
+
+  const transcriptText =
+    segments.length > 0
+      ? segments
+          .map(s => s.source)
+          .filter(Boolean)
+          .join(' ')
+      : streamTranscriptText;
+
+  const translationText =
+    segments.length > 0
+      ? segments
+          .map(s => s.target)
+          .filter(Boolean)
+          .join(' ')
+      : streamTranslationText;
+
+  const resetTranscript = useCallback(() => {
+    resetTranscriptStream();
+    // Linked pairs live with the transcript session — clear both sides here.
+    setSegments([]);
+  }, [resetTranscriptStream]);
+
+  const resetTranslation = useCallback(() => {
+    resetTranslationStream();
+  }, [resetTranslationStream]);
 
   const prepareForNewRecording = useCallback(() => {
     const pt = persistedTranscript.trim();
     const pl = persistedTranslation.trim();
-    const lt = transcriptText.trim();
-    const lv = translationText.trim();
+    const lt = streamTranscriptText.trim();
+    const lv = streamTranslationText.trim();
 
     if (pt && (!lt || (pt.length > lt.length && !lt.startsWith(pt.slice(0, 32))))) {
       seedTranscript(pt);
@@ -276,8 +307,8 @@ const useSocket = () => {
   }, [
     persistedTranscript,
     persistedTranslation,
-    transcriptText,
-    translationText,
+    streamTranscriptText,
+    streamTranslationText,
     seedTranscript,
     seedTranslation,
   ]);
@@ -363,20 +394,51 @@ const useSocket = () => {
       }
     });
 
-    s.on('final', transcript => {
-      console.log('🟢 Final transcript received:', transcript);
-      enqueueTranscript(transcript);
-      dispatch(pushTranscript(transcript));
+    s.on('final', payload => {
+      const { id, text } = normalizeSocketSegment(payload);
+      if (!text) return;
+
+      console.log('🟢 Final transcript received:', id || '(no-id)', text);
+      enqueueTranscript(text);
+      dispatch(pushTranscript(text));
+
+      if (id) {
+        setSegments(prev => {
+          const next = prev.some(seg => seg.id === id)
+            ? prev.map(seg =>
+                seg.id === id ? { ...seg, source: text } : seg
+              )
+            : [...prev, { id, source: text, target: null }];
+
+          return next.length > MAX_LIVE_SEGMENTS
+            ? next.slice(-MAX_LIVE_SEGMENTS)
+            : next;
+        });
+      }
     });
 
-    s.on('final-transleted', translation => {
-      console.log('🟢 Final translation received:', translation);
+    s.on('final-transleted', payload => {
+      const { id, text } = normalizeSocketSegment(payload);
+      if (!text) return;
 
-      const cleanTranslation = String(translation || '').trim();
-      if (!cleanTranslation) return;
+      console.log('🟢 Final translation received:', id || '(no-id)', text);
+      enqueueTranslation(text);
+      dispatch(pushTranslation(text));
 
-      enqueueTranslation(cleanTranslation);
-      dispatch(pushTranslation(cleanTranslation));
+      if (id) {
+        setSegments(prev => {
+          if (prev.some(seg => seg.id === id)) {
+            return prev.map(seg =>
+              seg.id === id ? { ...seg, target: text } : seg
+            );
+          }
+          // Translation arrived without a known source (shouldn't happen often).
+          const next = [...prev, { id, source: '', target: text }];
+          return next.length > MAX_LIVE_SEGMENTS
+            ? next.slice(-MAX_LIVE_SEGMENTS)
+            : next;
+        });
+      }
     });
 
     s.on('translation-inactivity-warning', payload => {
@@ -545,6 +607,7 @@ const useSocket = () => {
     disconnect,
     transcriptText,
     translationText,
+    segments,
     resetTranscript,
     resetTranslation,
     prepareForNewRecording,

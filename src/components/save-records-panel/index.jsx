@@ -56,6 +56,7 @@ const SaveRecordsPanel = () => {
 
   const handleClear = () => {
     if (clearDisabled) return;
+    // resetTranscript also clears linked sentence segments
     resetTranscript();
     resetTranslation();
     dispatch(clearLocalTexts());
