@@ -1,5 +1,4 @@
 import HomeClient from './home-client';
-import HomeSeoContent from '@/components/seo/home-seo-content';
 
 const SITE_URL = 'https://speakflow.art';
 
@@ -88,11 +87,21 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      {/* First viewport: the tool stays centered and unchanged */}
-      <HomeClient />
+      {/* Crawlable copy without taking layout space — keeps the tool compact when tiling */}
+      <section className="sr-only" aria-label="About SpeakFlow">
+        <h1>
+          SpeakFlow — Live transcription and translation for your voice and
+          your computer
+        </h1>
+        <p>
+          Transcribe and translate live from your microphone and from audio
+          playing on your computer — Google Meet, YouTube, movies, and more. On
+          mobile, use the microphone as a live travel translator. Read the full
+          guide at {SITE_URL}/how-it-works.
+        </p>
+      </section>
 
-      {/* Below the fold: crawlable product copy for SEO */}
-      <HomeSeoContent />
+      <HomeClient />
     </>
   );
 }

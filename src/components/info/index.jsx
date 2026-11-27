@@ -9,6 +9,26 @@ const Info = () => {
         SpeakFlow — User Guide
       </Text>
 
+      <section className="flex flex-col gap-2 rounded-md border border-[var(--accent2)] border-opacity-40 bg-[var(--clear-white)] p-3">
+        <Text type="tiny" as="h3" fontWeight="medium">
+          Live transcription &amp; translation for your voice and your computer
+        </Text>
+        <Text type="small" as="p" fontWeight="light">
+          On desktop: your microphone and audio playing on the computer —
+          Google Meet, YouTube, movies, lectures. On mobile: microphone only —
+          a live travel translator when someone speaks near you. The tool stays
+          in the center of the page; this INFO tab is the in-app guide.
+        </Text>
+        <a
+          href="/how-it-works"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[13px] text-[var(--accent2)] underline underline-offset-2 hover:text-[var(--text-main)] w-fit"
+        >
+          Open full “How it works” page →
+        </a>
+      </section>
+
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
           1. Open SpeakFlow
