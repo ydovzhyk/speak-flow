@@ -14,10 +14,10 @@ const Info = () => {
           1. Open SpeakFlow
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          When you open the website, you’ll see the main tool right away.
-          SpeakFlow works in any modern browser: on desktop you can capture both
-          your microphone and meeting/tab audio; on mobile you can record only
-          from the microphone.
+          When you open the website, you’ll see the main tool right away —
+          centered on the page. On desktop SpeakFlow can capture your
+          microphone and audio playing on your computer (meetings, YouTube,
+          movies). On mobile it uses the microphone as a live travel translator.
         </Text>
       </section>
 
@@ -37,8 +37,8 @@ const Info = () => {
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Transcription Language — the language you will speak or hear in
-              the meeting.
+              Transcription Language — the language you speak or hear (meeting,
+              video, or people around you).
             </Text>
           </li>
           <li>
@@ -61,19 +61,21 @@ const Info = () => {
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Microphone</strong> — only your mic (your own voice).
+              <strong>Microphone</strong> — your voice on desktop or mobile
+              (speaking in a call, dictation, or travel conversations).
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Speaker</strong> — tab/system audio from a shared browser
-              tab (colleagues in a meeting, videos). Desktop browsers.
+              <strong>Speaker</strong> — audio from a shared browser tab:
+              colleagues in a meeting, YouTube, films, lectures. Desktop
+              browsers.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Auto</strong> — switches between microphone and shared
-              tab audio during recording.
+              <strong>Auto</strong> — switches between your microphone and
+              shared tab audio in one session (desktop).
             </Text>
           </li>
         </ul>
@@ -86,17 +88,18 @@ const Info = () => {
 
       <section className="flex flex-col gap-2">
         <Text type="tiny" as="h3" fontWeight="medium">
-          3. Meetings (Google Meet, Zoom in browser, Teams, etc.)
+          3. Computer audio: meetings, YouTube, movies (desktop)
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          To hear and translate your colleagues, SpeakFlow needs the{' '}
-          <strong>meeting tab’s audio</strong> — not your whole screen.
+          To translate what your computer plays — colleagues in a call, a
+          YouTube video, a film — SpeakFlow needs that{' '}
+          <strong>tab’s audio</strong>, not the entire screen.
         </Text>
         <ol className="list-decimal pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Join the meeting first</strong> (Google Meet or another
-              browser-based call) and keep that tab open.
+              <strong>Start the source first</strong>: join Google Meet / Zoom
+              web / Teams, or open the YouTube/movie tab, and keep it open.
             </Text>
           </li>
           <li>
@@ -107,15 +110,14 @@ const Info = () => {
           <li>
             <Text type="small" as="span" fontWeight="light">
               In SETTINGS, set source to <strong>Speaker</strong> or{' '}
-              <strong>Auto</strong>.
+              <strong>Auto</strong> (Auto still uses your microphone too).
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Press <strong>Record</strong>. In the browser share dialog choose{' '}
-              <strong>Chrome Tab</strong> (or “A tab”) — select the{' '}
-              <strong>exact meeting tab</strong>, enable{' '}
-              <strong>Share tab audio</strong>, then click Share.
+              Press <strong>Record</strong>. Choose <strong>Chrome Tab</strong>,
+              select the <strong>exact tab</strong> that is playing audio,
+              enable <strong>Share tab audio</strong>, then Share.
             </Text>
           </li>
         </ol>
@@ -125,24 +127,35 @@ const Info = () => {
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Do <strong>not</strong> share Entire Screen for meetings — tab
-              audio is more reliable and captures only the call.
+              Prefer <strong>Chrome Tab</strong> over Entire Screen for
+              reliable audio from meetings and videos.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Start the meeting <strong>before</strong> sharing. If you share
-              first and then open Meet, you may need to share the Meet tab
-              again.
+              Start Meet/video <strong>before</strong> sharing. If you open it
+              after sharing, share that tab again.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Your mic still captures only you; shared tab audio captures what
-              you hear from the meeting.
+              Desktop microphone always works: your voice in the call, plus tab
+              audio for what you hear.
             </Text>
           </li>
         </ul>
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <Text type="tiny" as="h3" fontWeight="medium">
+          3b. Mobile &amp; travel (microphone)
+        </Text>
+        <Text type="small" as="p" fontWeight="light">
+          On phones, browsers cannot share system audio — only the microphone.
+          That is still powerful: in another country, open SpeakFlow, allow the
+          mic, and get a live transcript and translation when someone explains
+          directions or speaks near you.
+        </Text>
       </section>
 
       <section className="flex flex-col gap-2">
@@ -312,8 +325,9 @@ const Info = () => {
           That’s SpeakFlow
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          Join the meeting → share that tab’s audio → hit Record → follow live
-          transcript and translation. Copy, expand, save, and reopen anytime.
+          Your voice and what your computer plays — live transcript and
+          translation. Meetings, YouTube, movies on desktop; mic travel mode on
+          mobile. Copy, expand, save, reopen.
         </Text>
       </section>
     </div>

@@ -1,17 +1,20 @@
 import HomeClient from './home-client';
+import HomeSeoContent from '@/components/seo/home-seo-content';
 
 const SITE_URL = 'https://speakflow.art';
 
-const jsonLd = {
+const appJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
   name: 'SpeakFlow',
   url: SITE_URL,
   description:
-    'SpeakFlow is a lightweight web app for live speech transcription and instant AI translation. Record from microphone or system audio, transcribe in real time, translate on the fly, and save your sessions.',
+    'SpeakFlow provides live speech transcription and AI translation for your microphone and for audio playing on your computer — meetings, YouTube, movies — plus a mic-based live translator on mobile.',
   applicationCategory: 'MultimediaApplication',
+  applicationSubCategory: 'Speech translation',
   operatingSystem: 'Web Browser',
-  browserRequirements: 'Requires JavaScript. Chrome, Edge, or Firefox recommended.',
+  browserRequirements:
+    'Requires JavaScript. Chrome or Edge recommended for tab audio capture on desktop.',
   offers: {
     '@type': 'Offer',
     price: '0',
@@ -25,9 +28,51 @@ const jsonLd = {
   featureList: [
     'Live speech-to-text transcription',
     'Real-time AI translation',
-    'Microphone and system audio capture',
+    'Microphone capture on desktop and mobile',
+    'Browser tab audio capture for meetings and media (desktop)',
+    'Google Meet / Zoom web / Teams companion mode',
+    'YouTube and movie audio transcription',
+    'Linked transcript and translation highlighting',
     'Saved transcription records',
-    'Guest and registered usage modes',
+  ],
+};
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Can SpeakFlow translate Google Meet or other online meetings?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Join the meeting first, open SpeakFlow in another tab, press Record, and share that meeting Chrome tab with “Share tab audio” enabled. SpeakFlow will transcribe and translate what you hear from colleagues.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Can SpeakFlow transcribe YouTube videos or movies on my computer?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes on desktop. Share the browser tab (or media tab) with tab audio so SpeakFlow can capture what is playing, then get a live transcript and translation.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Does SpeakFlow work on phones?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes for microphone input. Mobile browsers cannot share system or tab audio, but you can still use SpeakFlow as a live travel translator when people speak near your phone.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Does the microphone work on desktop too?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Yes. Desktop supports microphone, shared tab/speaker audio, and Auto mode that switches between them during one session.',
+      },
+    },
   ],
 };
 
@@ -36,27 +81,18 @@ export default function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      {/* SSR SEO block — available to crawlers without opening INFO */}
-      <section className="sr-only" aria-label="About SpeakFlow">
-        <h1>SpeakFlow — Live Speech Translation & Transcription</h1>
-        <p>
-          SpeakFlow is a lightweight tool for live speech transcription and
-          instant translation. Capture audio from your microphone or system
-          speakers, get real-time transcripts, and translate them into your
-          target language in one place.
-        </p>
-        <p>
-          Choose input and output languages, record or pause sessions, and save
-          your transcriptions for later. SpeakFlow works in modern browsers on
-          desktop and mobile — ideal for meetings, interviews, language
-          practice, and content review.
-        </p>
-      </section>
-
+      {/* First viewport: the tool stays centered and unchanged */}
       <HomeClient />
+
+      {/* Below the fold: crawlable product copy for SEO */}
+      <HomeSeoContent />
     </>
   );
 }

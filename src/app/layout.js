@@ -17,26 +17,33 @@ const inter = Inter({
 });
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
+
+const SITE_URL = 'https://speakflow.art';
+const SITE_NAME = 'SpeakFlow';
+const DEFAULT_TITLE =
+  'SpeakFlow — Live Transcription & Translation for Voice, Meetings & Videos';
+const DEFAULT_DESCRIPTION =
+  'Transcribe and translate live: your microphone, Google Meet colleagues, YouTube, movies, and more. Desktop captures voice and computer audio; on mobile use your mic as a live travel translator.';
+
 export const metadata = {
-  metadataBase: new URL('https://speakflow.art'),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'SpeakFlow — Live Speech Translation & Transcription',
-    template: '%s | SpeakFlow',
+    default: DEFAULT_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    'SpeakFlow — a lightweight tool for live speech transcription and instant translation. Record, transcribe, translate, and save your sessions in one place.',
+  description: DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
   openGraph: {
-    title: 'SpeakFlow — Live Speech Translation & Transcription',
-    description:
-      'Transcribe speech in real time and get instant translations. Simple UI, fast results, and saved records when you need them.',
-    url: 'https://speakflow.art/',
-    siteName: 'SpeakFlow',
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'SpeakFlow — live transcription & translation interface',
+        alt: 'SpeakFlow — live speech transcription and translation',
       },
     ],
     type: 'website',
@@ -44,31 +51,53 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'SpeakFlow — Live Speech Translation & Transcription',
+    title: DEFAULT_TITLE,
     description:
-      'Real-time transcription and instant translation in a clean, single-page app.',
+      'Live speech-to-text and translation for your voice and anything your computer plays — meetings, YouTube, films. Mic-only live translator on mobile.',
     images: ['/og-image.png'],
   },
   keywords: [
     'SpeakFlow',
-    'speech to text',
     'live transcription',
     'real-time translation',
-    'AI transcription',
+    'speech to text',
+    'live speech translator',
+    'Google Meet translation',
+    'meeting translation',
+    'YouTube transcription',
+    'translate computer audio',
+    'tab audio transcription',
     'voice translator',
-    'speech translator',
-    'transcribe audio',
-    'subtitle generator',
-    'meeting notes',
+    'travel voice translator',
+    'AI transcription',
+    'AI translation',
+    'live captions',
     'транскрипція мови',
-    'переклад мовлення',
-    'онлайн транскрипція',
-    'перекладач голосу',
+    'переклад зустрічей',
+    'переклад Google Meet',
+    'переклад з YouTube',
+    'живий перекладач',
     'розпізнавання мовлення',
+    'перекладач голосу',
   ],
-  authors: [{ name: 'Yuriy Dovzhyk', url: 'https://speakflow.art' }],
-  alternates: { canonical: 'https://speakflow.art/' },
-  robots: { index: true, follow: true },
+  authors: [{ name: 'Yuriy Dovzhyk', url: SITE_URL }],
+  creator: 'Yuriy Dovzhyk',
+  publisher: SITE_NAME,
+  category: 'technology',
+  alternates: {
+    canonical: SITE_URL,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
   icons: {
     icon: '/favicon.ico',
   },
@@ -80,7 +109,6 @@ export default function RootLayout({ children }) {
       <body className={`${inter.variable} antialiased`}>
         <StoreProvider>
           <LanguageProvider>
-            {/* gtag.js */}
             {GA_ID && (
               <>
                 <Script
