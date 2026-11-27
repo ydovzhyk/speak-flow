@@ -135,7 +135,7 @@ const LinkedScrollBox = ({
                     style={
                       isActive
                         ? {
-                            backgroundColor: 'rgba(2, 153, 181, 0.45)',
+                            backgroundColor: 'rgba(2, 153, 181, 0.28)',
                             borderRadius: '6px',
                           }
                         : undefined
