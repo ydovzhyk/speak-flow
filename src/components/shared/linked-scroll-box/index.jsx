@@ -76,15 +76,9 @@ const LinkedScrollBox = ({
       el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
   };
 
-  // Live follow only — skipped for saved records / static previews.
+  // Live follow: only when a NEW sentence arrives and user is stuck to bottom.
+  // Do not run on trailingLoading alone — that was yanking scroll after Stop.
   useLayoutEffect(() => {
-    if (!followLive) {
-      prevCountRef.current = Array.isArray(segments)
-        ? segments.filter(s => s?.text?.trim()).length
-        : 0;
-      return;
-    }
-
     const usable = Array.isArray(segments)
       ? segments.filter(s => s?.text?.trim())
       : [];
@@ -92,27 +86,27 @@ const LinkedScrollBox = ({
     const grew = count > prevCountRef.current;
     prevCountRef.current = count;
 
-    if (!stickToBottomRef.current) return;
+    if (!followLive || !grew || !stickToBottomRef.current) return;
 
     const box = boxRef.current;
     requestAnimationFrame(() => {
-      if (grew && count > 0) {
-        const last = usable[count - 1];
-        const node = last?.id
-          ? spanRefs.current.get(String(last.id))
-          : null;
-        if (node && box) {
-          scrollChildIntoBox(box, node, { block: 'start' });
-          return;
-        }
+      if (!box) return;
+      const last = usable[count - 1];
+      const node = last?.id ? spanRefs.current.get(String(last.id)) : null;
+      if (node) {
+        scrollChildIntoBox(box, node, { block: 'start' });
+      } else {
+        box.scrollTop = box.scrollHeight;
       }
-      endRef.current?.scrollIntoView({ block: 'end', behavior: 'auto' });
     });
-  }, [segments, trailingLoading, followLive]);
+  }, [segments, followLive]);
 
   // Pair sync: scroll only this box to the active sentence.
   useEffect(() => {
     if (!activeId) return;
+
+    // Hover/click means the user is browsing — pause live stick-to-bottom.
+    stickToBottomRef.current = false;
 
     const run = () => {
       const node = spanRefs.current.get(String(activeId));
@@ -122,7 +116,7 @@ const LinkedScrollBox = ({
       return true;
     };
 
-    // First paint after open may not have laid out yet — retry briefly.
+    // First paint may not have laid out yet — retry briefly.
     if (run()) return undefined;
     let tries = 0;
     const id = window.setInterval(() => {
@@ -130,7 +124,7 @@ const LinkedScrollBox = ({
       if (run() || tries >= 10) window.clearInterval(id);
     }, 50);
     return () => window.clearInterval(id);
-  }, [activeId, segments]);
+  }, [activeId]);
 
   const handleCopy = async () => {
     if (!hasText) return;
