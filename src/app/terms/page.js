@@ -7,7 +7,7 @@ const UPDATED = 'November 27, 2026';
 export const metadata = {
   title: 'Terms of Use',
   description:
-    'Terms of Use for SpeakFlow.art — the live transcription and translation browser tool.',
+    'Terms of Use for SpeakFlow.art - the live transcription and translation browser tool.',
   alternates: { canonical: `${SITE_URL}/terms` },
   openGraph: {
     title: 'SpeakFlow Terms of Use',

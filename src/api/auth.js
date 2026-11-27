@@ -62,7 +62,7 @@ export function setupInterceptors(store) {
       const isRefreshReq =
         url.endsWith('/auth/refresh') || url.includes('/auth/refresh');
 
-      // Якщо саме refresh впав — жорсткий логаут
+      // Якщо саме refresh впав - жорсткий логаут
       if (isRefreshReq) {
         clearAuthData(store);
         return Promise.reject(error);
@@ -118,7 +118,7 @@ export function setupInterceptors(store) {
             Authorization: `Bearer ${newData.accessToken}`,
           };
 
-          // Якщо падав /auth/current — повторюємо запит з оновленим sid
+          // Якщо падав /auth/current - повторюємо запит з оновленим sid
           if (originalRequest.url === '/auth/current') {
             originalRequest.data = {
               sid: newData.sid,
@@ -132,7 +132,7 @@ export function setupInterceptors(store) {
         }
       }
 
-      // 403 для refresh-логіки: NO_TOKEN та інші — теж логаут
+      // 403 для refresh-логіки: NO_TOKEN та інші - теж логаут
       if (status === 403) {
         clearAuthData(store);
       }

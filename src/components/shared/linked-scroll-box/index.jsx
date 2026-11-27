@@ -7,7 +7,7 @@ import { MdOpenInFull } from 'react-icons/md';
 import LoaderDots from '../loader-dots';
 import PanelActionButton from '../panel-action-button';
 
-/** Scroll a child into view inside `box` only — never touch ancestor scrollers. */
+/** Scroll a child into view inside `box` only - never touch ancestor scrollers. */
 const scrollChildIntoBox = (box, node, { block = 'nearest', smooth = false } = {}) => {
   if (!box || !node) return;
 
@@ -77,7 +77,7 @@ const LinkedScrollBox = ({
   };
 
   // Live follow: only when a NEW sentence arrives and user is stuck to bottom.
-  // Do not run on trailingLoading alone — that was yanking scroll after Stop.
+  // Do not run on trailingLoading alone - that was yanking scroll after Stop.
   useLayoutEffect(() => {
     const usable = Array.isArray(segments)
       ? segments.filter(s => s?.text?.trim())
@@ -105,7 +105,7 @@ const LinkedScrollBox = ({
   useEffect(() => {
     if (!activeId) return;
 
-    // Hover/click means the user is browsing — pause live stick-to-bottom.
+    // Hover/click means the user is browsing - pause live stick-to-bottom.
     stickToBottomRef.current = false;
 
     const run = () => {
@@ -116,7 +116,7 @@ const LinkedScrollBox = ({
       return true;
     };
 
-    // First paint may not have laid out yet — retry briefly.
+    // First paint may not have laid out yet - retry briefly.
     if (run()) return undefined;
     let tries = 0;
     const id = window.setInterval(() => {

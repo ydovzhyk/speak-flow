@@ -17,7 +17,7 @@ const AuthProvider = () => {
   const oauthInitRef = useRef(false);
 
   useEffect(() => {
-    // ⛔ якщо зараз ініт з URL (Google OAuth) — не робимо дубль
+    // ⛔ якщо зараз ініт з URL (Google OAuth) - не робимо дубль
     if (oauthInitRef.current) return;
 
     if (authData.sid && !isLogin) {

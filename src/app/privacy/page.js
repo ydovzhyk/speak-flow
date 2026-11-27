@@ -7,7 +7,7 @@ const UPDATED = 'November 27, 2026';
 export const metadata = {
   title: 'Privacy Policy',
   description:
-    'Privacy Policy for SpeakFlow.art — how audio, transcripts, accounts, and analytics are handled.',
+    'Privacy Policy for SpeakFlow.art - how audio, transcripts, accounts, and analytics are handled.',
   alternates: { canonical: `${SITE_URL}/privacy` },
   openGraph: {
     title: 'SpeakFlow Privacy Policy',
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Analytics</strong> (for example Google Analytics / Vercel
-            Analytics) about page views and basic product usage — not the
+            Analytics) about page views and basic product usage - not the
             content of your private transcripts unless you save them to your
             account.
           </li>

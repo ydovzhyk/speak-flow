@@ -21,7 +21,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const SITE_URL = 'https://speakflow.art';
 const SITE_NAME = 'SpeakFlow';
 const DEFAULT_TITLE =
-  'SpeakFlow — Live Transcription & Translation for Voice, Meetings & Videos';
+  'SpeakFlow - Live Transcription & Translation for Voice, Meetings & Videos';
 const DEFAULT_DESCRIPTION =
   'Transcribe and translate live: your microphone, Google Meet colleagues, YouTube, movies, and more. Desktop captures voice and computer audio; on mobile use your mic as a live travel translator.';
 
@@ -43,7 +43,7 @@ export const metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'SpeakFlow — live speech transcription and translation',
+        alt: 'SpeakFlow - live speech transcription and translation',
       },
     ],
     type: 'website',
@@ -53,7 +53,7 @@ export const metadata = {
     card: 'summary_large_image',
     title: DEFAULT_TITLE,
     description:
-      'Live speech-to-text and translation for your voice and anything your computer plays — meetings, YouTube, films. Mic-only live translator on mobile.',
+      'Live speech-to-text and translation for your voice and anything your computer plays - meetings, YouTube, films. Mic-only live translator on mobile.',
     images: ['/og-image.png'],
   },
   keywords: [

@@ -13,11 +13,11 @@ const nameToName = new Map(list.map(({ lang }) => [norm(lang), lang]));
 
 /**
  * Повертає повну назву мови з languageData за кодом ('uk') або назвою ('Ukrainian').
- * Якщо не знайдено — повертає вхідне значення або '—'.
+ * Якщо не знайдено - повертає вхідне значення або '-'.
  */
 export function getLangLabel(value) {
   const v = norm(value);
-  if (!v) return '—';
+  if (!v) return '-';
 
   if (codeToName.has(v)) return codeToName.get(v); // 'uk' -> 'Ukrainian'
   if (nameToName.has(v)) return nameToName.get(v); // 'ukrainian' -> 'Ukrainian'
@@ -30,5 +30,5 @@ export function getLangLabel(value) {
       norm(lang).startsWith(v) ||
       v.startsWith(norm(lang))
   );
-  return hit?.lang || value || '—';
+  return hit?.lang || value || '-';
 }

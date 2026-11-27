@@ -6,7 +6,7 @@ const Info = () => {
   return (
     <div className="flex flex-col gap-4 border border-[rgba(82,85,95,0.2)] p-4 rounded-md">
       <Text type="regular" as="h2" fontWeight="bold">
-        SpeakFlow — User Guide
+        SpeakFlow - User Guide
       </Text>
 
       <section className="flex flex-col gap-2 rounded-md border border-[var(--accent2)] border-opacity-40 bg-[var(--clear-white)] p-3">
@@ -21,8 +21,8 @@ const Info = () => {
           the product evolves.
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          On desktop: your microphone and audio playing on the computer —
-          Google Meet, YouTube, movies, lectures. On mobile: microphone only —
+          On desktop: your microphone and audio playing on the computer -
+          Google Meet, YouTube, movies, lectures. On mobile: microphone only -
           a live travel translator when someone speaks near you. The tool stays
           in the center of the page; this INFO tab is the in-app guide.
         </Text>
@@ -57,7 +57,7 @@ const Info = () => {
           1. Open SpeakFlow
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          When you open the website, you’ll see the main tool right away —
+          When you open the website, you’ll see the main tool right away -
           centered on the page. On desktop SpeakFlow can capture your
           microphone and audio playing on your computer (meetings, YouTube,
           movies). On mobile it uses the microphone as a live travel translator.
@@ -75,24 +75,24 @@ const Info = () => {
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              App Language — the language for all menus and buttons.
+              App Language - the language for all menus and buttons.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Transcription Language — the language you speak or hear (meeting,
+              Transcription Language - the language you speak or hear (meeting,
               video, or people around you).
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Translation Language — the language you want the live translation
+              Translation Language - the language you want the live translation
               in.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Audio Recording Source — Microphone / Speaker / Auto.
+              Audio Recording Source - Microphone / Speaker / Auto.
             </Text>
           </li>
         </ul>
@@ -104,20 +104,20 @@ const Info = () => {
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Microphone</strong> — your voice on desktop or mobile
+              <strong>Microphone</strong> - your voice on desktop or mobile
               (speaking in a call, dictation, or travel conversations).
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Speaker</strong> — audio from a shared browser tab:
+              <strong>Speaker</strong> - audio from a shared browser tab:
               colleagues in a meeting, YouTube, films, lectures. Desktop
               browsers.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              <strong>Auto</strong> — switches between your microphone and
+              <strong>Auto</strong> - switches between your microphone and
               shared tab audio in one session (desktop).
             </Text>
           </li>
@@ -134,8 +134,8 @@ const Info = () => {
           3. Computer audio: meetings, YouTube, movies (desktop)
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          To translate what your computer plays — colleagues in a call, a
-          YouTube video, a film — SpeakFlow needs that{' '}
+          To translate what your computer plays - colleagues in a call, a
+          YouTube video, a film - SpeakFlow needs that{' '}
           <strong>tab’s audio</strong>, not the entire screen.
         </Text>
         <ol className="list-decimal pl-5">
@@ -194,7 +194,7 @@ const Info = () => {
           3b. Mobile &amp; travel (microphone)
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          On phones, browsers cannot share system audio — only the microphone.
+          On phones, browsers cannot share system audio - only the microphone.
           That is still powerful: in another country, open SpeakFlow, allow the
           mic, and get a live transcript and translation when someone explains
           directions or speaks near you.
@@ -219,7 +219,7 @@ const Info = () => {
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Quick login via Google — just one click.
+              Quick login via Google - just one click.
             </Text>
           </li>
         </ul>
@@ -239,15 +239,15 @@ const Info = () => {
           <li>
             <Text type="small" as="span" fontWeight="light">
               If Speaker/Auto is selected, your browser asks what to share:
-              <br />– prefer <strong>Chrome Tab</strong> + the meeting (or
+              <br />- prefer <strong>Chrome Tab</strong> + the meeting (or
               media) tab,
-              <br />– turn on <strong>Share tab audio</strong>,
-              <br />– click <strong>Share</strong>.
+              <br />- turn on <strong>Share tab audio</strong>,
+              <br />- click <strong>Share</strong>.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Speak into the mic and/or let meeting audio play — SpeakFlow
+              Speak into the mic and/or let meeting audio play - SpeakFlow
               transcribes and translates live.
             </Text>
           </li>
@@ -264,7 +264,7 @@ const Info = () => {
           <li>
             <Text type="small" as="span" fontWeight="light">
               <strong>Pause</strong> temporarily suspends recording but does not
-              end the session. Resume with Record — new text is appended. A long
+              end the session. Resume with Record - new text is appended. A long
               pause may drop the browser connection.
             </Text>
           </li>
@@ -287,31 +287,31 @@ const Info = () => {
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Transcript (top) — original speech.
+              Transcript (top) - original speech.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Translation (bottom) — live translation.
+              Translation (bottom) - live translation.
             </Text>
           </li>
         </ul>
         <ul className="list-disc pl-5">
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Linked sentences — hover or click a sentence to highlight its pair
+              Linked sentences - hover or click a sentence to highlight its pair
               and scroll the other panel to it.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Auto-scroll — while you stay at the bottom, new sentences come into
+              Auto-scroll - while you stay at the bottom, new sentences come into
               view.
             </Text>
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Copy / Expand — buttons on each panel to copy text or open it full
+              Copy / Expand - buttons on each panel to copy text or open it full
               size under the header.
             </Text>
           </li>
@@ -343,7 +343,7 @@ const Info = () => {
           </li>
           <li>
             <Text type="small" as="span" fontWeight="light">
-              Nothing is saved automatically — you decide when to Save.
+              Nothing is saved automatically - you decide when to Save.
             </Text>
           </li>
           <li>
@@ -361,7 +361,7 @@ const Info = () => {
         <Text type="small" as="p" fontWeight="light">
           SpeakFlow is operated by Yuriy Dovzhyk. Open the CONTACT tab, fill
           out the form (name, email, message), and send your question or
-          feedback — including privacy requests.
+          feedback - including privacy requests.
         </Text>
       </section>
 
@@ -370,7 +370,7 @@ const Info = () => {
           That’s SpeakFlow
         </Text>
         <Text type="small" as="p" fontWeight="light">
-          Your voice and what your computer plays — live transcript and
+          Your voice and what your computer plays - live transcript and
           translation. Meetings, YouTube, movies on desktop; mic travel mode on
           mobile. Copy, expand, save, reopen.
         </Text>

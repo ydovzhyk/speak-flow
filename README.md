@@ -1,4 +1,4 @@
-# SpeakFlow — Frontend
+# SpeakFlow - Frontend
 
 Live speech transcription and translation web app. Captures microphone or tab audio, streams it to the backend in real time, and displays source text alongside AI-powered translation.
 
@@ -123,7 +123,7 @@ src/
 3. Ensure the backend CORS allows `https://speakflow.art`.
 4. Add `https://speakflow.art` to Google OAuth **Authorized JavaScript origins**.
 
-No frontend secrets are required for core transcription/translation — API keys live on the server.
+No frontend secrets are required for core transcription/translation - API keys live on the server.
 
 ---
 

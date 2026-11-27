@@ -65,7 +65,7 @@ const useAudioRecorder = ({
   const silentGainSpeakerRef = useRef(null);
   const timerIntervalRef = useRef(null);
 
-  // режим може мінятись під час запису — тримаємо в ref
+  // режим може мінятись під час запису - тримаємо в ref
   const modeRef = useRef(normalizeMode(mode));
   modeRef.current = normalizeMode(mode);
 
@@ -126,7 +126,7 @@ const useAudioRecorder = ({
     }
 
     try {
-      // 1) MIC — завжди
+      // 1) MIC - завжди
       const streamMic = await getUserMediaAny({
         audio: {
           echoCancellation: true,
@@ -136,7 +136,7 @@ const useAudioRecorder = ({
       });
       micStreamRef.current = streamMic;
 
-      // 2) SPEAKER — через getDisplayMedia (частіше desktop)
+      // 2) SPEAKER - через getDisplayMedia (частіше desktop)
       let streamSpeaker = null;
       try {
         if (navigator.mediaDevices?.getDisplayMedia) {
@@ -156,7 +156,7 @@ const useAudioRecorder = ({
         // cancel / unsupported
       }
 
-      // якщо користувач обрав speaker, а його нема — фолбек (і пояснення)
+      // якщо користувач обрав speaker, а його нема - фолбек (і пояснення)
       if (modeRef.current === 'speaker' && !streamSpeaker) {
         toast.info('Speaker capture is not available here. Using microphone.');
         modeRef.current = 'microphone';
@@ -207,7 +207,7 @@ const useAudioRecorder = ({
         }
 
         if (m === 'auto') {
-          // якщо спікера нема — auto => mic
+          // якщо спікера нема - auto => mic
           if (!streamSpeaker || lastMicLevel >= lastSpeakerLevel) {
             setActiveChannel('microphone');
             dataCb(pcm16Audio, audioContext.current.sampleRate, 'microphone');
@@ -270,7 +270,7 @@ const useAudioRecorder = ({
 
       setIsRecording(true);
 
-      // MediaRecorder — опційно
+      // MediaRecorder - опційно
       try {
         const recMic = new MediaRecorder(streamMic);
         recMic.start();

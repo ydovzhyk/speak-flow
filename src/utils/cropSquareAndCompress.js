@@ -133,7 +133,7 @@ export async function cropSquareAndCompressToBase64(
     }
   }
 
-  // Якщо навіть 128px не вліз — повернемо найменший варіант із мінімальною якістю (JPEG)
+  // Якщо навіть 128px не вліз - повернемо найменший варіант із мінімальною якістю (JPEG)
   const smallest = drawSquareCrop(img, sizes[sizes.length - 1], {
     biasY,
     upscale,
@@ -254,7 +254,7 @@ export async function cropSquareAndCompressToBase64(
 
 //   const MAX_TOTAL = base64MaxKB * 1024;
 
-//   // 0) Якщо оригінал у форматі file.type і так влізає як dataURL — можна віддати без ресемплу
+//   // 0) Якщо оригінал у форматі file.type і так влізає як dataURL - можна віддати без ресемплу
 //   //    (Дуже безпечна перевірка з урахуванням хедера та JSON overhead)
 //   if (file && file.type) {
 //     const est = estimateDataUrlBytes(file.size, file.type, overheadBytes);
@@ -286,7 +286,7 @@ export async function cropSquareAndCompressToBase64(
 //       }
 //     }
 
-//     // Якщо навіть на minQuality не влізло — візьмемо minQuality як «найкраще з гіршого»
+//     // Якщо навіть на minQuality не влізло - візьмемо minQuality як «найкраще з гіршого»
 //     if (!bestBlob) {
 //       const blob = await canvasToBlob(canvas, type, minQuality);
 //       const total = estimateDataUrlBytes(blob.size, type, overheadBytes);
@@ -306,7 +306,7 @@ export async function cropSquareAndCompressToBase64(
 //     probe = await tryFormat(chosenType);
 //   }
 
-//   // 3) Якщо ще завелике — зменшуємо габарити та повторюємо
+//   // 3) Якщо ще завелике - зменшуємо габарити та повторюємо
 //   while (probe.total > MAX_TOTAL && w > 96 && h > 96) {
 //     w = Math.max(96, Math.round(w * 0.85));
 //     h = Math.max(96, Math.round(h * 0.85));

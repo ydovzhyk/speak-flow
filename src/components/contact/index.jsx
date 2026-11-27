@@ -63,7 +63,7 @@ function Contact() {
         <Text type="tiny" as="p" fontWeight="light">
           SpeakFlow is operated by <strong>Yuriy Dovzhyk</strong>. Have
           questions about the app, privacy, or ideas for new features? Fill out
-          the form below — your message goes to me.
+          the form below - your message goes to me.
         </Text>
         <Text type="tiny" as="p" fontWeight="light">
           <a

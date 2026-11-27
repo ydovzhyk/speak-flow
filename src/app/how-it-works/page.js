@@ -13,7 +13,7 @@ export const metadata = {
   openGraph: {
     title: 'How SpeakFlow Works',
     description:
-      'Step-by-step: capture your voice and computer audio for live transcript and translation — meetings, YouTube, films, and travel.',
+      'Step-by-step: capture your voice and computer audio for live transcript and translation - meetings, YouTube, films, and travel.',
     url: `${SITE_URL}/how-it-works`,
     siteName: 'SpeakFlow',
     type: 'article',
@@ -22,7 +22,7 @@ export const metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'SpeakFlow — how it works',
+        alt: 'SpeakFlow - how it works',
       },
     ],
   },
@@ -74,7 +74,7 @@ export default function HowItWorksPage() {
           SpeakFlow is a live speech companion: it transcribes what it hears
           and translates it instantly. On a computer that can be{' '}
           <strong>your voice</strong> and{' '}
-          <strong>anything playing through a shared browser tab</strong> —
+          <strong>anything playing through a shared browser tab</strong> -
           meetings, YouTube, movies. On a phone it uses the microphone as a
           live translator when you travel or talk to people around you.
         </p>
@@ -92,7 +92,7 @@ export default function HowItWorksPage() {
           >
             speakflow.art
           </Link>
-          . You land straight on the tool — no extra dashboard. Set languages
+          . You land straight on the tool - no extra dashboard. Set languages
           in SETTINGS, press Record, and watch Transcript and Translation fill
           in live. Hover a sentence to highlight its pair.
         </p>
@@ -138,7 +138,7 @@ export default function HowItWorksPage() {
           4. Why it exists
         </h2>
         <p className="text-[15px] leading-7">
-          SpeakFlow grew out of real international teamwork — keeping up when
+          SpeakFlow grew out of real international teamwork - keeping up when
           meetings and content move quickly in another language. The goal is
           simple: make foreign speech readable in the moment, whether it comes
           from your mic or from your computer speakers.

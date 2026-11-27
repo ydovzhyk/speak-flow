@@ -545,7 +545,7 @@ const ToolCard = () => {
               <div className="h-full overflow-y-auto thin-scrollbar p-4">
                 <PanelContent active={panel} />
               </div>
-              {/* Expand from Records/Save stays inside the side panel — no card-border clash */}
+              {/* Expand from Records/Save stays inside the side panel - no card-border clash */}
               <div
                 id="speakflow-panel-expand-host"
                 className="absolute inset-0 z-30 pointer-events-none overflow-hidden"

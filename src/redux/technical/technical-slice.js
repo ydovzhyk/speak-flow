@@ -69,7 +69,7 @@ const technical = createSlice({
         .slice(-MAX_SEGMENTS);
     },
     /**
-     * Full pair upsert — source + target bound by the same id.
+     * Full pair upsert - source + target bound by the same id.
      * target may be null when translation was skipped.
      */
     upsertPairSegment: (store, action) => {

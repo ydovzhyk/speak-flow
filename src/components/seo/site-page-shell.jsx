@@ -15,7 +15,7 @@ export default function SitePageShell({
       className="relative min-h-screen w-full bg-cover bg-center bg-no-repeat px-3 py-6 sm:px-5 sm:py-10 md:px-8 md:py-12"
       style={{ backgroundImage: "url('/images/bg.webp')" }}
     >
-      {/* Desktop only — same size/placement as home tool (no logo on mobile) */}
+      {/* Desktop only - same size/placement as home tool (no logo on mobile) */}
       <div className="pointer-events-auto absolute top-[20px] left-[50px] hidden md:block z-10">
         <Logo variant="color" eager />
       </div>

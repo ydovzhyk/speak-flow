@@ -8,7 +8,7 @@ const appJsonLd = {
   name: 'SpeakFlow',
   url: SITE_URL,
   description:
-    'SpeakFlow provides live speech transcription and AI translation for your microphone and for audio playing on your computer — meetings, YouTube, movies — plus a mic-based live translator on mobile.',
+    'SpeakFlow provides live speech transcription and AI translation for your microphone and for audio playing on your computer - meetings, YouTube, movies - plus a mic-based live translator on mobile.',
   applicationCategory: 'MultimediaApplication',
   applicationSubCategory: 'Speech translation',
   operatingSystem: 'Web Browser',
@@ -87,15 +87,15 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
-      {/* Crawlable copy without taking layout space — keeps the tool compact when tiling */}
+      {/* Crawlable copy without taking layout space - keeps the tool compact when tiling */}
       <section className="sr-only" aria-label="About SpeakFlow">
         <h1>
-          SpeakFlow — Live transcription and translation for your voice and
+          SpeakFlow - Live transcription and translation for your voice and
           your computer
         </h1>
         <p>
           Transcribe and translate live from your microphone and from audio
-          playing on your computer — Google Meet, YouTube, movies, and more. On
+          playing on your computer - Google Meet, YouTube, movies, and more. On
           mobile, use the microphone as a live travel translator. Read the full
           guide at {SITE_URL}/how-it-works.
         </p>

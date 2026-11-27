@@ -407,7 +407,7 @@ const useSocket = () => {
       }
     });
 
-    // Canonical paired update — never pair by array index on the client.
+    // Canonical paired update - never pair by array index on the client.
     s.on('final-pair', payload => {
       const id =
         payload?.id != null && String(payload.id).length > 0

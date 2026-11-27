@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react';
 const AudioBarsVisualizer = ({
   audioContext,
   sourceNode,
-  height = 35, // видима висота (px) — CSS
+  height = 35, // видима висота (px) - CSS
   barWidth = 5, // ширина стовпчика (px, у канвасі)
   gap = 2, // проміжок між стовпчиками (px)
   minDecibels = -90,
