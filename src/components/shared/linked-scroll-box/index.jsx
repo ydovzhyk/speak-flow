@@ -10,6 +10,7 @@ import PanelActionButton from '../panel-action-button';
 /**
  * Renders sentence segments as interactive spans.
  * Hover/click activates a shared id so the paired panel can highlight + scroll.
+ * While the user is at the bottom, new sentences auto-scroll into view.
  */
 const LinkedScrollBox = ({
   segments = [],
@@ -28,6 +29,7 @@ const LinkedScrollBox = ({
   const endRef = useRef(null);
   const spanRefs = useRef(new Map());
   const stickToBottomRef = useRef(true);
+  const prevCountRef = useRef(0);
   const [copied, setCopied] = useState(false);
 
   const hasText = Array.isArray(segments) && segments.some(s => s?.text?.trim());
@@ -39,20 +41,39 @@ const LinkedScrollBox = ({
       el.scrollTop + el.clientHeight >= el.scrollHeight - 10;
   };
 
+  // Live follow: when stuck to bottom and a new sentence arrives, show its start.
   useLayoutEffect(() => {
-    if (!stickToBottomRef.current || activeId) return;
-    requestAnimationFrame(() => {
-      endRef.current?.scrollIntoView({ block: 'end' });
-    });
-  }, [segments, trailingLoading, activeId]);
+    const usable = Array.isArray(segments)
+      ? segments.filter(s => s?.text?.trim())
+      : [];
+    const count = usable.length;
+    const grew = count > prevCountRef.current;
+    prevCountRef.current = count;
 
+    if (!stickToBottomRef.current) return;
+
+    requestAnimationFrame(() => {
+      if (grew && count > 0) {
+        const last = usable[count - 1];
+        const node = last?.id
+          ? spanRefs.current.get(String(last.id))
+          : null;
+        if (node) {
+          node.scrollIntoView({ block: 'start', behavior: 'auto' });
+          return;
+        }
+      }
+      endRef.current?.scrollIntoView({ block: 'end', behavior: 'auto' });
+    });
+  }, [segments, trailingLoading]);
+
+  // Pair sync: scroll to active sentence only when the active id changes
+  // (hover/click) — not on every new segment, so live follow keeps working.
   useEffect(() => {
     if (!activeId) return;
     const node = spanRefs.current.get(String(activeId));
     const box = boxRef.current;
     if (!node || !box) return;
-
-    stickToBottomRef.current = false;
 
     const boxRect = box.getBoundingClientRect();
     const nodeRect = node.getBoundingClientRect();
@@ -68,7 +89,7 @@ const LinkedScrollBox = ({
         behavior: 'smooth',
       });
     }
-  }, [activeId, segments]);
+  }, [activeId]);
 
   const handleCopy = async () => {
     if (!hasText) return;
