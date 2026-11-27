@@ -14,6 +14,7 @@ import {
 } from '@/redux/technical/technical-selectors';
 import { getLangLabel } from '@/utils/langLabel';
 
+const EXPAND_HOST_ID = 'speakflow-expand-host';
 const TOOL_BODY_ID = 'speakflow-tool-body';
 
 const LiveTextPanels = ({
@@ -21,6 +22,7 @@ const LiveTextPanels = ({
   translation,
   segments: segmentsProp,
   className = '',
+  compact = false,
 }) => {
   const ctx = typeof useSocketContext === 'function' ? useSocketContext() : {};
   const transcriptText = transcript ?? ctx?.transcriptText ?? '';
@@ -55,6 +57,7 @@ const LiveTextPanels = ({
   // Reset highlight when opening another saved record.
   useEffect(() => {
     setActiveId(null);
+    setExpandedPanel(null);
   }, [segmentsProp, transcript, translation]);
 
   const onActivate = useCallback(id => {
@@ -62,6 +65,7 @@ const LiveTextPanels = ({
   }, []);
 
   const useLinked = segments.some(s => s?.id && s?.source);
+  const showExpand = true;
 
   const sourceSegments = useLinked
     ? segments
@@ -75,17 +79,17 @@ const LiveTextPanels = ({
         .map(s => ({ id: String(s.id), text: s.target }))
     : [];
 
-  const showExpand = liveMode;
-
   const renderPanel = (kind, { expanded = false } = {}) => {
     const isTranscript = kind === 'transcript';
     const placeholder = isTranscript
-      ? `Live transcription (${inputLabel})`
-      : `Live translation (${outputLabel})`;
+      ? liveMode
+        ? `Live transcription (${inputLabel})`
+        : `Transcript (${inputLabel})`
+      : liveMode
+        ? `Live translation (${outputLabel})`
+        : `Translation (${outputLabel})`;
     const trailingLabel = isTranscript ? 'Listening' : 'Translating';
-    const onExpand = showExpand
-      ? () => setExpandedPanel(kind)
-      : undefined;
+    const onExpand = () => setExpandedPanel(kind);
 
     if (useLinked) {
       return (
@@ -116,15 +120,16 @@ const LiveTextPanels = ({
     );
   };
 
-  const toolBody =
+  const expandHost =
     portalReady && typeof document !== 'undefined'
-      ? document.getElementById(TOOL_BODY_ID)
+      ? document.getElementById(EXPAND_HOST_ID) ||
+        document.getElementById(TOOL_BODY_ID)
       : null;
 
   const expandedOverlay =
-    expandedPanel && toolBody
+    expandedPanel && expandHost
       ? createPortal(
-          <div className="absolute inset-0 z-20 bg-white flex flex-col px-4 pb-4 pt-2">
+          <div className="pointer-events-auto absolute inset-0 z-20 bg-white flex flex-col px-4 pb-4 pt-2">
             <div className="flex justify-end items-center shrink-0 mb-2 min-h-[28px]">
               <button
                 type="button"
@@ -139,13 +144,15 @@ const LiveTextPanels = ({
               {renderPanel(expandedPanel, { expanded: true })}
             </div>
           </div>,
-          toolBody
+          expandHost
         )
       : null;
 
   return (
     <div
-      className={`w-full h-full min-h-0 flex flex-col gap-3 overflow-hidden ${className}`}
+      className={`w-full h-full min-h-0 flex flex-col overflow-hidden ${
+        compact ? 'gap-1.5' : 'gap-3'
+      } ${className}`}
     >
       <div className="flex-1 min-h-0 overflow-auto">
         {renderPanel('transcript')}
@@ -159,4 +166,4 @@ const LiveTextPanels = ({
 };
 
 export default LiveTextPanels;
-export { TOOL_BODY_ID };
+export { TOOL_BODY_ID, EXPAND_HOST_ID };

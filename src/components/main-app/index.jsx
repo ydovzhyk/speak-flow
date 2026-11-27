@@ -545,6 +545,12 @@ const ToolCard = () => {
               <PanelContent active={panel} />
             </div>
           </div>
+
+          {/* Above side panels so expand from Records matches live behavior */}
+          <div
+            id="speakflow-expand-host"
+            className="absolute left-0 right-0 bottom-0 top-[9vh] landscape:!top-[12%] z-[70] pointer-events-none"
+          />
         </div>
       </div>
     </div>

@@ -248,24 +248,34 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100%+70px)] min-h-0 mt-[-15px]">
+    <div
+      className={`flex flex-col min-h-0 ${
+        selectedRecord
+          ? 'h-[calc(100%+48px)] mt-[-8px]'
+          : 'h-[calc(100%+70px)] mt-[-15px]'
+      }`}
+    >
       {selectedRecord && (
-        <div className="flex h-full flex-col gap-3">
-          <div className="font-medium">
+        <div className="flex h-full flex-col gap-1.5">
+          <div className="font-medium text-sm leading-tight shrink-0">
             {selectedRecord.title || '(no title)'}
           </div>
           <div className="flex-1 min-h-0">
             {Array.isArray(selectedRecord.segments) &&
             selectedRecord.segments.length > 0 ? (
-              <LiveTextPanels segments={selectedRecord.segments} />
+              <LiveTextPanels
+                segments={selectedRecord.segments}
+                compact
+              />
             ) : (
               <LiveTextPanels
                 transcript={selectedRecord.transcript}
                 translation={selectedRecord.translation}
+                compact
               />
             )}
           </div>
-          <div className="mb-[-10px]">
+          <div className="shrink-0 -mb-1">
             <Button
               text="Back to List"
               btnClass="btnPlain"
@@ -276,8 +286,8 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
         </div>
       )}
       {!selectedRecord && (
-        <div className="flex flex-col gap-3">
-          <label className="flex-1 flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
+          <label className="flex-1 flex flex-col gap-1">
             <Text type="tiny" as="span" fontWeight="normal">
               {tSearchLabel}
             </Text>
@@ -286,7 +296,7 @@ const GetList = ({ selectedRecord, setSelectedRecord }) => {
               onChange={e => setQuery(e.target.value)}
               placeholder={tSearchPH}
               aria-label={tSearchLabel}
-              className="w-full pl-[10px] rounded-[5px] h-[40px] bg-white font-normal text-[14px] regular-border border-opacity-50 transition-all duration-300 ease-in-out outline-none"
+              className="w-full pl-[10px] rounded-[5px] h-[36px] bg-white font-normal text-[14px] regular-border border-opacity-50 transition-all duration-300 ease-in-out outline-none"
             />
           </label>
 
@@ -364,7 +374,13 @@ const Records = () => {
         </div>
       </div>
 
-      <div className="w-full lg:landscape:!h-[calc(100%-40px)] portrait:h-[calc(100%-40px)] landscape:!h-auto landscape:max-h-[calc(100%-40px)] flex flex-col gap-5 pt-9 px-5 pb-5">
+      <div
+        className={`w-full lg:landscape:!h-[calc(100%-40px)] portrait:h-[calc(100%-40px)] landscape:!h-auto landscape:max-h-[calc(100%-40px)] flex flex-col ${
+          effectiveType === 'GetRecords' && selectedRecord
+            ? 'gap-2 pt-3 px-3 pb-3'
+            : 'gap-5 pt-9 px-5 pb-5'
+        }`}
+      >
         {effectiveType === 'GetRecords' ? (
           <GetList
             selectedRecord={selectedRecord}
